@@ -2,8 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LandingController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\UserManagementController as AdminUserManagementController;
 use App\Http\Controllers\Customer\AuthController as CustomerAuthController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 
@@ -34,6 +36,7 @@ Route::domain('hub.aviato.ir')
         Route::middleware('auth:web')->group(function () {
             Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
             Route::get('/dashboard', [AdminDashboardController::class, 'index']);
+            Route::get('/users', [AdminUserManagementController::class, 'index'])->name('users.index');
         });
     });
 
