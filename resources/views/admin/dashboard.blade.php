@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', __('dashboard.dashboard'))
+@section('title', 'داشبورد')
 
 @php
     $direction = config('ui.direction', 'ltr');
@@ -11,7 +11,7 @@
 <div class="space-y-1">
     <!-- Projects Section -->
     <div class="mb-6">
-        <h3 class="px-3 text-xs font-semibold uppercase tracking-wider mb-2 text-white">{{ __('dashboard.projects') }}</h3>
+        <h3 class="px-3 text-xs font-semibold uppercase tracking-wider mb-2 text-white">پروژه‌ها</h3>
     </div>
     
     <!-- Droplets -->
@@ -19,7 +19,7 @@
         <svg class="w-5 h-5 {{ $isRtl ? 'ml-3' : 'mr-3' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
         </svg>
-        {{ __('dashboard.droplets') }}
+        قطرات
     </a>
     
     <!-- Kubernetes -->
@@ -27,7 +27,7 @@
         <svg class="w-5 h-5 {{ $isRtl ? 'ml-3' : 'mr-3' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
         </svg>
-        {{ __('dashboard.kubernetes') }}
+        کوبرنتیز
     </a>
     
     <!-- Databases -->
@@ -35,7 +35,7 @@
         <svg class="w-5 h-5 {{ $isRtl ? 'ml-3' : 'mr-3' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
         </svg>
-        {{ __('dashboard.databases') }}
+        پایگاه‌های داده
     </a>
     
     <!-- Volumes -->
@@ -43,7 +43,7 @@
         <svg class="w-5 h-5 {{ $isRtl ? 'ml-3' : 'mr-3' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
         </svg>
-        {{ __('dashboard.volumes') }}
+        حجم‌ها
     </a>
     
     <!-- Networking -->
@@ -51,7 +51,7 @@
         <svg class="w-5 h-5 {{ $isRtl ? 'ml-3' : 'mr-3' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
         </svg>
-        {{ __('dashboard.networking') }}
+        شبکه‌سازی
     </a>
     
     <!-- Monitoring -->
@@ -59,7 +59,7 @@
         <svg class="w-5 h-5 {{ $isRtl ? 'ml-3' : 'mr-3' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
         </svg>
-        {{ __('dashboard.monitoring') }}
+        نظارت
     </a>
 </div>
 
@@ -73,7 +73,7 @@
         <svg class="w-5 h-5 {{ $isRtl ? 'ml-3' : 'mr-3' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
         </svg>
-        {{ __('dashboard.billing') }}
+        صورتحساب
     </a>
     
     <!-- Account -->
@@ -81,7 +81,7 @@
         <svg class="w-5 h-5 {{ $isRtl ? 'ml-3' : 'mr-3' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
         </svg>
-        {{ __('dashboard.account') }}
+        حساب کاربری
     </a>
     
     <!-- API Tokens -->
@@ -89,7 +89,7 @@
         <svg class="w-5 h-5 {{ $isRtl ? 'ml-3' : 'mr-3' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
         </svg>
-        {{ __('dashboard.api_tokens') }}
+        توکن‌های API
     </a>
 </div>
 @endsection
@@ -98,14 +98,14 @@
 <!-- Page Header -->
 <div class="flex items-center justify-between mb-8">
     <div>
-        <h1 class="text-3xl font-bold text-gray-900">{{ __('dashboard.dashboard') }}</h1>
-        <p class="mt-1 text-sm text-gray-500">{{ __('dashboard.high_level_overview') }}</p>
+        <h1 class="text-3xl font-bold text-gray-900">داشبورد</h1>
+        <p class="mt-1 text-sm text-gray-500">نمای کلی سطح بالا برای اپراتورهای ابری</p>
     </div>
     <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium text-sm transition-colors duration-200 flex items-center gap-2 shadow-sm">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>
-        {{ __('dashboard.create') }}
+        ایجاد
     </button>
 </div>
 
@@ -113,7 +113,7 @@
 <div class="space-y-6">
     <!-- Overview Stats: VMs, Networks, Volumes -->
     <div>
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ __('dashboard.infrastructure_overview') }}</h2>
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">نمای کلی زیرساخت</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Active VMs Card -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
@@ -125,22 +125,22 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500 font-medium">{{ __('dashboard.active_vms') }}</p>
+                            <p class="text-sm text-gray-500 font-medium">ماشین‌های مجازی فعال</p>
                             <p class="text-2xl font-bold text-gray-900">1,247</p>
                         </div>
                     </div>
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         <span class="w-1.5 h-1.5 rounded-full bg-green-500 {{ $isRtl ? 'ml-1.5' : 'mr-1.5' }}"></span>
-                        {{ __('dashboard.active') }}
+                        فعال
                     </span>
                 </div>
                 <div class="pt-4 border-t border-gray-100">
                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-gray-500">{{ __('dashboard.running') }}</span>
+                        <span class="text-gray-500">در حال اجرا</span>
                         <span class="font-semibold text-gray-900">1,198</span>
                     </div>
                     <div class="flex items-center justify-between text-sm mt-1">
-                        <span class="text-gray-500">{{ __('dashboard.stopped') }}</span>
+                        <span class="text-gray-500">متوقف شده</span>
                         <span class="font-semibold text-gray-900">49</span>
                     </div>
                 </div>
@@ -156,22 +156,22 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500 font-medium">{{ __('dashboard.active_networks') }}</p>
+                            <p class="text-sm text-gray-500 font-medium">شبکه‌های فعال</p>
                             <p class="text-2xl font-bold text-gray-900">342</p>
                         </div>
                     </div>
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         <span class="w-1.5 h-1.5 rounded-full bg-green-500 {{ $isRtl ? 'ml-1.5' : 'mr-1.5' }}"></span>
-                        {{ __('dashboard.active') }}
+                        فعال
                     </span>
                 </div>
                 <div class="pt-4 border-t border-gray-100">
                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-gray-500">{{ __('dashboard.private') }}</span>
+                        <span class="text-gray-500">خصوصی</span>
                         <span class="font-semibold text-gray-900">298</span>
                     </div>
                     <div class="flex items-center justify-between text-sm mt-1">
-                        <span class="text-gray-500">{{ __('dashboard.public') }}</span>
+                        <span class="text-gray-500">عمومی</span>
                         <span class="font-semibold text-gray-900">44</span>
                     </div>
                 </div>
@@ -187,22 +187,22 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500 font-medium">{{ __('dashboard.active_volumes') }}</p>
+                            <p class="text-sm text-gray-500 font-medium">حجم‌های فعال</p>
                             <p class="text-2xl font-bold text-gray-900">856</p>
                         </div>
                     </div>
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         <span class="w-1.5 h-1.5 rounded-full bg-green-500 {{ $isRtl ? 'ml-1.5' : 'mr-1.5' }}"></span>
-                        {{ __('dashboard.active') }}
+                        فعال
                     </span>
                 </div>
                 <div class="pt-4 border-t border-gray-100">
                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-gray-500">{{ __('dashboard.attached') }}</span>
+                        <span class="text-gray-500">متصل شده</span>
                         <span class="font-semibold text-gray-900">812</span>
                     </div>
                     <div class="flex items-center justify-between text-sm mt-1">
-                        <span class="text-gray-500">{{ __('dashboard.unattached') }}</span>
+                        <span class="text-gray-500">غیر متصل</span>
                         <span class="font-semibold text-gray-900">44</span>
                     </div>
                 </div>
@@ -215,8 +215,8 @@
         <!-- Hypervisor Status -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-lg font-semibold text-gray-900">{{ __('dashboard.hypervisor_status') }}</h2>
-                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">{{ __('dashboard.view_all') }}</a>
+                <h2 class="text-lg font-semibold text-gray-900">وضعیت هایپروایزر</h2>
+                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">مشاهده همه</a>
             </div>
             <div class="space-y-4">
                 <!-- Online Hypervisors -->
@@ -228,13 +228,13 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-900">{{ __('dashboard.online') }}</p>
-                            <p class="text-xs text-gray-500">{{ __('dashboard.hypervisors_operational') }}</p>
+                            <p class="text-sm font-semibold text-gray-900">آنلاین</p>
+                            <p class="text-xs text-gray-500">هایپروایزرهای عملیاتی</p>
                         </div>
                     </div>
                     <div class="text-right">
                         <p class="text-2xl font-bold text-green-600">24</p>
-                        <p class="text-xs text-gray-500">{{ __('dashboard.uptime_percent', ['percent' => '96']) }}</p>
+                        <p class="text-xs text-gray-500">۹۶٪ زمان فعالیت</p>
                     </div>
                 </div>
 
@@ -247,13 +247,13 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-900">{{ __('dashboard.offline') }}</p>
-                            <p class="text-xs text-gray-500">{{ __('dashboard.requires_attention') }}</p>
+                            <p class="text-sm font-semibold text-gray-900">آفلاین</p>
+                            <p class="text-xs text-gray-500">نیاز به توجه دارد</p>
                         </div>
                     </div>
                     <div class="text-right">
                         <p class="text-2xl font-bold text-red-600">1</p>
-                        <p class="text-xs text-gray-500">{{ __('dashboard.downtime_percent', ['percent' => '4']) }}</p>
+                        <p class="text-xs text-gray-500">۴٪ زمان توقف</p>
                     </div>
                 </div>
 
@@ -296,8 +296,8 @@
         <!-- Resource Capacity -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-lg font-semibold text-gray-900">{{ __('dashboard.resource_capacity') }}</h2>
-                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">{{ __('dashboard.view_details') }}</a>
+                <h2 class="text-lg font-semibold text-gray-900">ظرفیت منابع</h2>
+                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">مشاهده جزئیات</a>
             </div>
             <div class="space-y-6">
                 <!-- vCPU Capacity -->
@@ -314,7 +314,7 @@
                     <div class="w-full bg-gray-200 rounded-full h-2.5">
                         <div class="bg-blue-600 h-2.5 rounded-full" style="width: 84.56%"></div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.utilized_percent', ['percent' => '84.6']) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">۸۴.۶٪ استفاده شده</p>
                 </div>
 
                 <!-- RAM Capacity -->
@@ -331,7 +331,7 @@
                     <div class="w-full bg-gray-200 rounded-full h-2.5">
                         <div class="bg-purple-600 h-2.5 rounded-full" style="width: 81%"></div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.utilized_percent', ['percent' => '81']) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">۸۱٪ استفاده شده</p>
                 </div>
 
                 <!-- Storage Capacity -->
@@ -341,14 +341,14 @@
                             <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
                             </svg>
-                            <span class="text-sm font-semibold text-gray-900">Storage</span>
+                            <span class="text-sm font-semibold text-gray-900">ذخیره‌سازی</span>
                         </div>
                         <span class="text-sm font-semibold text-gray-900">245 PB / 300 PB</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2.5">
                         <div class="bg-orange-600 h-2.5 rounded-full" style="width: 81.67%"></div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.utilized_percent', ['percent' => '81.7']) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">۸۱.۷٪ استفاده شده</p>
                 </div>
             </div>
         </div>
@@ -359,43 +359,43 @@
         <!-- Revenue Metrics -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-lg font-semibold text-gray-900">{{ __('dashboard.revenue_metrics') }}</h2>
+                <h2 class="text-lg font-semibold text-gray-900">معیارهای درآمد</h2>
                 <select class="text-sm border border-gray-300 rounded-lg px-3 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>{{ __('dashboard.last_30_days') }}</option>
-                    <option>{{ __('dashboard.last_7_days') }}</option>
-                    <option>{{ __('dashboard.last_90_days') }}</option>
+                    <option>۳۰ روز گذشته</option>
+                    <option>۷ روز گذشته</option>
+                    <option>۹۰ روز گذشته</option>
                 </select>
             </div>
             <div class="space-y-6">
                 <!-- Total Revenue -->
                 <div class="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm text-gray-600 font-medium">{{ __('dashboard.total_revenue') }}</span>
+                        <span class="text-sm text-gray-600 font-medium">درآمد کل</span>
                         <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full font-medium">+12.5%</span>
                     </div>
                     <p class="text-3xl font-bold text-gray-900">$2,847,392</p>
-                    <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.vs_previous_period', ['amount' => '$2,530,184']) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">در مقابل $۲,۵۳۰,۱۸۴ دوره قبلی</p>
                 </div>
 
                 <!-- Revenue Breakdown -->
                 <div class="grid grid-cols-3 gap-4">
                     <div class="text-center p-3 bg-gray-50 rounded-lg">
-                        <p class="text-xs text-gray-500 mb-1">{{ __('dashboard.monthly_recurring') }}</p>
+                        <p class="text-xs text-gray-500 mb-1">ماهانه تکراری</p>
                         <p class="text-lg font-bold text-gray-900">$1,924,580</p>
                     </div>
                     <div class="text-center p-3 bg-gray-50 rounded-lg">
-                        <p class="text-xs text-gray-500 mb-1">{{ __('dashboard.one_time') }}</p>
+                        <p class="text-xs text-gray-500 mb-1">یکباره</p>
                         <p class="text-lg font-bold text-gray-900">$623,450</p>
                     </div>
                     <div class="text-center p-3 bg-gray-50 rounded-lg">
-                        <p class="text-xs text-gray-500 mb-1">{{ __('dashboard.add_ons') }}</p>
+                        <p class="text-xs text-gray-500 mb-1">افزونه‌ها</p>
                         <p class="text-lg font-bold text-gray-900">$299,362</p>
                     </div>
                 </div>
 
                 <!-- Revenue Chart Placeholder -->
                 <div class="h-32 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center">
-                    <p class="text-sm text-gray-400">{{ __('dashboard.revenue_trend_chart') }}</p>
+                    <p class="text-sm text-gray-400">نمودار روند درآمد</p>
                 </div>
             </div>
         </div>
@@ -403,15 +403,15 @@
         <!-- New Signups -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-lg font-semibold text-gray-900">{{ __('dashboard.new_signups') }}</h2>
-                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">{{ __('dashboard.view_all') }}</a>
+                <h2 class="text-lg font-semibold text-gray-900">ثبت‌نام‌های جدید</h2>
+                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">مشاهده همه</a>
             </div>
             <div class="space-y-4">
                 <!-- Today's Signups -->
                 <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm text-gray-600 font-medium">{{ __('dashboard.today') }}</p>
+                            <p class="text-sm text-gray-600 font-medium">امروز</p>
                             <p class="text-2xl font-bold text-gray-900 mt-1">47</p>
                         </div>
                         <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
@@ -431,8 +431,8 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-900">{{ __('dashboard.this_week') }}</p>
-                            <p class="text-xs text-gray-500">{{ __('dashboard.mon_sun') }}</p>
+                            <p class="text-sm font-semibold text-gray-900">این هفته</p>
+                            <p class="text-xs text-gray-500">دوشنبه - یکشنبه</p>
                         </div>
                     </div>
                     <p class="text-lg font-bold text-gray-900">312</p>
@@ -447,8 +447,8 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-900">{{ __('dashboard.this_month') }}</p>
-                            <p class="text-xs text-gray-500">{{ __('dashboard.current_month') }}</p>
+                            <p class="text-sm font-semibold text-gray-900">این ماه</p>
+                            <p class="text-xs text-gray-500">ماه جاری</p>
                         </div>
                     </div>
                     <p class="text-lg font-bold text-gray-900">1,247</p>
@@ -456,28 +456,28 @@
 
                 <!-- Recent Signups List -->
                 <div class="pt-4 border-t border-gray-100">
-                    <p class="text-sm font-semibold text-gray-900 mb-3">{{ __('dashboard.recent_signups') }}</p>
+                    <p class="text-sm font-semibold text-gray-900 mb-3">ثبت‌نام‌های اخیر</p>
                     <div class="space-y-2">
                         <div class="flex items-center justify-between text-sm">
                             <div class="flex items-center gap-2">
                                 <div class="w-6 h-6 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-medium">JD</div>
                                 <span class="text-gray-900">John Doe</span>
                             </div>
-                            <span class="text-xs text-gray-500">{{ __('dashboard.hours_ago', ['hours' => '2']) }}</span>
+                            <span class="text-xs text-gray-500">۲ ساعت پیش</span>
                         </div>
                         <div class="flex items-center justify-between text-sm">
                             <div class="flex items-center gap-2">
                                 <div class="w-6 h-6 rounded-full bg-green-600 text-white text-xs flex items-center justify-center font-medium">SM</div>
                                 <span class="text-gray-900">Sarah Miller</span>
                             </div>
-                            <span class="text-xs text-gray-500">{{ __('dashboard.hours_ago', ['hours' => '5']) }}</span>
+                            <span class="text-xs text-gray-500">۵ ساعت پیش</span>
                         </div>
                         <div class="flex items-center justify-between text-sm">
                             <div class="flex items-center gap-2">
                                 <div class="w-6 h-6 rounded-full bg-purple-600 text-white text-xs flex items-center justify-center font-medium">RJ</div>
                                 <span class="text-gray-900">Robert Johnson</span>
                             </div>
-                            <span class="text-xs text-gray-500">{{ __('dashboard.days_ago', ['days' => '1']) }}</span>
+                            <span class="text-xs text-gray-500">۱ روز پیش</span>
                         </div>
                     </div>
                 </div>
@@ -491,10 +491,10 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-2">
-                    <h2 class="text-lg font-semibold text-gray-900">{{ __('dashboard.pending_support_tickets') }}</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">تیکت‌های پشتیبانی در انتظار</h2>
                     <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-800 text-xs font-bold">8</span>
                 </div>
-                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">{{ __('dashboard.view_all') }}</a>
+                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">مشاهده همه</a>
             </div>
             <div class="space-y-3">
                 <!-- High Priority Ticket -->
@@ -502,13 +502,13 @@
                     <div class="flex items-start justify-between mb-2">
                         <div class="flex-1">
                             <div class="flex items-center gap-2 mb-1">
-                                <span class="px-2 py-0.5 bg-red-600 text-white text-xs font-semibold rounded">{{ __('dashboard.high') }}</span>
+                                <span class="px-2 py-0.5 bg-red-600 text-white text-xs font-semibold rounded">بالا</span>
                                 <span class="text-sm font-semibold text-gray-900">#TKT-4829</span>
                             </div>
-                            <p class="text-sm text-gray-700 font-medium">{{ __('dashboard.vm_build_failure_urgent') }}</p>
-                            <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.customer', ['name' => 'Acme Corp']) }}</p>
+                            <p class="text-sm text-gray-700 font-medium">خطا در ساخت ماشین مجازی - فوری</p>
+                            <p class="text-xs text-gray-500 mt-1">مشتری: Acme Corp</p>
                         </div>
-                        <span class="text-xs text-gray-500 whitespace-nowrap {{ $isRtl ? 'mr-2' : 'ml-2' }}">{{ __('dashboard.hours_ago_short', ['hours' => '2']) }}</span>
+                        <span class="text-xs text-gray-500 whitespace-nowrap {{ $isRtl ? 'mr-2' : 'ml-2' }}">۲ ساعت پیش</span>
                     </div>
                 </div>
 
@@ -517,13 +517,13 @@
                     <div class="flex items-start justify-between mb-2">
                         <div class="flex-1">
                             <div class="flex items-center gap-2 mb-1">
-                                <span class="px-2 py-0.5 bg-orange-600 text-white text-xs font-semibold rounded">{{ __('dashboard.medium') }}</span>
+                                <span class="px-2 py-0.5 bg-orange-600 text-white text-xs font-semibold rounded">متوسط</span>
                                 <span class="text-sm font-semibold text-gray-900">#TKT-4828</span>
                             </div>
-                            <p class="text-sm text-gray-700 font-medium">{{ __('dashboard.network_connectivity_issues') }}</p>
-                            <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.customer', ['name' => 'TechStart Inc']) }}</p>
+                            <p class="text-sm text-gray-700 font-medium">مشکلات اتصال شبکه</p>
+                            <p class="text-xs text-gray-500 mt-1">مشتری: TechStart Inc</p>
                         </div>
-                        <span class="text-xs text-gray-500 whitespace-nowrap {{ $isRtl ? 'mr-2' : 'ml-2' }}">{{ __('dashboard.hours_ago_short', ['hours' => '5']) }}</span>
+                        <span class="text-xs text-gray-500 whitespace-nowrap {{ $isRtl ? 'mr-2' : 'ml-2' }}">۵ ساعت پیش</span>
                     </div>
                 </div>
 
@@ -532,19 +532,19 @@
                     <div class="flex items-start justify-between mb-2">
                         <div class="flex-1">
                             <div class="flex items-center gap-2 mb-1">
-                                <span class="px-2 py-0.5 bg-gray-600 text-white text-xs font-semibold rounded">{{ __('dashboard.low') }}</span>
+                                <span class="px-2 py-0.5 bg-gray-600 text-white text-xs font-semibold rounded">پایین</span>
                                 <span class="text-sm font-semibold text-gray-900">#TKT-4827</span>
                             </div>
-                            <p class="text-sm text-gray-700 font-medium">{{ __('dashboard.billing_inquiry') }}</p>
-                            <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.customer', ['name' => 'DevSolutions']) }}</p>
+                            <p class="text-sm text-gray-700 font-medium">استعلام صورتحساب</p>
+                            <p class="text-xs text-gray-500 mt-1">مشتری: DevSolutions</p>
                         </div>
-                        <span class="text-xs text-gray-500 whitespace-nowrap {{ $isRtl ? 'mr-2' : 'ml-2' }}">{{ __('dashboard.days_ago_short', ['days' => '1']) }}</span>
+                        <span class="text-xs text-gray-500 whitespace-nowrap {{ $isRtl ? 'mr-2' : 'ml-2' }}">۱ روز پیش</span>
                     </div>
                 </div>
 
                 <!-- More Tickets Indicator -->
                 <div class="pt-3 border-t border-gray-100">
-                    <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">{{ __('dashboard.more_tickets', ['count' => '5']) }}</a>
+                    <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">+۵ تیکت دیگر</a>
                 </div>
             </div>
         </div>
@@ -553,10 +553,10 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-2">
-                    <h2 class="text-lg font-semibold text-gray-900">{{ __('dashboard.system_alerts') }}</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">هشدارهای سیستم</h2>
                     <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-100 text-yellow-800 text-xs font-bold">5</span>
                 </div>
-                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">{{ __('dashboard.view_all') }}</a>
+                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">مشاهده همه</a>
             </div>
             <div class="space-y-3">
                 <!-- Quota Full Alert -->
@@ -568,9 +568,9 @@
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <p class="text-sm font-semibold text-gray-900 mb-1">{{ __('dashboard.quota_full') }}</p>
-                            <p class="text-xs text-gray-600">{{ __('dashboard.quota_full_message', ['customer' => 'Enterprise Solutions', 'limit' => '10 TB']) }}</p>
-                            <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.hours_ago', ['hours' => '2']) }}</p>
+                            <p class="text-sm font-semibold text-gray-900 mb-1">سهمیه پر شده</p>
+                            <p class="text-xs text-gray-600">مشتری "Enterprise Solutions" به حد سهمیه ذخیره‌سازی (۱۰ ترابایت) رسیده است</p>
+                            <p class="text-xs text-gray-500 mt-1">۲ ساعت پیش</p>
                         </div>
                     </div>
                 </div>
@@ -584,9 +584,9 @@
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <p class="text-sm font-semibold text-gray-900 mb-1">{{ __('dashboard.system_error') }}</p>
-                            <p class="text-xs text-gray-600">{{ __('dashboard.hypervisor_connectivity_issue', ['name' => 'hv-sfo-03']) }}</p>
-                            <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.hours_ago', ['hours' => '4']) }}</p>
+                            <p class="text-sm font-semibold text-gray-900 mb-1">خطای سیستم</p>
+                            <p class="text-xs text-gray-600">هایپروایزر hv-sfo-03 در حال تجربه مشکلات اتصال است</p>
+                            <p class="text-xs text-gray-500 mt-1">۴ ساعت پیش</p>
                         </div>
                     </div>
                 </div>
@@ -600,9 +600,9 @@
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <p class="text-sm font-semibold text-gray-900 mb-1">{{ __('dashboard.failed_build') }}</p>
-                            <p class="text-xs text-gray-600">{{ __('dashboard.failed_build_message', ['count' => '3']) }}</p>
-                            <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.hour_ago', ['count' => '1']) }}</p>
+                            <p class="text-sm font-semibold text-gray-900 mb-1">ساخت ناموفق</p>
+                            <p class="text-xs text-gray-600">۳ ساخت ماشین مجازی در ساعت گذشته ناموفق بود - منابع ناکافی</p>
+                            <p class="text-xs text-gray-500 mt-1">۱ ساعت پیش</p>
                         </div>
                     </div>
                 </div>
@@ -616,16 +616,16 @@
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <p class="text-sm font-semibold text-gray-900 mb-1">{{ __('dashboard.capacity_warning') }}</p>
-                            <p class="text-xs text-gray-600">{{ __('dashboard.capacity_warning_message', ['percent' => '85']) }}</p>
-                            <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.hours_ago', ['hours' => '6']) }}</p>
+                            <p class="text-sm font-semibold text-gray-900 mb-1">هشدار ظرفیت</p>
+                            <p class="text-xs text-gray-600">استفاده از vCPU به آستانه ۸۵٪ نزدیک می‌شود</p>
+                            <p class="text-xs text-gray-500 mt-1">۶ ساعت پیش</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- More Alerts Indicator -->
                 <div class="pt-3 border-t border-gray-100">
-                    <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">{{ __('dashboard.more_alerts', ['count' => '1']) }}</a>
+                    <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">+۱ هشدار دیگر</a>
                 </div>
             </div>
         </div>
