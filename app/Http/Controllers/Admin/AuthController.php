@@ -49,7 +49,7 @@ class AuthController extends Controller
         if (Auth::guard('web')->attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            return redirect()->intended(config('subdomains.admin.redirect_after_login', '/dashboard'));
+            return redirect()->intended(route('admin.dashboard'));
         }
 
         throw ValidationException::withMessages([
@@ -70,6 +70,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect(config('subdomains.admin.redirect_after_logout', '/login'));
+        return redirect()->route('admin.login');
     }
 }

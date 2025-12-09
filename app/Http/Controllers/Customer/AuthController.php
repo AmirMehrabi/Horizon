@@ -172,11 +172,11 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Phone verified successfully!',
-                'redirect' => config('subdomains.customer.redirect_after_login', '/dashboard'),
+                'redirect' => route('customer.dashboard'),
             ]);
         }
 
-        return redirect()->intended(config('subdomains.customer.redirect_after_login', '/dashboard'))
+        return redirect()->intended(route('customer.dashboard'))
             ->with('success', 'Welcome! Your account has been verified.');
     }
 
@@ -290,11 +290,11 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Login successful!',
-                'redirect' => config('subdomains.customer.redirect_after_login', '/dashboard'),
+                'redirect' => route('customer.dashboard'),
             ]);
         }
 
-        return redirect()->intended(config('subdomains.customer.redirect_after_login', '/dashboard'))
+        return redirect()->intended(route('customer.dashboard'))
             ->with('success', 'Welcome back!');
     }
 
@@ -346,6 +346,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect(config('subdomains.customer.redirect_after_logout', '/'));
+        return redirect()->route('landing');
     }
 }
