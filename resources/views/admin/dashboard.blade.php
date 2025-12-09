@@ -99,7 +99,7 @@
 <div class="flex items-center justify-between mb-8">
     <div>
         <h1 class="text-3xl font-bold text-gray-900">{{ __('dashboard.dashboard') }}</h1>
-        <p class="mt-1 text-sm text-gray-500">High-level overview for cloud operators</p>
+        <p class="mt-1 text-sm text-gray-500">{{ __('dashboard.high_level_overview') }}</p>
     </div>
     <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium text-sm transition-colors duration-200 flex items-center gap-2 shadow-sm">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,7 +113,7 @@
 <div class="space-y-6">
     <!-- Overview Stats: VMs, Networks, Volumes -->
     <div>
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Infrastructure Overview</h2>
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ __('dashboard.infrastructure_overview') }}</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Active VMs Card -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
@@ -125,22 +125,22 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500 font-medium">Active VMs</p>
+                            <p class="text-sm text-gray-500 font-medium">{{ __('dashboard.active_vms') }}</p>
                             <p class="text-2xl font-bold text-gray-900">1,247</p>
                         </div>
                     </div>
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         <span class="w-1.5 h-1.5 rounded-full bg-green-500 {{ $isRtl ? 'ml-1.5' : 'mr-1.5' }}"></span>
-                        Active
+                        {{ __('dashboard.active') }}
                     </span>
                 </div>
                 <div class="pt-4 border-t border-gray-100">
                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-gray-500">Running</span>
+                        <span class="text-gray-500">{{ __('dashboard.running') }}</span>
                         <span class="font-semibold text-gray-900">1,198</span>
                     </div>
                     <div class="flex items-center justify-between text-sm mt-1">
-                        <span class="text-gray-500">Stopped</span>
+                        <span class="text-gray-500">{{ __('dashboard.stopped') }}</span>
                         <span class="font-semibold text-gray-900">49</span>
                     </div>
                 </div>
@@ -156,22 +156,22 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500 font-medium">Active Networks</p>
+                            <p class="text-sm text-gray-500 font-medium">{{ __('dashboard.active_networks') }}</p>
                             <p class="text-2xl font-bold text-gray-900">342</p>
                         </div>
                     </div>
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         <span class="w-1.5 h-1.5 rounded-full bg-green-500 {{ $isRtl ? 'ml-1.5' : 'mr-1.5' }}"></span>
-                        Active
+                        {{ __('dashboard.active') }}
                     </span>
                 </div>
                 <div class="pt-4 border-t border-gray-100">
                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-gray-500">Private</span>
+                        <span class="text-gray-500">{{ __('dashboard.private') }}</span>
                         <span class="font-semibold text-gray-900">298</span>
                     </div>
                     <div class="flex items-center justify-between text-sm mt-1">
-                        <span class="text-gray-500">Public</span>
+                        <span class="text-gray-500">{{ __('dashboard.public') }}</span>
                         <span class="font-semibold text-gray-900">44</span>
                     </div>
                 </div>
@@ -187,22 +187,22 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500 font-medium">Active Volumes</p>
+                            <p class="text-sm text-gray-500 font-medium">{{ __('dashboard.active_volumes') }}</p>
                             <p class="text-2xl font-bold text-gray-900">856</p>
                         </div>
                     </div>
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         <span class="w-1.5 h-1.5 rounded-full bg-green-500 {{ $isRtl ? 'ml-1.5' : 'mr-1.5' }}"></span>
-                        Active
+                        {{ __('dashboard.active') }}
                     </span>
                 </div>
                 <div class="pt-4 border-t border-gray-100">
                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-gray-500">Attached</span>
+                        <span class="text-gray-500">{{ __('dashboard.attached') }}</span>
                         <span class="font-semibold text-gray-900">812</span>
                     </div>
                     <div class="flex items-center justify-between text-sm mt-1">
-                        <span class="text-gray-500">Unattached</span>
+                        <span class="text-gray-500">{{ __('dashboard.unattached') }}</span>
                         <span class="font-semibold text-gray-900">44</span>
                     </div>
                 </div>
@@ -215,8 +215,8 @@
         <!-- Hypervisor Status -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-lg font-semibold text-gray-900">Hypervisor Status</h2>
-                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">View All</a>
+                <h2 class="text-lg font-semibold text-gray-900">{{ __('dashboard.hypervisor_status') }}</h2>
+                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">{{ __('dashboard.view_all') }}</a>
             </div>
             <div class="space-y-4">
                 <!-- Online Hypervisors -->
@@ -228,13 +228,13 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-900">Online</p>
-                            <p class="text-xs text-gray-500">Hypervisors operational</p>
+                            <p class="text-sm font-semibold text-gray-900">{{ __('dashboard.online') }}</p>
+                            <p class="text-xs text-gray-500">{{ __('dashboard.hypervisors_operational') }}</p>
                         </div>
                     </div>
                     <div class="text-right">
                         <p class="text-2xl font-bold text-green-600">24</p>
-                        <p class="text-xs text-gray-500">96% uptime</p>
+                        <p class="text-xs text-gray-500">{{ __('dashboard.uptime_percent', ['percent' => '96']) }}</p>
                     </div>
                 </div>
 
@@ -247,13 +247,13 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-900">Offline</p>
-                            <p class="text-xs text-gray-500">Requires attention</p>
+                            <p class="text-sm font-semibold text-gray-900">{{ __('dashboard.offline') }}</p>
+                            <p class="text-xs text-gray-500">{{ __('dashboard.requires_attention') }}</p>
                         </div>
                     </div>
                     <div class="text-right">
                         <p class="text-2xl font-bold text-red-600">1</p>
-                        <p class="text-xs text-gray-500">4% downtime</p>
+                        <p class="text-xs text-gray-500">{{ __('dashboard.downtime_percent', ['percent' => '4']) }}</p>
                     </div>
                 </div>
 
@@ -296,8 +296,8 @@
         <!-- Resource Capacity -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-lg font-semibold text-gray-900">Resource Capacity</h2>
-                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">View Details</a>
+                <h2 class="text-lg font-semibold text-gray-900">{{ __('dashboard.resource_capacity') }}</h2>
+                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">{{ __('dashboard.view_details') }}</a>
             </div>
             <div class="space-y-6">
                 <!-- vCPU Capacity -->
@@ -314,7 +314,7 @@
                     <div class="w-full bg-gray-200 rounded-full h-2.5">
                         <div class="bg-blue-600 h-2.5 rounded-full" style="width: 84.56%"></div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1">84.6% utilized</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.utilized_percent', ['percent' => '84.6']) }}</p>
                 </div>
 
                 <!-- RAM Capacity -->
@@ -331,7 +331,7 @@
                     <div class="w-full bg-gray-200 rounded-full h-2.5">
                         <div class="bg-purple-600 h-2.5 rounded-full" style="width: 81%"></div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1">81% utilized</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.utilized_percent', ['percent' => '81']) }}</p>
                 </div>
 
                 <!-- Storage Capacity -->
@@ -348,7 +348,7 @@
                     <div class="w-full bg-gray-200 rounded-full h-2.5">
                         <div class="bg-orange-600 h-2.5 rounded-full" style="width: 81.67%"></div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1">81.7% utilized</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.utilized_percent', ['percent' => '81.7']) }}</p>
                 </div>
             </div>
         </div>
@@ -359,43 +359,43 @@
         <!-- Revenue Metrics -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-lg font-semibold text-gray-900">Revenue Metrics</h2>
+                <h2 class="text-lg font-semibold text-gray-900">{{ __('dashboard.revenue_metrics') }}</h2>
                 <select class="text-sm border border-gray-300 rounded-lg px-3 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>Last 30 days</option>
-                    <option>Last 7 days</option>
-                    <option>Last 90 days</option>
+                    <option>{{ __('dashboard.last_30_days') }}</option>
+                    <option>{{ __('dashboard.last_7_days') }}</option>
+                    <option>{{ __('dashboard.last_90_days') }}</option>
                 </select>
             </div>
             <div class="space-y-6">
                 <!-- Total Revenue -->
                 <div class="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm text-gray-600 font-medium">Total Revenue</span>
+                        <span class="text-sm text-gray-600 font-medium">{{ __('dashboard.total_revenue') }}</span>
                         <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full font-medium">+12.5%</span>
                     </div>
                     <p class="text-3xl font-bold text-gray-900">$2,847,392</p>
-                    <p class="text-xs text-gray-500 mt-1">vs $2,530,184 previous period</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.vs_previous_period', ['amount' => '$2,530,184']) }}</p>
                 </div>
 
                 <!-- Revenue Breakdown -->
                 <div class="grid grid-cols-3 gap-4">
                     <div class="text-center p-3 bg-gray-50 rounded-lg">
-                        <p class="text-xs text-gray-500 mb-1">Monthly Recurring</p>
+                        <p class="text-xs text-gray-500 mb-1">{{ __('dashboard.monthly_recurring') }}</p>
                         <p class="text-lg font-bold text-gray-900">$1,924,580</p>
                     </div>
                     <div class="text-center p-3 bg-gray-50 rounded-lg">
-                        <p class="text-xs text-gray-500 mb-1">One-time</p>
+                        <p class="text-xs text-gray-500 mb-1">{{ __('dashboard.one_time') }}</p>
                         <p class="text-lg font-bold text-gray-900">$623,450</p>
                     </div>
                     <div class="text-center p-3 bg-gray-50 rounded-lg">
-                        <p class="text-xs text-gray-500 mb-1">Add-ons</p>
+                        <p class="text-xs text-gray-500 mb-1">{{ __('dashboard.add_ons') }}</p>
                         <p class="text-lg font-bold text-gray-900">$299,362</p>
                     </div>
                 </div>
 
                 <!-- Revenue Chart Placeholder -->
                 <div class="h-32 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center">
-                    <p class="text-sm text-gray-400">Revenue trend chart</p>
+                    <p class="text-sm text-gray-400">{{ __('dashboard.revenue_trend_chart') }}</p>
                 </div>
             </div>
         </div>
@@ -403,15 +403,15 @@
         <!-- New Signups -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-lg font-semibold text-gray-900">New Signups</h2>
-                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">View All</a>
+                <h2 class="text-lg font-semibold text-gray-900">{{ __('dashboard.new_signups') }}</h2>
+                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">{{ __('dashboard.view_all') }}</a>
             </div>
             <div class="space-y-4">
                 <!-- Today's Signups -->
                 <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm text-gray-600 font-medium">Today</p>
+                            <p class="text-sm text-gray-600 font-medium">{{ __('dashboard.today') }}</p>
                             <p class="text-2xl font-bold text-gray-900 mt-1">47</p>
                         </div>
                         <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
@@ -431,8 +431,8 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-900">This Week</p>
-                            <p class="text-xs text-gray-500">Mon - Sun</p>
+                            <p class="text-sm font-semibold text-gray-900">{{ __('dashboard.this_week') }}</p>
+                            <p class="text-xs text-gray-500">{{ __('dashboard.mon_sun') }}</p>
                         </div>
                     </div>
                     <p class="text-lg font-bold text-gray-900">312</p>
@@ -447,8 +447,8 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-900">This Month</p>
-                            <p class="text-xs text-gray-500">Current month</p>
+                            <p class="text-sm font-semibold text-gray-900">{{ __('dashboard.this_month') }}</p>
+                            <p class="text-xs text-gray-500">{{ __('dashboard.current_month') }}</p>
                         </div>
                     </div>
                     <p class="text-lg font-bold text-gray-900">1,247</p>
@@ -456,28 +456,28 @@
 
                 <!-- Recent Signups List -->
                 <div class="pt-4 border-t border-gray-100">
-                    <p class="text-sm font-semibold text-gray-900 mb-3">Recent Signups</p>
+                    <p class="text-sm font-semibold text-gray-900 mb-3">{{ __('dashboard.recent_signups') }}</p>
                     <div class="space-y-2">
                         <div class="flex items-center justify-between text-sm">
                             <div class="flex items-center gap-2">
                                 <div class="w-6 h-6 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-medium">JD</div>
                                 <span class="text-gray-900">John Doe</span>
                             </div>
-                            <span class="text-xs text-gray-500">2 hours ago</span>
+                            <span class="text-xs text-gray-500">{{ __('dashboard.hours_ago', ['hours' => '2']) }}</span>
                         </div>
                         <div class="flex items-center justify-between text-sm">
                             <div class="flex items-center gap-2">
                                 <div class="w-6 h-6 rounded-full bg-green-600 text-white text-xs flex items-center justify-center font-medium">SM</div>
                                 <span class="text-gray-900">Sarah Miller</span>
                             </div>
-                            <span class="text-xs text-gray-500">5 hours ago</span>
+                            <span class="text-xs text-gray-500">{{ __('dashboard.hours_ago', ['hours' => '5']) }}</span>
                         </div>
                         <div class="flex items-center justify-between text-sm">
                             <div class="flex items-center gap-2">
                                 <div class="w-6 h-6 rounded-full bg-purple-600 text-white text-xs flex items-center justify-center font-medium">RJ</div>
                                 <span class="text-gray-900">Robert Johnson</span>
                             </div>
-                            <span class="text-xs text-gray-500">1 day ago</span>
+                            <span class="text-xs text-gray-500">{{ __('dashboard.days_ago', ['days' => '1']) }}</span>
                         </div>
                     </div>
                 </div>
@@ -491,10 +491,10 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-2">
-                    <h2 class="text-lg font-semibold text-gray-900">Pending Support Tickets</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">{{ __('dashboard.pending_support_tickets') }}</h2>
                     <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-800 text-xs font-bold">8</span>
                 </div>
-                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">View All</a>
+                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">{{ __('dashboard.view_all') }}</a>
             </div>
             <div class="space-y-3">
                 <!-- High Priority Ticket -->
@@ -502,13 +502,13 @@
                     <div class="flex items-start justify-between mb-2">
                         <div class="flex-1">
                             <div class="flex items-center gap-2 mb-1">
-                                <span class="px-2 py-0.5 bg-red-600 text-white text-xs font-semibold rounded">High</span>
+                                <span class="px-2 py-0.5 bg-red-600 text-white text-xs font-semibold rounded">{{ __('dashboard.high') }}</span>
                                 <span class="text-sm font-semibold text-gray-900">#TKT-4829</span>
                             </div>
-                            <p class="text-sm text-gray-700 font-medium">VM build failure - urgent</p>
-                            <p class="text-xs text-gray-500 mt-1">Customer: Acme Corp</p>
+                            <p class="text-sm text-gray-700 font-medium">{{ __('dashboard.vm_build_failure_urgent') }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.customer', ['name' => 'Acme Corp']) }}</p>
                         </div>
-                        <span class="text-xs text-gray-500 whitespace-nowrap {{ $isRtl ? 'mr-2' : 'ml-2' }}">2h ago</span>
+                        <span class="text-xs text-gray-500 whitespace-nowrap {{ $isRtl ? 'mr-2' : 'ml-2' }}">{{ __('dashboard.hours_ago_short', ['hours' => '2']) }}</span>
                     </div>
                 </div>
 
@@ -517,13 +517,13 @@
                     <div class="flex items-start justify-between mb-2">
                         <div class="flex-1">
                             <div class="flex items-center gap-2 mb-1">
-                                <span class="px-2 py-0.5 bg-orange-600 text-white text-xs font-semibold rounded">Medium</span>
+                                <span class="px-2 py-0.5 bg-orange-600 text-white text-xs font-semibold rounded">{{ __('dashboard.medium') }}</span>
                                 <span class="text-sm font-semibold text-gray-900">#TKT-4828</span>
                             </div>
-                            <p class="text-sm text-gray-700 font-medium">Network connectivity issues</p>
-                            <p class="text-xs text-gray-500 mt-1">Customer: TechStart Inc</p>
+                            <p class="text-sm text-gray-700 font-medium">{{ __('dashboard.network_connectivity_issues') }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.customer', ['name' => 'TechStart Inc']) }}</p>
                         </div>
-                        <span class="text-xs text-gray-500 whitespace-nowrap {{ $isRtl ? 'mr-2' : 'ml-2' }}">5h ago</span>
+                        <span class="text-xs text-gray-500 whitespace-nowrap {{ $isRtl ? 'mr-2' : 'ml-2' }}">{{ __('dashboard.hours_ago_short', ['hours' => '5']) }}</span>
                     </div>
                 </div>
 
@@ -532,19 +532,19 @@
                     <div class="flex items-start justify-between mb-2">
                         <div class="flex-1">
                             <div class="flex items-center gap-2 mb-1">
-                                <span class="px-2 py-0.5 bg-gray-600 text-white text-xs font-semibold rounded">Low</span>
+                                <span class="px-2 py-0.5 bg-gray-600 text-white text-xs font-semibold rounded">{{ __('dashboard.low') }}</span>
                                 <span class="text-sm font-semibold text-gray-900">#TKT-4827</span>
                             </div>
-                            <p class="text-sm text-gray-700 font-medium">Billing inquiry</p>
-                            <p class="text-xs text-gray-500 mt-1">Customer: DevSolutions</p>
+                            <p class="text-sm text-gray-700 font-medium">{{ __('dashboard.billing_inquiry') }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.customer', ['name' => 'DevSolutions']) }}</p>
                         </div>
-                        <span class="text-xs text-gray-500 whitespace-nowrap {{ $isRtl ? 'mr-2' : 'ml-2' }}">1d ago</span>
+                        <span class="text-xs text-gray-500 whitespace-nowrap {{ $isRtl ? 'mr-2' : 'ml-2' }}">{{ __('dashboard.days_ago_short', ['days' => '1']) }}</span>
                     </div>
                 </div>
 
                 <!-- More Tickets Indicator -->
                 <div class="pt-3 border-t border-gray-100">
-                    <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">+5 more tickets</a>
+                    <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">{{ __('dashboard.more_tickets', ['count' => '5']) }}</a>
                 </div>
             </div>
         </div>
@@ -553,10 +553,10 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-2">
-                    <h2 class="text-lg font-semibold text-gray-900">System Alerts</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">{{ __('dashboard.system_alerts') }}</h2>
                     <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-100 text-yellow-800 text-xs font-bold">5</span>
                 </div>
-                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">View All</a>
+                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">{{ __('dashboard.view_all') }}</a>
             </div>
             <div class="space-y-3">
                 <!-- Quota Full Alert -->
@@ -568,9 +568,9 @@
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <p class="text-sm font-semibold text-gray-900 mb-1">Quota Full</p>
-                            <p class="text-xs text-gray-600">Customer "Enterprise Solutions" has reached storage quota limit (10 TB)</p>
-                            <p class="text-xs text-gray-500 mt-1">2 hours ago</p>
+                            <p class="text-sm font-semibold text-gray-900 mb-1">{{ __('dashboard.quota_full') }}</p>
+                            <p class="text-xs text-gray-600">{{ __('dashboard.quota_full_message', ['customer' => 'Enterprise Solutions', 'limit' => '10 TB']) }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.hours_ago', ['hours' => '2']) }}</p>
                         </div>
                     </div>
                 </div>
@@ -584,9 +584,9 @@
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <p class="text-sm font-semibold text-gray-900 mb-1">System Error</p>
-                            <p class="text-xs text-gray-600">Hypervisor hv-sfo-03 experiencing connectivity issues</p>
-                            <p class="text-xs text-gray-500 mt-1">4 hours ago</p>
+                            <p class="text-sm font-semibold text-gray-900 mb-1">{{ __('dashboard.system_error') }}</p>
+                            <p class="text-xs text-gray-600">{{ __('dashboard.hypervisor_connectivity_issue', ['name' => 'hv-sfo-03']) }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.hours_ago', ['hours' => '4']) }}</p>
                         </div>
                     </div>
                 </div>
@@ -600,9 +600,9 @@
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <p class="text-sm font-semibold text-gray-900 mb-1">Failed Build</p>
-                            <p class="text-xs text-gray-600">3 VM builds failed in the last hour - insufficient resources</p>
-                            <p class="text-xs text-gray-500 mt-1">1 hour ago</p>
+                            <p class="text-sm font-semibold text-gray-900 mb-1">{{ __('dashboard.failed_build') }}</p>
+                            <p class="text-xs text-gray-600">{{ __('dashboard.failed_build_message', ['count' => '3']) }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.hour_ago', ['count' => '1']) }}</p>
                         </div>
                     </div>
                 </div>
@@ -616,16 +616,16 @@
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <p class="text-sm font-semibold text-gray-900 mb-1">Capacity Warning</p>
-                            <p class="text-xs text-gray-600">vCPU usage approaching 85% threshold</p>
-                            <p class="text-xs text-gray-500 mt-1">6 hours ago</p>
+                            <p class="text-sm font-semibold text-gray-900 mb-1">{{ __('dashboard.capacity_warning') }}</p>
+                            <p class="text-xs text-gray-600">{{ __('dashboard.capacity_warning_message', ['percent' => '85']) }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ __('dashboard.hours_ago', ['hours' => '6']) }}</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- More Alerts Indicator -->
                 <div class="pt-3 border-t border-gray-100">
-                    <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">+1 more alert</a>
+                    <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">{{ __('dashboard.more_alerts', ['count' => '1']) }}</a>
                 </div>
             </div>
         </div>
