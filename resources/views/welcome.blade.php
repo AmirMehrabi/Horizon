@@ -234,7 +234,10 @@
                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('dashboard.profile') }}</a>
                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('dashboard.settings') }}</a>
                             <div class="border-t border-gray-200 my-1"></div>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('dashboard.sign_out') }}</a>
+                            <form method="POST" action="{{ route('admin.logout') }}">
+                                @csrf
+                                <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('dashboard.sign_out') }}</button>
+                            </form>
                         </div>
                     </div>
                 </div>
