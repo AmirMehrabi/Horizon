@@ -9,6 +9,16 @@ use App\Http\Controllers\Customer\DashboardController as CustomerDashboardContro
 
 /*
 |--------------------------------------------------------------------------
+| Fallback Routes (for any domain)
+|--------------------------------------------------------------------------
+*/
+// Fallback login route to redirect to portal selection
+Route::get('/login', function () {
+    return redirect()->route('choose-portal');
+})->name('login');
+
+/*
+|--------------------------------------------------------------------------
 | Main Domain Routes (without subdomain)
 |--------------------------------------------------------------------------
 */
