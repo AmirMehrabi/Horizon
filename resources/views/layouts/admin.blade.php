@@ -74,6 +74,32 @@
             </style>
         @endif
 
+        <style>
+            /* Hide scrollbar for sidebar navigation */
+            #sidebar nav {
+                scrollbar-width: thin;
+                scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+            }
+            
+            /* Webkit browsers (Chrome, Safari, Edge) */
+            #sidebar nav::-webkit-scrollbar {
+                width: 6px;
+            }
+            
+            #sidebar nav::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            
+            #sidebar nav::-webkit-scrollbar-thumb {
+                background-color: rgba(255, 255, 255, 0.3);
+                border-radius: 3px;
+            }
+            
+            #sidebar nav::-webkit-scrollbar-thumb:hover {
+                background-color: rgba(255, 255, 255, 0.5);
+            }
+        </style>
+        
         @stack('styles')
     </head>
 <body class="bg-white" style="direction: {{ $direction }};">
