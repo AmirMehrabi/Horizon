@@ -14,24 +14,22 @@ use App\Http\Controllers\Customer\DashboardController as CustomerDashboardContro
 */
 Route::domain('hub.aviato.ir')
     ->name('admin.')
-    ->middleware('guest:web')
     ->group(function () {
-        // Authentication Routes
-        Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
-        Route::post('/login', [AdminAuthController::class, 'login'])->withoutMiddleware('guest:web');
-        Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout')->withoutMiddleware('guest:web');
+        // Logout route (accessible to authenticated users)
+        Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
         
-        // Landing page for hub subdomain
-        Route::get('/', [LandingController::class, 'index'])->name('landing');
-        Route::get('/choose-portal', [LandingController::class, 'choosePortal'])->name('choose-portal');
-    });
-
-// Admin protected routes
-Route::domain('hub.aviato.ir')
-    ->name('admin.')
-    ->middleware('auth:web')
-    ->group(function () {
-        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        // Guest routes (login, landing)
+        Route::middleware('guest:web')->group(function () {
+            Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
+            Route::post('/login', [AdminAuthController::class, 'login']);
+            Route::get('/', [LandingController::class, 'index'])->name('landing');
+            Route::get('/choose-portal', [LandingController::class, 'choosePortal'])->name('choose-portal');
+        });
+        
+        // Protected routes (dashboard)
+        Route::middleware('auth:web')->group(function () {
+            Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        });
     });
 
 /*
@@ -41,33 +39,34 @@ Route::domain('hub.aviato.ir')
 */
 Route::domain('panel.aviato.ir')
     ->name('customer.')
-    ->middleware('guest:customer')
     ->group(function () {
-        // Authentication Routes
-        Route::get('/register', [CustomerAuthController::class, 'showRegistrationForm'])->name('register');
-        Route::post('/register', [CustomerAuthController::class, 'register'])->withoutMiddleware('guest:customer');
-        Route::get('/login', [CustomerAuthController::class, 'showLoginForm'])->name('login');
-        Route::post('/login', [CustomerAuthController::class, 'login'])->withoutMiddleware('guest:customer');
+        // Logout route (accessible to authenticated users)
+        Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('logout');
         
-        // Verification Routes
-        Route::get('/verify', [CustomerAuthController::class, 'showVerificationForm'])->name('verify');
-        Route::post('/verify', [CustomerAuthController::class, 'verify'])->withoutMiddleware('guest:customer');
-        Route::post('/verify-login', [CustomerAuthController::class, 'verifyLogin'])->name('verify-login')->withoutMiddleware('guest:customer');
-        Route::post('/resend-code', [CustomerAuthController::class, 'resendCode'])->name('resend-code')->withoutMiddleware('guest:customer');
+        // Guest routes (login, register, verification)
+        Route::middleware('guest:customer')->group(function () {
+            Route::get('/register', [CustomerAuthController::class, 'showRegistrationForm'])->name('register');
+            Route::post('/register', [CustomerAuthController::class, 'register']);
+            Route::get('/login', [CustomerAuthController::class, 'showLoginForm'])->name('login');
+            Route::post('/login', [CustomerAuthController::class, 'login']);
+            
+            // Verification Routes
+            Route::get('/verify', [CustomerAuthController::class, 'showVerificationForm'])->name('verify');
+            Route::post('/verify', [CustomerAuthController::class, 'verify']);
+            Route::post('/verify-login', [CustomerAuthController::class, 'verifyLogin'])->name('verify-login');
+            Route::post('/resend-code', [CustomerAuthController::class, 'resendCode'])->name('resend-code');
+            
+            // Root redirects to login
+            Route::get('/', function () {
+                return redirect()->route('customer.login');
+            });
+        });
         
-        // Logout
-        Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('logout')->withoutMiddleware('guest:customer');
-        
-        // Landing page for panel subdomain
-        Route::get('/', [LandingController::class, 'index'])->name('landing');
-    });
-
-// Customer protected routes
-Route::domain('panel.aviato.ir')
-    ->name('customer.')
-    ->middleware('auth:customer')
-    ->group(function () {
-        Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
+        // Protected routes (dashboard)
+        Route::middleware('auth:customer')->group(function () {
+            Route::get('/', [CustomerDashboardController::class, 'index'])->name('dashboard');
+            Route::get('/dashboard', [CustomerDashboardController::class, 'index']);
+        });
     });
 
 /*

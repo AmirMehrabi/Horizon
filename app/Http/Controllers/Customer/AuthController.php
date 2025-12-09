@@ -346,6 +346,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('https://panel.aviato.ir/');
+        return redirect('https://panel.aviato.ir/login');
     }
 }
