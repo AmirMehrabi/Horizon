@@ -89,7 +89,7 @@ Route::get('/', function () {
     if (str_contains($host, 'hub.aviato.ir')) {
         return redirect()->route('admin.landing');
     } elseif (str_contains($host, 'panel.aviato.ir')) {
-        return redirect()->route('customer.landing');
+        return redirect()->route('customer.login');
     }
     return redirect('https://hub.aviato.ir');
 })->name('landing');
