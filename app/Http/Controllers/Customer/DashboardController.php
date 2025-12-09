@@ -14,7 +14,7 @@ class DashboardController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:customer');
+        // Laravel 12 uses different middleware registration
     }
 
     /**

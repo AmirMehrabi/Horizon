@@ -5,21 +5,20 @@ This document provides a comprehensive guide for setting up and using the dual-p
 ## 🚀 Features Implemented
 
 ### ✅ Admin Portal
-- **Path**: `/admin/*`
+- **Subdomain**: `hub.aviato.ir`
 - **Authentication**: Email/Password based
 - **Dashboard**: Existing dashboard from welcome.blade.php
 - **Features**: User management, customer oversight, system analytics
 
 ### ✅ Customer Portal  
-- **Path**: `/customer/*`
+- **Subdomain**: `panel.aviato.ir`
 - **Authentication**: Phone number + SMS verification
 - **Registration**: Phone-based with SMS verification
 - **Dashboard**: Custom dashboard with machine statistics
 - **Features**: Resource management, monitoring, billing access
 
 ### ✅ Landing Page
-- **Main Domain**: `/`
-- **Portal Selection**: Choose between Admin and Customer portals
+- **Available on both subdomains**: Portal selection when needed
 - **Responsive Design**: Mobile-friendly interface
 
 ## 🛠 Setup Instructions
@@ -57,12 +56,13 @@ protected function schedule(Schedule $schedule)
 ## 🔐 Default Credentials
 
 ### Admin Portal
-- **URL**: `https://hub.aviato.ir/admin/login`
+- **URL**: `https://hub.aviato.ir/login`
 - **Email**: `admin@example.com`
 - **Password**: `password`
 
 ### Customer Portal
-- **URL**: `https://hub.aviato.ir/customer/register`
+- **Login**: `https://panel.aviato.ir/login`
+- **Register**: `https://panel.aviato.ir/register`
 - **Registration**: Use any phone number (codes are logged for development)
 
 ## 📱 SMS Verification
@@ -96,16 +96,13 @@ The system uses a consistent blue color scheme matching your existing dashboard:
 ## 🔄 Portal Flow
 
 ### Admin Flow
-1. Visit main site (`https://hub.aviato.ir`)
-2. Click "Choose Portal" → Select "Admin Portal"
-3. Login with email/password
-4. Access existing dashboard
+1. Visit `https://hub.aviato.ir/login`
+2. Login with email/password
+3. Access existing dashboard at `https://hub.aviato.ir/dashboard`
 
 ### Customer Flow
-1. Visit main site (`https://hub.aviato.ir`)
-2. Click "Choose Portal" → Select "Customer Portal"
-3. **New Users**: Register with phone number → Verify SMS → Access dashboard
-4. **Existing Users**: Login with phone number → Verify SMS → Access dashboard
+1. **New Users**: Visit `https://panel.aviato.ir/register` → Register with phone number → Verify SMS → Access dashboard
+2. **Existing Users**: Visit `https://panel.aviato.ir/login` → Login with phone number → Verify SMS → Access dashboard
 
 ## 📊 Database Schema
 
@@ -160,11 +157,11 @@ The system uses a consistent blue color scheme matching your existing dashboard:
 ## 🧪 Testing URLs
 
 ### Production URLs
-- **Main Site**: `https://hub.aviato.ir`
-- **Portal Selection**: `https://hub.aviato.ir/choose-portal`
-- **Admin Login**: `https://hub.aviato.ir/admin/login`
-- **Customer Register**: `https://hub.aviato.ir/customer/register`
-- **Customer Login**: `https://hub.aviato.ir/customer/login`
+- **Admin Portal**: `https://hub.aviato.ir/login`
+- **Admin Dashboard**: `https://hub.aviato.ir/dashboard`
+- **Customer Login**: `https://panel.aviato.ir/login`
+- **Customer Register**: `https://panel.aviato.ir/register`
+- **Customer Dashboard**: `https://panel.aviato.ir/dashboard`
 
 ### API Endpoints
 All authentication endpoints support both web and JSON responses for AJAX usage.
@@ -174,8 +171,12 @@ All authentication endpoints support both web and JSON responses for AJAX usage.
 ### Common Issues
 
 1. **Route [login] not defined error**
-   - ✅ **FIXED**: Added fallback login route that redirects to portal selection
+   - ✅ **FIXED**: Added fallback login route that redirects based on subdomain
    - Clear route cache: `php artisan route:clear`
+
+2. **Call to undefined method middleware() error**
+   - ✅ **FIXED**: Removed deprecated middleware() calls in Laravel 12
+   - Middleware is now applied at route level
 
 2. **SMS codes not appearing**
    - Check `storage/logs/laravel.log`
