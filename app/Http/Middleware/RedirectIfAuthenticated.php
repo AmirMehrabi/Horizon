@@ -20,12 +20,12 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                // Determine redirect based on guard and subdomain
-                $host = $request->getHost();
+                // Determine redirect based on guard and path
+                $path = $request->getPathInfo();
                 
-                if (str_contains($host, config('subdomains.admin.subdomain'))) {
+                if (str_starts_with($path, '/admin')) {
                     return redirect()->route('admin.dashboard');
-                } elseif (str_contains($host, config('subdomains.customer.subdomain'))) {
+                } elseif (str_starts_with($path, '/customer')) {
                     return redirect()->route('customer.dashboard');
                 } else {
                     // Default redirect to portal selection

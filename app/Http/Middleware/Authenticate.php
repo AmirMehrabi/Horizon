@@ -14,12 +14,12 @@ class Authenticate extends Middleware
     protected function redirectTo(Request $request): ?string
     {
         if (!$request->expectsJson()) {
-            $host = $request->getHost();
+            $path = $request->getPathInfo();
             
-            // Redirect to appropriate login based on subdomain
-            if (str_contains($host, config('subdomains.admin.subdomain'))) {
+            // Redirect to appropriate login based on path
+            if (str_starts_with($path, '/admin')) {
                 return route('admin.login');
-            } elseif (str_contains($host, config('subdomains.customer.subdomain'))) {
+            } elseif (str_starts_with($path, '/customer')) {
                 return route('customer.login');
             } else {
                 // Default redirect to portal selection

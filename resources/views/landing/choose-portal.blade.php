@@ -65,7 +65,7 @@
                         </li>
                     </ul>
                     
-                    <a href="http://{{ config('subdomains.admin.subdomain') }}.{{ config('subdomains.base_domain') }}/login" 
+                    <a href="{{ route('admin.login') }}" 
                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md text-center block transition-colors duration-200">
                         {{ __('Access Admin Portal') }}
                     </a>
@@ -117,11 +117,11 @@
                     </ul>
                     
                     <div class="space-y-3">
-                        <a href="http://{{ config('subdomains.customer.subdomain') }}.{{ config('subdomains.base_domain') }}/login" 
+                        <a href="{{ route('customer.login') }}" 
                            class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-md text-center block transition-colors duration-200">
                             {{ __('Sign In') }}
                         </a>
-                        <a href="http://{{ config('subdomains.customer.subdomain') }}.{{ config('subdomains.base_domain') }}/register" 
+                        <a href="{{ route('customer.register') }}" 
                            class="w-full bg-white hover:bg-gray-50 text-green-600 font-medium py-3 px-4 rounded-md text-center block border border-green-600 transition-colors duration-200">
                             {{ __('Create Account') }}
                         </a>

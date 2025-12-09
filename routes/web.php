@@ -9,30 +9,25 @@ use App\Http\Controllers\Customer\DashboardController as CustomerDashboardContro
 
 /*
 |--------------------------------------------------------------------------
-| Fallback Routes (for any domain)
+| Main Routes (Path-based instead of subdomain-based for now)
 |--------------------------------------------------------------------------
 */
+
 // Fallback login route to redirect to portal selection
 Route::get('/login', function () {
     return redirect()->route('choose-portal');
 })->name('login');
 
-/*
-|--------------------------------------------------------------------------
-| Main Domain Routes (without subdomain)
-|--------------------------------------------------------------------------
-*/
-Route::domain(config('subdomains.base_domain'))->group(function () {
-    Route::get('/', [LandingController::class, 'index'])->name('landing');
-    Route::get('/choose-portal', [LandingController::class, 'choosePortal'])->name('choose-portal');
-});
+// Main landing pages
+Route::get('/', [LandingController::class, 'index'])->name('landing');
+Route::get('/choose-portal', [LandingController::class, 'choosePortal'])->name('choose-portal');
 
 /*
 |--------------------------------------------------------------------------
-| Admin Subdomain Routes
+| Admin Routes (Path-based: /admin/*)
 |--------------------------------------------------------------------------
 */
-Route::domain(config('subdomains.admin.subdomain') . '.' . config('subdomains.base_domain'))
+Route::prefix('admin')
     ->name('admin.')
     ->group(function () {
         // Authentication Routes
@@ -49,10 +44,10 @@ Route::domain(config('subdomains.admin.subdomain') . '.' . config('subdomains.ba
 
 /*
 |--------------------------------------------------------------------------
-| Customer Subdomain Routes
+| Customer Routes (Path-based: /customer/*)
 |--------------------------------------------------------------------------
 */
-Route::domain(config('subdomains.customer.subdomain') . '.' . config('subdomains.base_domain'))
+Route::prefix('customer')
     ->name('customer.')
     ->group(function () {
         // Authentication Routes
