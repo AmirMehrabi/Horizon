@@ -20,16 +20,16 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                // Determine redirect based on guard and path
-                $path = $request->getPathInfo();
+                // Determine redirect based on guard and subdomain
+                $host = $request->getHost();
                 
-                if (str_starts_with($path, '/admin')) {
+                if (str_contains($host, 'hub.aviato.ir')) {
                     return redirect()->route('admin.dashboard');
-                } elseif (str_starts_with($path, '/customer')) {
+                } elseif (str_contains($host, 'panel.aviato.ir')) {
                     return redirect()->route('customer.dashboard');
                 } else {
-                    // Default redirect to portal selection
-                    return redirect()->route('choose-portal');
+                    // Default redirect to hub
+                    return redirect('https://hub.aviato.ir');
                 }
             }
         }

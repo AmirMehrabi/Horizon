@@ -19,7 +19,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest:customer')->except('logout');
+        // Laravel 12 uses different middleware registration
     }
 
     /**
@@ -172,11 +172,11 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Phone verified successfully!',
-                'redirect' => route('customer.dashboard'),
+                'redirect' => 'https://panel.aviato.ir/dashboard',
             ]);
         }
 
-        return redirect()->intended(route('customer.dashboard'))
+        return redirect()->intended('https://panel.aviato.ir/dashboard')
             ->with('success', 'Welcome! Your account has been verified.');
     }
 
@@ -290,11 +290,11 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Login successful!',
-                'redirect' => route('customer.dashboard'),
+                'redirect' => 'https://panel.aviato.ir/dashboard',
             ]);
         }
 
-        return redirect()->intended(route('customer.dashboard'))
+        return redirect()->intended('https://panel.aviato.ir/dashboard')
             ->with('success', 'Welcome back!');
     }
 
@@ -346,6 +346,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('landing');
+        return redirect('https://panel.aviato.ir/');
     }
 }

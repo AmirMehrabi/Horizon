@@ -14,16 +14,16 @@ class Authenticate extends Middleware
     protected function redirectTo(Request $request): ?string
     {
         if (!$request->expectsJson()) {
-            $path = $request->getPathInfo();
+            $host = $request->getHost();
             
-            // Redirect to appropriate login based on path
-            if (str_starts_with($path, '/admin')) {
+            // Redirect to appropriate login based on subdomain
+            if (str_contains($host, 'hub.aviato.ir')) {
                 return route('admin.login');
-            } elseif (str_starts_with($path, '/customer')) {
+            } elseif (str_contains($host, 'panel.aviato.ir')) {
                 return route('customer.login');
             } else {
-                // Default redirect to portal selection
-                return route('choose-portal');
+                // Default redirect to hub
+                return 'https://hub.aviato.ir/login';
             }
         }
 

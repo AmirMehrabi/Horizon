@@ -16,7 +16,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest:web')->except('logout');
+        // Laravel 12 uses different middleware registration
     }
 
     /**
@@ -49,7 +49,7 @@ class AuthController extends Controller
         if (Auth::guard('web')->attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            return redirect()->intended(route('admin.dashboard'));
+            return redirect()->intended('https://hub.aviato.ir/dashboard');
         }
 
         throw ValidationException::withMessages([
@@ -70,6 +70,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('admin.login');
+        return redirect('https://hub.aviato.ir/login');
     }
 }
