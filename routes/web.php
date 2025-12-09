@@ -22,13 +22,18 @@ Route::domain('hub.aviato.ir')
         Route::middleware('guest:web')->group(function () {
             Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
             Route::post('/login', [AdminAuthController::class, 'login']);
-            Route::get('/', [LandingController::class, 'index'])->name('landing');
             Route::get('/choose-portal', [LandingController::class, 'choosePortal'])->name('choose-portal');
+            
+            // Root redirects to login for unauthenticated users
+            Route::get('/', function () {
+                return redirect()->route('admin.login');
+            });
         });
         
         // Protected routes (dashboard)
         Route::middleware('auth:web')->group(function () {
-            Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+            Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+            Route::get('/dashboard', [AdminDashboardController::class, 'index']);
         });
     });
 
