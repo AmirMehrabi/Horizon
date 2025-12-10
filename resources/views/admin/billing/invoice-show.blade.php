@@ -47,7 +47,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="dd grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Invoice Details -->
     <div class="lg:col-span-2">
         <!-- Customer Information -->
