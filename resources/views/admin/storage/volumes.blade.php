@@ -271,11 +271,11 @@ function closeCreateVolumeModal() {
 }
 
 function resizeVolume(volumeId) {
-    window.location.href = "{{ route('admin.storage.volumes.show', '') }}/" + volumeId + "?action=resize";
+    window.location.href = "{{ route('admin.storage.volumes.show', 'PLACEHOLDER') }}".replace('PLACEHOLDER', volumeId) + "?action=resize";
 }
 
 function createSnapshot(volumeId) {
-    window.location.href = "{{ route('admin.storage.volumes.show', '') }}/" + volumeId + "?action=snapshot";
+    window.location.href = "{{ route('admin.storage.volumes.show', 'PLACEHOLDER') }}".replace('PLACEHOLDER', volumeId) + "?action=snapshot";
 }
 
 function deleteOrphanedVolume(volumeId) {

@@ -256,7 +256,7 @@ function closeCreateLoadBalancerModal() {
 }
 
 function editLoadBalancer(lbId) {
-    window.location.href = "{{ route('admin.networks.load-balancers.show', '') }}/" + lbId;
+    window.location.href = "{{ route('admin.networks.load-balancers.show', 'PLACEHOLDER') }}".replace('PLACEHOLDER', lbId);
 }
 </script>
 @endsection
