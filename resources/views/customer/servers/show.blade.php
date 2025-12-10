@@ -14,14 +14,26 @@
         <a href="{{ route('customer.servers.index') }}" class="text-blue-600 hover:text-blue-700 text-sm mb-2 inline-block">
             ← بازگشت به لیست سرورها
         </a>
-        <h1 class="text-3xl font-bold text-gray-900">وب سرور اصلی</h1>
-        <p class="mt-1 text-sm text-gray-500">Ubuntu 22.04 LTS • ۴ vCPU • ۸GB RAM</p>
+        <h1 class="text-3xl font-bold text-gray-900">{{ $server['name'] }}</h1>
+        <p class="mt-1 text-sm text-gray-500">{{ $server['os'] }} • {{ $server['vcpu'] }} vCPU • {{ $server['ram'] }}GB RAM</p>
     </div>
     <div class="flex items-center gap-3">
+        @if($server['status'] === 'active')
         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
             <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
             فعال
         </span>
+        @elseif($server['status'] === 'stopped')
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+            <span class="w-2 h-2 bg-gray-500 rounded-full mr-2"></span>
+            متوقف شده
+        </span>
+        @else
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+            <span class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
+            در حال راه‌اندازی
+        </span>
+        @endif
     </div>
 </div>
 
@@ -55,28 +67,28 @@
                     <div>
                         <div class="flex justify-between text-sm mb-2">
                             <span class="text-gray-600">CPU</span>
-                            <span class="font-medium text-gray-900">۲۳%</span>
+                            <span class="font-medium text-gray-900">{{ $server['cpu_usage'] }}%</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-blue-600 h-2 rounded-full" style="width: 23%"></div>
+                            <div class="bg-blue-600 h-2 rounded-full" style="width: {{ $server['cpu_usage'] }}%"></div>
                         </div>
                     </div>
                     <div>
                         <div class="flex justify-between text-sm mb-2">
                             <span class="text-gray-600">RAM</span>
-                            <span class="font-medium text-gray-900">۴.۲ GB از ۸ GB</span>
+                            <span class="font-medium text-gray-900">{{ number_format($server['ram_used'], 1) }} GB از {{ $server['ram'] }} GB</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-green-600 h-2 rounded-full" style="width: 52.5%"></div>
+                            <div class="bg-green-600 h-2 rounded-full" style="width: {{ ($server['ram_used'] / $server['ram']) * 100 }}%"></div>
                         </div>
                     </div>
                     <div>
                         <div class="flex justify-between text-sm mb-2">
                             <span class="text-gray-600">دیسک</span>
-                            <span class="font-medium text-gray-900">۳۵ GB از ۸۰ GB</span>
+                            <span class="font-medium text-gray-900">{{ $server['storage_used'] }} GB از {{ $server['storage'] }} GB</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-yellow-600 h-2 rounded-full" style="width: 43.75%"></div>
+                            <div class="bg-yellow-600 h-2 rounded-full" style="width: {{ ($server['storage_used'] / $server['storage']) * 100 }}%"></div>
                         </div>
                     </div>
                 </div>
@@ -88,27 +100,27 @@
                 <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <dt class="text-sm font-medium text-gray-500">نام سرور</dt>
-                        <dd class="mt-1 text-sm text-gray-900">وب سرور اصلی</dd>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $server['name'] }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">نوع</dt>
-                        <dd class="mt-1 text-sm text-gray-900">VPS</dd>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $server['type'] }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">منطقه</dt>
-                        <dd class="mt-1 text-sm text-gray-900">تهران</dd>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $server['region'] }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">IP عمومی</dt>
-                        <dd class="mt-1 text-sm text-gray-900">185.123.45.67</dd>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $server['public_ip'] }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">IP خصوصی</dt>
-                        <dd class="mt-1 text-sm text-gray-900">10.0.0.5</dd>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $server['private_ip'] }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">تاریخ ایجاد</dt>
-                        <dd class="mt-1 text-sm text-gray-900">۱۴۰۳/۰۹/۱۵</dd>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $server['created_at'] }}</dd>
                     </div>
                 </dl>
             </div>
@@ -269,15 +281,17 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">IP های شناور</h2>
             <div class="space-y-4">
+                @foreach($server['floating_ips'] as $floatingIP)
                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div>
-                        <p class="text-sm font-medium text-gray-900">185.123.45.67</p>
+                        <p class="text-sm font-medium text-gray-900">{{ $floatingIP['ip'] }}</p>
                         <p class="text-xs text-gray-500 mt-1">متصل به این سرور</p>
                     </div>
-                    <button onclick="removeFloatingIP('185.123.45.67')" class="text-red-600 hover:text-red-700 text-sm font-medium">
+                    <button onclick="removeFloatingIP('{{ $floatingIP['ip'] }}')" class="text-red-600 hover:text-red-700 text-sm font-medium">
                         حذف
                     </button>
                 </div>
+                @endforeach
                 <button onclick="showAssignIPModal()" class="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-500 hover:bg-blue-50 transition-colors text-center">
                     <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -291,15 +305,17 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">گروه‌های امنیتی</h2>
             <div class="space-y-3">
+                @foreach($server['security_groups'] as $group)
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
-                        <p class="text-sm font-medium text-gray-900">پیش‌فرض</p>
-                        <p class="text-xs text-gray-500 mt-1">SSH (22), HTTP (80), HTTPS (443)</p>
+                        <p class="text-sm font-medium text-gray-900">{{ $group['name'] }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ $group['rules'] }}</p>
                     </div>
-                    <button onclick="editSecurityGroup('default')" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                    <button onclick="editSecurityGroup('{{ $group['name'] }}')" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
                         ویرایش
                     </button>
                 </div>
+                @endforeach
                 <button onclick="showAddSecurityGroupModal()" class="w-full border-2 border-dashed border-gray-300 rounded-lg p-3 hover:border-blue-500 hover:bg-blue-50 transition-colors text-center text-sm font-medium text-gray-700">
                     + افزودن گروه امنیتی
                 </button>
@@ -313,20 +329,20 @@
                 <div>
                     <div class="flex justify-between text-sm mb-2">
                         <span class="text-gray-600">مصرف این ماه</span>
-                        <span class="font-medium text-gray-900">۲۸۵ GB از ۲TB</span>
+                        <span class="font-medium text-gray-900">{{ $server['bandwidth']['used'] }} GB از {{ $server['bandwidth']['limit'] }} GB</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-blue-600 h-2 rounded-full" style="width: 14.25%"></div>
+                        <div class="bg-blue-600 h-2 rounded-full" style="width: {{ ($server['bandwidth']['used'] / $server['bandwidth']['limit']) * 100 }}%"></div>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4 text-sm">
                     <div>
                         <p class="text-gray-600">ورودی:</p>
-                        <p class="font-medium text-gray-900">۱۲۰ GB</p>
+                        <p class="font-medium text-gray-900">{{ $server['bandwidth']['inbound'] }} GB</p>
                     </div>
                     <div>
                         <p class="text-gray-600">خروجی:</p>
-                        <p class="font-medium text-gray-900">۱۶۵ GB</p>
+                        <p class="font-medium text-gray-900">{{ $server['bandwidth']['outbound'] }} GB</p>
                     </div>
                 </div>
             </div>
@@ -341,20 +357,22 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">حجم‌های متصل</h2>
             <div class="space-y-3">
+                @foreach($server['volumes'] as $volume)
                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div>
-                        <p class="text-sm font-medium text-gray-900">حجم اصلی</p>
-                        <p class="text-xs text-gray-500 mt-1">۸۰ GB • SSD</p>
+                        <p class="text-sm font-medium text-gray-900">{{ $volume['name'] }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ $volume['size'] }} GB • {{ $volume['type'] }}</p>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="showResizeVolumeModal('main')" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                        <button onclick="showResizeVolumeModal('{{ $volume['id'] }}')" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
                             تغییر اندازه
                         </button>
-                        <button onclick="showSnapshotModal('main')" class="text-purple-600 hover:text-purple-700 text-sm font-medium">
+                        <button onclick="showSnapshotModal('{{ $volume['id'] }}')" class="text-purple-600 hover:text-purple-700 text-sm font-medium">
                             ایجاد Snapshot
                         </button>
                     </div>
                 </div>
+                @endforeach
                 <button onclick="showAttachVolumeModal()" class="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-500 hover:bg-blue-50 transition-colors text-center">
                     <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -368,21 +386,22 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Snapshots</h2>
             <div class="space-y-3">
+                @foreach($server['snapshots'] as $snapshot)
                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div>
-                        <p class="text-sm font-medium text-gray-900">Snapshot قبل از به‌روزرسانی</p>
-                        <p class="text-xs text-gray-500 mt-1">۱۴۰۳/۰۹/۲۰ • ۸۰ GB</p>
+                        <p class="text-sm font-medium text-gray-900">{{ $snapshot['name'] }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ $snapshot['date'] }} • {{ $snapshot['size'] }} GB</p>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="restoreFromSnapshot('snapshot-1')" class="text-green-600 hover:text-green-700 text-sm font-medium">
+                        <button onclick="restoreFromSnapshot('{{ $snapshot['id'] }}')" class="text-green-600 hover:text-green-700 text-sm font-medium">
                             بازیابی
                         </button>
-                        <button onclick="deleteSnapshot('snapshot-1')" class="text-red-600 hover:text-red-700 text-sm font-medium">
+                        <button onclick="deleteSnapshot('{{ $snapshot['id'] }}')" class="text-red-600 hover:text-red-700 text-sm font-medium">
                             حذف
                         </button>
                     </div>
                 </div>
-            </div>
+                @endforeach
         </div>
     </div>
 </div>
@@ -436,7 +455,7 @@ function showDeleteModal() {
 }
 
 function openVNCConsole() {
-    window.open('/vnc-console/{{ $id }}', '_blank', 'width=1024,height=768');
+    window.open('/vnc-console/{{ $server['id'] }}', '_blank', 'width=1024,height=768');
 }
 
 function removeFloatingIP(ip) {
