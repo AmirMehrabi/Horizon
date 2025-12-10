@@ -369,8 +369,8 @@
             <a href="{{ route('customer.storage.snapshots') }}" class="text-sm text-blue-600 hover:text-blue-700">مشاهده همه</a>
         </div>
         
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+        <div class="overflow-x-auto w-full">
+            <table class="w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نام</th>
