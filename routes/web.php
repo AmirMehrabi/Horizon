@@ -17,6 +17,7 @@ use App\Http\Controllers\Customer\AuthController as CustomerAuthController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\ServerController as CustomerServerController;
 use App\Http\Controllers\Customer\WalletController as CustomerWalletController;
+use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -193,12 +194,15 @@ Route::domain('panel.aviato.ir')
             
             // Profile Routes
             Route::prefix('profile')->name('profile.')->group(function () {
-                Route::get('/', function () { return view('customer.profile.index'); })->name('index');
-            });
-            
-            // API Keys Routes
-            Route::prefix('api-keys')->name('api-keys.')->group(function () {
-                Route::get('/', function () { return view('customer.api-keys.index'); })->name('index');
+                Route::get('/', [CustomerProfileController::class, 'index'])->name('index');
+                Route::post('/update', [CustomerProfileController::class, 'updateProfile'])->name('update');
+                Route::get('/2fa', [CustomerProfileController::class, 'show2FA'])->name('2fa');
+                Route::post('/2fa/enable', [CustomerProfileController::class, 'enable2FA'])->name('2fa.enable');
+                Route::post('/2fa/disable', [CustomerProfileController::class, 'disable2FA'])->name('2fa.disable');
+                Route::get('/change-password', [CustomerProfileController::class, 'showChangePassword'])->name('change-password');
+                Route::post('/change-password', [CustomerProfileController::class, 'changePassword'])->name('change-password.update');
+                Route::post('/api-keys', [CustomerProfileController::class, 'createApiKey'])->name('api-keys.create');
+                Route::delete('/api-keys/{id}', [CustomerProfileController::class, 'deleteApiKey'])->name('api-keys.delete');
             });
         });
     });
