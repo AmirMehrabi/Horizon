@@ -123,8 +123,41 @@
                     </h1>
                 </div>
                 
-                <!-- Right Side: Balance Indicator & User Menu -->
+                <!-- Right Side: Notifications, Balance Indicator & User Menu -->
                 <div class="flex items-center gap-4">
+                    <!-- Notification Bell -->
+                    <div class="relative">
+                        <button id="notification-bell-button" class="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" aria-label="اعلان‌ها" title="اعلان‌ها">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            </svg>
+                            <span id="notification-badge" class="hidden absolute top-0 {{ $isRtl ? 'left-0' : 'right-0' }} inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">0</span>
+                        </button>
+                        
+                        <!-- Notification Dropdown -->
+                        <div id="notification-dropdown" class="hidden absolute {{ $isRtl ? 'left-0' : 'right-0' }} mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 overflow-hidden notification-dropdown">
+                            <!-- Header -->
+                            <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+                                <h3 class="text-sm font-semibold text-gray-900">اعلان‌ها</h3>
+                                <a href="{{ route('customer.notifications.index') }}" class="text-xs text-blue-600 hover:text-blue-700">مشاهده همه</a>
+                            </div>
+                            
+                            <!-- Notifications List -->
+                            <div id="notification-list" class="max-h-96 overflow-y-auto">
+                                <div class="p-4 text-center text-sm text-gray-500">
+                                    در حال بارگذاری...
+                                </div>
+                            </div>
+                            
+                            <!-- Footer -->
+                            <div class="px-4 py-3 border-t border-gray-200 bg-gray-50 text-center">
+                                <a href="{{ route('customer.notifications.index') }}" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                                    مشاهده همه اعلان‌ها
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Wallet Balance Indicator -->
                     <div class="relative">
                         <button id="wallet-balance-button" class="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all duration-200 hover:scale-[1.02] wallet-balance-button" aria-label="منوی موجودی کیف پول" title="موجودی کیف پول شما">
@@ -267,6 +300,99 @@
             sidebarOverlay.addEventListener('click', toggleSidebar);
         }
         
+        // Notification bell toggle
+        const notificationBellButton = document.getElementById('notification-bell-button');
+        const notificationDropdown = document.getElementById('notification-dropdown');
+        
+        function toggleNotificationDropdown(show) {
+            if (!notificationDropdown) return;
+            
+            if (show) {
+                notificationDropdown.classList.remove('hidden');
+                void notificationDropdown.offsetWidth;
+                notificationDropdown.style.opacity = '1';
+                notificationDropdown.style.transform = 'translateY(0)';
+                loadNotifications();
+            } else {
+                notificationDropdown.style.opacity = '0';
+                notificationDropdown.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    notificationDropdown.classList.add('hidden');
+                }, 120);
+            }
+        }
+        
+        function loadNotifications() {
+            fetch('{{ route("customer.notifications.api") }}', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const notificationList = document.getElementById('notification-list');
+                const notificationBadge = document.getElementById('notification-badge');
+                
+                // Update badge
+                if (data.unread_count > 0) {
+                    notificationBadge.textContent = data.unread_count > 9 ? '9+' : data.unread_count;
+                    notificationBadge.classList.remove('hidden');
+                } else {
+                    notificationBadge.classList.add('hidden');
+                }
+                
+                // Update list
+                if (data.notifications && data.notifications.length > 0) {
+                    notificationList.innerHTML = data.notifications.map(notif => `
+                        <a href="{{ route('customer.notifications.index') }}" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 ${!notif.read ? 'bg-blue-50' : ''}">
+                            <div class="flex items-start gap-3">
+                                <div class="flex-shrink-0 w-2 h-2 rounded-full ${!notif.read ? 'bg-blue-600 mt-2' : 'bg-transparent'}"></div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900">${notif.title}</p>
+                                    <p class="text-xs text-gray-500 mt-1 line-clamp-2">${notif.description}</p>
+                                    <p class="text-xs text-gray-400 mt-1">${notif.time}</p>
+                                </div>
+                            </div>
+                        </a>
+                    `).join('');
+                } else {
+                    notificationList.innerHTML = '<div class="p-4 text-center text-sm text-gray-500">اعلانی وجود ندارد</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading notifications:', error);
+                document.getElementById('notification-list').innerHTML = '<div class="p-4 text-center text-sm text-red-500">خطا در بارگذاری اعلان‌ها</div>';
+            });
+        }
+        
+        if (notificationBellButton && notificationDropdown) {
+            notificationDropdown.style.opacity = '0';
+            notificationDropdown.style.transform = 'translateY(-10px)';
+            
+            notificationBellButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isHidden = notificationDropdown.classList.contains('hidden');
+                toggleNotificationDropdown(isHidden);
+                if (walletBalanceDropdown) walletBalanceDropdown.classList.add('hidden');
+                if (userMenu) userMenu.classList.add('hidden');
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!notificationBellButton.contains(e.target) && !notificationDropdown.contains(e.target)) {
+                    toggleNotificationDropdown(false);
+                }
+            });
+        }
+        
+        // Load notifications on page load
+        if (notificationBellButton) {
+            loadNotifications();
+            // Refresh every 30 seconds
+            setInterval(loadNotifications, 30000);
+        }
+        
         // Wallet balance dropdown toggle
         const walletBalanceButton = document.getElementById('wallet-balance-button');
         const walletBalanceDropdown = document.getElementById('wallet-balance-dropdown');
@@ -298,7 +424,7 @@
                 e.stopPropagation();
                 const isHidden = walletBalanceDropdown.classList.contains('hidden');
                 toggleWalletDropdown(isHidden);
-                // Close user menu if open
+                if (notificationDropdown) notificationDropdown.classList.add('hidden');
                 if (userMenu) userMenu.classList.add('hidden');
             });
             
@@ -318,8 +444,8 @@
             userMenuButton.addEventListener('click', (e) => {
                 e.stopPropagation();
                 userMenu.classList.toggle('hidden');
-                // Close wallet dropdown if open
                 if (walletBalanceDropdown) walletBalanceDropdown.classList.add('hidden');
+                if (notificationDropdown) notificationDropdown.classList.add('hidden');
             });
             
             // Close menu when clicking outside
@@ -396,6 +522,11 @@
     
     /* Wallet Balance Dropdown Animation */
     .wallet-dropdown {
+        transition: opacity 120ms ease-out, transform 120ms ease-out;
+    }
+    
+    /* Notification Dropdown Animation */
+    .notification-dropdown {
         transition: opacity 120ms ease-out, transform 120ms ease-out;
     }
     

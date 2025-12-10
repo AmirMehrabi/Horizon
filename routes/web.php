@@ -18,6 +18,9 @@ use App\Http\Controllers\Customer\DashboardController as CustomerDashboardContro
 use App\Http\Controllers\Customer\ServerController as CustomerServerController;
 use App\Http\Controllers\Customer\WalletController as CustomerWalletController;
 use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
+use App\Http\Controllers\Customer\SupportController as CustomerSupportController;
+use App\Http\Controllers\Customer\BackupController as CustomerBackupController;
+use App\Http\Controllers\Customer\NotificationController as CustomerNotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -161,7 +164,21 @@ Route::domain('panel.aviato.ir')
             
             // Backups Routes
             Route::prefix('backups')->name('backups.')->group(function () {
-                Route::get('/', function () { return view('customer.backups.index'); })->name('index');
+                Route::get('/', [CustomerBackupController::class, 'index'])->name('index');
+                Route::get('/create', [CustomerBackupController::class, 'create'])->name('create');
+                Route::post('/', [CustomerBackupController::class, 'store'])->name('store');
+                Route::get('/{id}/restore', [CustomerBackupController::class, 'showRestore'])->name('restore.show');
+                Route::post('/{id}/restore', [CustomerBackupController::class, 'restore'])->name('restore');
+                Route::delete('/{id}', [CustomerBackupController::class, 'destroy'])->name('destroy');
+                Route::post('/settings', [CustomerBackupController::class, 'updateSettings'])->name('settings.update');
+            });
+            
+            // Notifications Routes
+            Route::prefix('notifications')->name('notifications.')->group(function () {
+                Route::get('/', [CustomerNotificationController::class, 'index'])->name('index');
+                Route::get('/api', [CustomerNotificationController::class, 'getNotifications'])->name('api');
+                Route::post('/{id}/read', [CustomerNotificationController::class, 'markAsRead'])->name('read');
+                Route::post('/read-all', [CustomerNotificationController::class, 'markAllAsRead'])->name('read-all');
             });
             
             // Billing Routes
@@ -188,8 +205,12 @@ Route::domain('panel.aviato.ir')
             
             // Support Routes
             Route::prefix('support')->name('support.')->group(function () {
-                Route::get('/', function () { return view('customer.support.index'); })->name('index');
-                Route::get('/create', function () { return view('customer.support.create'); })->name('create');
+                Route::get('/', [CustomerSupportController::class, 'index'])->name('index');
+                Route::get('/create', [CustomerSupportController::class, 'create'])->name('create');
+                Route::post('/', [CustomerSupportController::class, 'store'])->name('store');
+                Route::get('/{id}', [CustomerSupportController::class, 'show'])->name('show');
+                Route::post('/{id}/reply', [CustomerSupportController::class, 'reply'])->name('reply');
+                Route::post('/{id}/close', [CustomerSupportController::class, 'close'])->name('close');
             });
             
             // Profile Routes
