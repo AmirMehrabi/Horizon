@@ -518,7 +518,7 @@ function closeCreateNetworkModal() {
 
 function editNetwork(networkId) {
     // Edit network logic
-    window.location.href = "{{ route('admin.networks.show', '') }}/" + networkId;
+    window.location.href = "{{ route('admin.networks.show', 'PLACEHOLDER') }}".replace('PLACEHOLDER', networkId);
 }
 </script>
 @endsection
