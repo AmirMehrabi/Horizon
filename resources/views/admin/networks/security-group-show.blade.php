@@ -7,9 +7,6 @@
     $isRtl = $direction === 'rtl';
 @endphp
 
-@section('sidebar')
-@include('admin.networks.sidebar')
-@endsection
 
 @section('content')
 <!-- Breadcrumb -->

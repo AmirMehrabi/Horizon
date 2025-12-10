@@ -7,9 +7,6 @@
     $isRtl = $direction === 'rtl';
 @endphp
 
-@section('sidebar')
-@include('admin.logs-monitoring.sidebar')
-@endsection
 
 @section('content')
 <!-- Page Header -->

@@ -118,7 +118,7 @@
             
             <!-- Navigation -->
             <nav class="flex-1 overflow-y-auto py-6 px-4">
-                @yield('sidebar')
+                @include('admin.partials.sidebar')
             </nav>
         </div>
     </aside>
