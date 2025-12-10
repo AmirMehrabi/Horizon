@@ -12,7 +12,7 @@
             </svg>
         @endif
 
-        @if(isset($item['url']) && !$item['active'])
+        @if(isset($item['url']) && !isset($item['active']))
             <!-- Link Item -->
             <a href="{{ $item['url'] }}" class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200 group">
                 @if(isset($item['icon']))
