@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\NotificationsController as AdminNotificationsCont
 use App\Http\Controllers\Admin\BillingController as AdminBillingController;
 use App\Http\Controllers\Customer\AuthController as CustomerAuthController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
+use App\Http\Controllers\Customer\ServerController as CustomerServerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -137,6 +138,13 @@ Route::domain('panel.aviato.ir')
         Route::middleware('auth:customer')->group(function () {
             Route::get('/', [CustomerDashboardController::class, 'index'])->name('dashboard');
             Route::get('/dashboard', [CustomerDashboardController::class, 'index']);
+            
+            // Servers/VPS Routes
+            Route::prefix('servers')->name('servers.')->group(function () {
+                Route::get('/', [CustomerServerController::class, 'index'])->name('index');
+                Route::get('/create', [CustomerServerController::class, 'create'])->name('create');
+                Route::post('/', [CustomerServerController::class, 'store'])->name('store');
+            });
         });
     });
 
