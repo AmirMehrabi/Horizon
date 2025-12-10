@@ -117,7 +117,7 @@
                 </div>
                 
                 <!-- Welcome Message -->
-                <div class="hidden md:flex flex-1 max-w-md mx-8">
+                <div class="hidden md:flex flex-1 max-w-md mx-8 relative z-40  mr-64">
                     <h1 class="text-lg font-medium text-gray-900">
                         @yield('header_welcome', __('Welcome back, :name!', ['name' => $customer->first_name ?? '']))
                     </h1>
