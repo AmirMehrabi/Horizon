@@ -123,8 +123,59 @@
                     </h1>
                 </div>
                 
-                <!-- Right Side: User Menu -->
+                <!-- Right Side: Balance Indicator & User Menu -->
                 <div class="flex items-center gap-4">
+                    <!-- Wallet Balance Indicator -->
+                    <div class="relative">
+                        <button id="wallet-balance-button" class="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors" aria-label="منوی موجودی کیف پول" title="موجودی کیف پول شما">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                            </svg>
+                            <span id="wallet-balance-text" class="text-sm font-medium">1,245,000 ریال</span>
+                        </button>
+                        
+                        <!-- Wallet Balance Dropdown -->
+                        <div id="wallet-balance-dropdown" class="hidden absolute {{ $isRtl ? 'left-0' : 'right-0' }} mt-2 w-[300px] bg-white rounded-lg shadow-lg border border-gray-200 z-50 overflow-hidden">
+                            <!-- Header -->
+                            <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                                <h3 class="text-sm font-semibold text-gray-900">کیف پول</h3>
+                                <p class="text-xs text-gray-500 mt-0.5">موجود برای پرداخت و تمدید سرویس‌ها</p>
+                            </div>
+                            
+                            <!-- Current Balance -->
+                            <div class="px-4 py-4">
+                                <p class="text-xs text-gray-500 mb-1">موجودی فعلی</p>
+                                <p id="wallet-balance-large" class="text-2xl font-semibold text-gray-900">1,245,000 ریال</p>
+                            </div>
+                            
+                            <!-- Quick Actions -->
+                            <div class="px-4 pb-3 space-y-2">
+                                <a href="{{ route('customer.wallet.topup') }}" class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                    شارژ کیف پول
+                                </a>
+                                <a href="{{ route('customer.wallet.index') }}" class="flex items-center justify-center gap-2 w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    مشاهده تراکنش‌ها
+                                </a>
+                            </div>
+                            
+                            <!-- Footer -->
+                            <div class="px-4 py-3 border-t border-gray-200 bg-gray-50">
+                                <div class="flex items-center gap-2 text-xs text-gray-500">
+                                    <svg class="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                    <span>پرداخت‌ها به‌صورت آنی ثبت می‌شوند.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- User Menu -->
                     <div class="relative">
                         <button id="user-menu-button" class="flex items-center gap-2 p-2 rounded-lg text-gray-700 hover:bg-gray-100 ">
@@ -216,6 +267,26 @@
             sidebarOverlay.addEventListener('click', toggleSidebar);
         }
         
+        // Wallet balance dropdown toggle
+        const walletBalanceButton = document.getElementById('wallet-balance-button');
+        const walletBalanceDropdown = document.getElementById('wallet-balance-dropdown');
+        
+        if (walletBalanceButton && walletBalanceDropdown) {
+            walletBalanceButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                walletBalanceDropdown.classList.toggle('hidden');
+                // Close user menu if open
+                if (userMenu) userMenu.classList.add('hidden');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!walletBalanceButton.contains(e.target) && !walletBalanceDropdown.contains(e.target)) {
+                    walletBalanceDropdown.classList.add('hidden');
+                }
+            });
+        }
+        
         // User menu toggle
         const userMenuButton = document.getElementById('user-menu-button');
         const userMenu = document.getElementById('user-menu');
@@ -224,6 +295,8 @@
             userMenuButton.addEventListener('click', (e) => {
                 e.stopPropagation();
                 userMenu.classList.toggle('hidden');
+                // Close wallet dropdown if open
+                if (walletBalanceDropdown) walletBalanceDropdown.classList.add('hidden');
             });
             
             // Close menu when clicking outside
@@ -233,6 +306,28 @@
                 }
             });
         }
+        
+        // Auto-refresh wallet balance every 30 seconds
+        function refreshWalletBalance() {
+            fetch('{{ route("customer.wallet.balance") }}', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const balanceText = document.getElementById('wallet-balance-text');
+                const balanceLarge = document.getElementById('wallet-balance-large');
+                if (balanceText) balanceText.textContent = data.formatted_balance;
+                if (balanceLarge) balanceLarge.textContent = data.formatted_balance;
+            })
+            .catch(error => console.error('Error refreshing balance:', error));
+        }
+        
+        // Refresh balance every 30 seconds
+        setInterval(refreshWalletBalance, 30000);
     </script>
 
     @stack('scripts')

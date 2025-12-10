@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\BillingController as AdminBillingController;
 use App\Http\Controllers\Customer\AuthController as CustomerAuthController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\ServerController as CustomerServerController;
+use App\Http\Controllers\Customer\WalletController as CustomerWalletController;
 
 /*
 |--------------------------------------------------------------------------
@@ -174,8 +175,9 @@ Route::domain('panel.aviato.ir')
             
             // Wallet Routes
             Route::prefix('wallet')->name('wallet.')->group(function () {
-                Route::get('/', function () { return view('customer.wallet.index'); })->name('index');
-                Route::get('/topup', function () { return view('customer.wallet.topup'); })->name('topup');
+                Route::get('/', [CustomerWalletController::class, 'index'])->name('index');
+                Route::get('/topup', [CustomerWalletController::class, 'topup'])->name('topup');
+                Route::get('/balance', [CustomerWalletController::class, 'getBalance'])->name('balance');
             });
             
             // Usage Routes
