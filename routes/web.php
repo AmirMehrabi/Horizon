@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserManagementController as AdminUserManagementCo
 use App\Http\Controllers\Admin\ProjectManagementController as AdminProjectManagementController;
 use App\Http\Controllers\Admin\ComputeController as AdminComputeController;
 use App\Http\Controllers\Admin\ImageManagementController as AdminImageManagementController;
+use App\Http\Controllers\Admin\NetworkManagementController as AdminNetworkManagementController;
 use App\Http\Controllers\Customer\AuthController as CustomerAuthController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 
@@ -44,6 +45,17 @@ Route::domain('hub.aviato.ir')
             Route::get('/compute/{id}', [AdminComputeController::class, 'show'])->name('compute.show');
             Route::get('/images', [AdminImageManagementController::class, 'index'])->name('images.index');
             Route::get('/images/{id}', [AdminImageManagementController::class, 'show'])->name('images.show');
+            
+            // Network Management
+            Route::get('/networks', [AdminNetworkManagementController::class, 'index'])->name('networks.index');
+            Route::get('/networks/{id}', [AdminNetworkManagementController::class, 'show'])->name('networks.show');
+            Route::get('/networks/routers', [AdminNetworkManagementController::class, 'routers'])->name('networks.routers');
+            Route::get('/networks/routers/{id}', [AdminNetworkManagementController::class, 'routerShow'])->name('networks.routers.show');
+            Route::get('/networks/floating-ips', [AdminNetworkManagementController::class, 'floatingIps'])->name('networks.floating-ips');
+            Route::get('/networks/security-groups', [AdminNetworkManagementController::class, 'securityGroups'])->name('networks.security-groups');
+            Route::get('/networks/security-groups/{id}', [AdminNetworkManagementController::class, 'securityGroupShow'])->name('networks.security-groups.show');
+            Route::get('/networks/load-balancers', [AdminNetworkManagementController::class, 'loadBalancers'])->name('networks.load-balancers');
+            Route::get('/networks/load-balancers/{id}', [AdminNetworkManagementController::class, 'loadBalancerShow'])->name('networks.load-balancers.show');
         });
     });
 

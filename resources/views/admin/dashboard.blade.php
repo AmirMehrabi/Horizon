@@ -111,6 +111,14 @@
         </svg>
         مدیریت Image ها
     </a>
+    
+    <!-- Network Management -->
+    <a href="{{ route('admin.networks.index') }}" class="flex items-center px-3 py-2 text-sm font-medium text-blue-100 hover:bg-blue-700 hover:text-white rounded-lg transition-colors {{ request()->routeIs('admin.networks.*') ? 'bg-blue-700 text-white' : '' }}">
+        <svg class="w-5 h-5 {{ $isRtl ? 'ml-3' : 'mr-3' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+        </svg>
+        مدیریت شبکه
+    </a>
 </div>
 
 <!-- Divider -->
