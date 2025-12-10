@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\ProjectManagementController as AdminProjectManage
 use App\Http\Controllers\Admin\ComputeController as AdminComputeController;
 use App\Http\Controllers\Admin\ImageManagementController as AdminImageManagementController;
 use App\Http\Controllers\Admin\NetworkManagementController as AdminNetworkManagementController;
+use App\Http\Controllers\Admin\StorageManagementController as AdminStorageManagementController;
 use App\Http\Controllers\Customer\AuthController as CustomerAuthController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 
@@ -56,6 +57,15 @@ Route::domain('hub.aviato.ir')
             Route::get('/networks/security-groups/{id}', [AdminNetworkManagementController::class, 'securityGroupShow'])->name('networks.security-groups.show');
             Route::get('/networks/load-balancers', [AdminNetworkManagementController::class, 'loadBalancers'])->name('networks.load-balancers');
             Route::get('/networks/load-balancers/{id}', [AdminNetworkManagementController::class, 'loadBalancerShow'])->name('networks.load-balancers.show');
+            
+            // Storage Management
+            Route::get('/storage', [AdminStorageManagementController::class, 'index'])->name('storage.index');
+            Route::get('/storage/volumes', [AdminStorageManagementController::class, 'volumes'])->name('storage.volumes');
+            Route::get('/storage/volumes/{id}', [AdminStorageManagementController::class, 'showVolume'])->name('storage.volumes.show');
+            Route::get('/storage/volume-types', [AdminStorageManagementController::class, 'volumeTypes'])->name('storage.volume-types');
+            Route::get('/storage/snapshots', [AdminStorageManagementController::class, 'snapshots'])->name('storage.snapshots');
+            Route::get('/storage/containers', [AdminStorageManagementController::class, 'containers'])->name('storage.containers');
+            Route::get('/storage/containers/{id}', [AdminStorageManagementController::class, 'showContainer'])->name('storage.containers.show');
         });
     });
 
