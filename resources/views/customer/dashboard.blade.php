@@ -5,7 +5,14 @@
 @php
     $direction = config('ui.direction', 'ltr');
     $isRtl = $direction === 'rtl';
+    $customer = auth('customer')->user();
 @endphp
+
+@section('header_content')
+    <h1 class="text-lg font-medium text-gray-900">
+        {{ __('Welcome back, :name!', ['name' => $customer->first_name ?? '']) }}
+    </h1>
+@endsection
 
 @section('content')
 <!-- Page Header -->

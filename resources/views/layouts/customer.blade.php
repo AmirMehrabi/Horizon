@@ -116,11 +116,15 @@
                     </a>
                 </div>
                 
-                <!-- Welcome Message -->
+                <!-- Header Content (Welcome Message or Breadcrumb) -->
                 <div class="hidden md:flex flex-1 max-w-md mx-8 relative z-40  mr-64">
-                    <h1 class="text-lg font-medium text-gray-900">
-                        @yield('header_welcome', __('Welcome back, :name!', ['name' => $customer->first_name ?? '']))
-                    </h1>
+                    @hasSection('header_content')
+                        @yield('header_content')
+                    @else
+                        <h1 class="text-lg font-medium text-gray-900">
+                            {{ __('Welcome back, :name!', ['name' => $customer->first_name ?? '']) }}
+                        </h1>
+                    @endif
                 </div>
                 
                 <!-- Right Side: Notifications, Balance Indicator & User Menu -->
