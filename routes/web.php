@@ -144,6 +144,7 @@ Route::domain('panel.aviato.ir')
                 Route::get('/', [CustomerServerController::class, 'index'])->name('index');
                 Route::get('/create', [CustomerServerController::class, 'create'])->name('create');
                 Route::post('/', [CustomerServerController::class, 'store'])->name('store');
+                Route::get('/{id}', [CustomerServerController::class, 'show'])->name('show');
             });
             
             // Storage Routes

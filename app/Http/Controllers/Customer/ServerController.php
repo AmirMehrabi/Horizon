@@ -34,5 +34,13 @@ class ServerController extends Controller
     {
         return view('customer.servers.index');
     }
+
+    /**
+     * Display VPS management page
+     */
+    public function show($id)
+    {
+        return view('customer.servers.show', compact('id'));
+    }
 }
 
