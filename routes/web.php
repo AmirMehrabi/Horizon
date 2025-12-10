@@ -190,6 +190,10 @@ Route::domain('panel.aviato.ir')
             // Invoices Routes
             Route::prefix('invoices')->name('invoices.')->group(function () {
                 Route::get('/', function () { return view('customer.invoices.index'); })->name('index');
+                Route::get('/export/{format}', function ($format) { 
+                    // Export logic will be implemented here
+                    return response()->json(['message' => 'Export functionality will be implemented']);
+                })->name('export');
                 Route::get('/{id}', function ($id) { return view('customer.invoices.show', ['id' => $id]); })->name('show');
             });
             
