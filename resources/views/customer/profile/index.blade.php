@@ -362,6 +362,25 @@ function showTab(tabName) {
     activeButton.classList.add('border-blue-500', 'text-blue-600');
 }
 
+// Handle hash fragment on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const hash = window.location.hash.replace('#', '');
+    if (hash) {
+        // Map hash to tab name
+        const tabMap = {
+            'api-keys': 'api-keys',
+            '2fa': '2fa',
+            'password': 'password',
+            'activity': 'activity',
+            'profile': 'profile'
+        };
+        
+        if (tabMap[hash]) {
+            showTab(tabMap[hash]);
+        }
+    }
+});
+
 // API Key functions
 function showCreateApiKeyModal() {
     document.getElementById('createApiKeyModal').classList.remove('hidden');
