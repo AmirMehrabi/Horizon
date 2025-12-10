@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\NetworkManagementController as AdminNetworkManage
 use App\Http\Controllers\Admin\StorageManagementController as AdminStorageManagementController;
 use App\Http\Controllers\Admin\LogsMonitoringController as AdminLogsMonitoringController;
 use App\Http\Controllers\Admin\NotificationsController as AdminNotificationsController;
+use App\Http\Controllers\Admin\BillingController as AdminBillingController;
 use App\Http\Controllers\Customer\AuthController as CustomerAuthController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 
@@ -82,6 +83,23 @@ Route::domain('hub.aviato.ir')
             Route::get('/notifications/sms-telegram', [AdminNotificationsController::class, 'smsTelegram'])->name('notifications.sms-telegram');
             Route::get('/notifications/account-alerts', [AdminNotificationsController::class, 'accountAlerts'])->name('notifications.account-alerts');
             Route::get('/notifications/admin-alerts', [AdminNotificationsController::class, 'adminAlerts'])->name('notifications.admin-alerts');
+            
+            // Billing System
+            Route::get('/billing', [AdminBillingController::class, 'index'])->name('billing.index');
+            Route::get('/billing/settings', [AdminBillingController::class, 'settings'])->name('billing.settings');
+            Route::get('/billing/plans', [AdminBillingController::class, 'plans'])->name('billing.plans');
+            Route::get('/billing/plans/create', [AdminBillingController::class, 'createPlan'])->name('billing.plans.create');
+            Route::get('/billing/usage-metrics', [AdminBillingController::class, 'usageMetrics'])->name('billing.usage-metrics');
+            Route::get('/billing/quotas', [AdminBillingController::class, 'quotas'])->name('billing.quotas');
+            Route::get('/billing/coupons', [AdminBillingController::class, 'coupons'])->name('billing.coupons');
+            Route::get('/billing/wallets', [AdminBillingController::class, 'wallets'])->name('billing.wallets');
+            Route::get('/billing/invoices', [AdminBillingController::class, 'invoices'])->name('billing.invoices');
+            Route::get('/billing/invoices/{id}', [AdminBillingController::class, 'showInvoice'])->name('billing.invoices.show');
+            Route::get('/billing/transactions', [AdminBillingController::class, 'transactions'])->name('billing.transactions');
+            Route::get('/billing/payment-gateways', [AdminBillingController::class, 'paymentGateways'])->name('billing.payment-gateways');
+            Route::get('/billing/automations', [AdminBillingController::class, 'automations'])->name('billing.automations');
+            Route::get('/billing/credit-system', [AdminBillingController::class, 'creditSystem'])->name('billing.credit-system');
+            Route::get('/billing/usage-reports', [AdminBillingController::class, 'usageReports'])->name('billing.usage-reports');
         });
     });
 
