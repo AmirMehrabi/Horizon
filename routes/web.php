@@ -145,6 +145,58 @@ Route::domain('panel.aviato.ir')
                 Route::get('/create', [CustomerServerController::class, 'create'])->name('create');
                 Route::post('/', [CustomerServerController::class, 'store'])->name('store');
             });
+            
+            // Storage Routes
+            Route::prefix('storage')->name('storage.')->group(function () {
+                Route::get('/', function () { return view('customer.storage.index'); })->name('index');
+            });
+            
+            // Networks Routes
+            Route::prefix('networks')->name('networks.')->group(function () {
+                Route::get('/', function () { return view('customer.networks.index'); })->name('index');
+            });
+            
+            // Backups Routes
+            Route::prefix('backups')->name('backups.')->group(function () {
+                Route::get('/', function () { return view('customer.backups.index'); })->name('index');
+            });
+            
+            // Billing Routes
+            Route::prefix('billing')->name('billing.')->group(function () {
+                Route::get('/', function () { return view('customer.billing.index'); })->name('index');
+            });
+            
+            // Invoices Routes
+            Route::prefix('invoices')->name('invoices.')->group(function () {
+                Route::get('/', function () { return view('customer.invoices.index'); })->name('index');
+            });
+            
+            // Wallet Routes
+            Route::prefix('wallet')->name('wallet.')->group(function () {
+                Route::get('/', function () { return view('customer.wallet.index'); })->name('index');
+                Route::get('/topup', function () { return view('customer.wallet.topup'); })->name('topup');
+            });
+            
+            // Usage Routes
+            Route::prefix('usage')->name('usage.')->group(function () {
+                Route::get('/', function () { return view('customer.usage.index'); })->name('index');
+            });
+            
+            // Support Routes
+            Route::prefix('support')->name('support.')->group(function () {
+                Route::get('/', function () { return view('customer.support.index'); })->name('index');
+                Route::get('/create', function () { return view('customer.support.create'); })->name('create');
+            });
+            
+            // Profile Routes
+            Route::prefix('profile')->name('profile.')->group(function () {
+                Route::get('/', function () { return view('customer.profile.index'); })->name('index');
+            });
+            
+            // API Keys Routes
+            Route::prefix('api-keys')->name('api-keys.')->group(function () {
+                Route::get('/', function () { return view('customer.api-keys.index'); })->name('index');
+            });
         });
     });
 
