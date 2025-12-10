@@ -60,7 +60,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Main Content: Messages -->
     <div class="lg:col-span-2">
         <!-- Ticket Metadata -->
