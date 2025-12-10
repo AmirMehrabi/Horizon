@@ -232,7 +232,7 @@ function closeCreateSecurityGroupModal() {
 }
 
 function editSecurityGroup(groupId) {
-    window.location.href = "{{ route('admin.networks.security-groups.show', '') }}/" + groupId;
+    window.location.href = "{{ route('admin.networks.security-groups.show', 'PLACEHOLDER') }}".replace('PLACEHOLDER', groupId);
 }
 </script>
 @endsection

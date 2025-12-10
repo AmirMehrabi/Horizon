@@ -246,7 +246,7 @@ function closeCreateRouterModal() {
 }
 
 function editRouter(routerId) {
-    window.location.href = "{{ route('admin.networks.routers.show', '') }}/" + routerId;
+    window.location.href = "{{ route('admin.networks.routers.show', 'PLACEHOLDER') }}".replace('PLACEHOLDER', routerId);
 }
 </script>
 @endsection
