@@ -91,7 +91,7 @@
             </div>
             
             <!-- Navigation -->
-            <nav class="flex-1 overflow-y-auto py-6 px-4">
+            <nav class="flex-1 overflow-y-auto py-6 px-4 sidebar-scroll">
                 @include('customer.partials.sidebar')
             </nav>
         </div>
@@ -236,6 +236,39 @@
     </script>
 
     @stack('scripts')
+    
+    <style>
+    /* Custom Scrollbar for Sidebar */
+    .sidebar-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    }
+    
+    .sidebar-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .sidebar-scroll::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    .sidebar-scroll::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+    }
+    
+    .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    /* Hide scrollbar for Firefox */
+    @-moz-document url-prefix() {
+        .sidebar-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+        }
+    }
+    </style>
 </body>
 </html>
 
