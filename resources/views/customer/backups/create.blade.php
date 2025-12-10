@@ -39,7 +39,7 @@
 </div>
 
 <!-- Create Snapshot Form -->
-<div class="max-w-2xl">
+<div class="w-full">
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <form method="POST" action="{{ route('customer.backups.store') }}">
             @csrf

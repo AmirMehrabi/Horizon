@@ -92,7 +92,7 @@
             <div class="space-y-6">
                 @foreach($messages as $message)
                 <div class="flex {{ $message['sender'] === 'user' ? ($isRtl ? 'justify-start' : 'justify-end') : ($isRtl ? 'justify-end' : 'justify-start') }}">
-                    <div class="max-w-2xl {{ $message['sender'] === 'user' ? 'order-2' : 'order-1' }}">
+                    <div class="w-full {{ $message['sender'] === 'user' ? 'order-2' : 'order-1' }}">
                         <div class="flex items-center gap-2 mb-2 {{ $message['sender'] === 'user' ? ($isRtl ? 'flex-row-reverse' : 'flex-row') : ($isRtl ? 'flex-row-reverse' : 'flex-row') }}">
                             <div class="w-8 h-8 rounded-full {{ $message['sender'] === 'user' ? 'bg-blue-600' : 'bg-gray-400' }} flex items-center justify-center text-white text-sm font-medium">
                                 {{ $message['sender'] === 'user' ? 'ش' : 'پ' }}

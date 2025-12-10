@@ -38,7 +38,7 @@
     <p class="mt-1 text-sm text-gray-500">افزایش امنیت حساب کاربری با احراز هویت دو مرحله‌ای</p>
 </div>
 
-<div class="max-w-2xl">
+<div class="w-full">
     <!-- Step 1: Scan QR Code -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div class="flex items-center gap-3 mb-4">
