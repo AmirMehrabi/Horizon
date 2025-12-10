@@ -37,7 +37,7 @@ class ProfileController extends Controller
             [
                 'id' => 1,
                 'name' => 'کلید API اصلی',
-                'key' => 'sk_live_51H3k2j3k4j5k6j7k8j9k0j1k2j3k4j5k6j',
+                'key' => 'api_live_51H3k2j3k4j5k6j7k8j9k0j1k2j3k4j5k6j7k8j9k0j1k2j3k4j5k6j',
                 'last_used' => '۱۴۰۳/۱۰/۲۰ - ۱۴:۳۰',
                 'created_at' => '۱۴۰۳/۰۹/۱۰',
                 'permissions' => ['read', 'write']
@@ -45,7 +45,7 @@ class ProfileController extends Controller
             [
                 'id' => 2,
                 'name' => 'کلید API تست',
-                'key' => 'sk_test_98H7k2j3k4j5k6j7k8j9k0j1k2j3k4j5k6j',
+                'key' => 'api_test_98H7k2j3k4j5k6j7k8j9k0j1k2j3k4j5k6j7k8j9k0j1k2j3k4j5k6j',
                 'last_used' => 'هرگز',
                 'created_at' => '۱۴۰۳/۱۰/۱۵',
                 'permissions' => ['read']
