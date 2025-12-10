@@ -127,7 +127,7 @@
                 <div class="flex items-center gap-4">
                     <!-- Wallet Balance Indicator -->
                     <div class="relative">
-                        <button id="wallet-balance-button" class="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors" aria-label="منوی موجودی کیف پول" title="موجودی کیف پول شما">
+                        <button id="wallet-balance-button" class="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all duration-200 hover:scale-[1.02] wallet-balance-button" aria-label="منوی موجودی کیف پول" title="موجودی کیف پول شما">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
                             </svg>
@@ -135,7 +135,7 @@
                         </button>
                         
                         <!-- Wallet Balance Dropdown -->
-                        <div id="wallet-balance-dropdown" class="hidden absolute {{ $isRtl ? 'left-0' : 'right-0' }} mt-2 w-[300px] bg-white rounded-lg shadow-lg border border-gray-200 z-50 overflow-hidden">
+                        <div id="wallet-balance-dropdown" class="hidden absolute {{ $isRtl ? 'left-0' : 'right-0' }} mt-2 w-[300px] bg-white rounded-lg shadow-lg border border-gray-200 z-50 overflow-hidden wallet-dropdown">
                             <!-- Header -->
                             <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
                                 <h3 class="text-sm font-semibold text-gray-900">کیف پول</h3>
@@ -145,7 +145,7 @@
                             <!-- Current Balance -->
                             <div class="px-4 py-4">
                                 <p class="text-xs text-gray-500 mb-1">موجودی فعلی</p>
-                                <p id="wallet-balance-large" class="text-2xl font-semibold text-gray-900">1,245,000 ریال</p>
+                                <p id="wallet-balance-large" class="text-2xl font-semibold text-gray-900 wallet-balance-value">1,245,000 ریال</p>
                             </div>
                             
                             <!-- Quick Actions -->
@@ -320,6 +320,13 @@
             .then(data => {
                 const balanceText = document.getElementById('wallet-balance-text');
                 const balanceLarge = document.getElementById('wallet-balance-large');
+                
+                // Add pulse animation
+                if (balanceLarge) {
+                    balanceLarge.classList.add('updating');
+                    setTimeout(() => balanceLarge.classList.remove('updating'), 1000);
+                }
+                
                 if (balanceText) balanceText.textContent = data.formatted_balance;
                 if (balanceLarge) balanceLarge.textContent = data.formatted_balance;
             })
@@ -362,6 +369,32 @@
             scrollbar-width: thin;
             scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
         }
+    }
+    
+    /* Wallet Balance Dropdown Animation */
+    .wallet-dropdown {
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: opacity 120ms ease-out, transform 120ms ease-out;
+    }
+    
+    .wallet-dropdown:not(.hidden) {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    /* Balance Update Animation */
+    @keyframes gentlePulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+    
+    .wallet-balance-value.updating {
+        animation: gentlePulse 1s ease-in-out;
     }
     </style>
 </body>
