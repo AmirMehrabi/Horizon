@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\ComputeController as AdminComputeController;
 use App\Http\Controllers\Admin\ImageManagementController as AdminImageManagementController;
 use App\Http\Controllers\Admin\NetworkManagementController as AdminNetworkManagementController;
 use App\Http\Controllers\Admin\StorageManagementController as AdminStorageManagementController;
+use App\Http\Controllers\Admin\LogsMonitoringController as AdminLogsMonitoringController;
+use App\Http\Controllers\Admin\NotificationsController as AdminNotificationsController;
 use App\Http\Controllers\Customer\AuthController as CustomerAuthController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 
@@ -66,6 +68,20 @@ Route::domain('hub.aviato.ir')
             Route::get('/storage/snapshots', [AdminStorageManagementController::class, 'snapshots'])->name('storage.snapshots');
             Route::get('/storage/containers', [AdminStorageManagementController::class, 'containers'])->name('storage.containers');
             Route::get('/storage/containers/{id}', [AdminStorageManagementController::class, 'showContainer'])->name('storage.containers.show');
+            
+            // Logs & Monitoring
+            Route::get('/logs-monitoring', [AdminLogsMonitoringController::class, 'index'])->name('logs-monitoring.index');
+            Route::get('/logs-monitoring/system-logs', [AdminLogsMonitoringController::class, 'systemLogs'])->name('logs-monitoring.system-logs');
+            Route::get('/logs-monitoring/failed-provisioning', [AdminLogsMonitoringController::class, 'failedProvisioning'])->name('logs-monitoring.failed-provisioning');
+            Route::get('/logs-monitoring/openstack-logs', [AdminLogsMonitoringController::class, 'openstackLogs'])->name('logs-monitoring.openstack-logs');
+            Route::get('/logs-monitoring/api-health', [AdminLogsMonitoringController::class, 'apiHealth'])->name('logs-monitoring.api-health');
+            
+            // Notifications
+            Route::get('/notifications', [AdminNotificationsController::class, 'index'])->name('notifications.index');
+            Route::get('/notifications/email-templates', [AdminNotificationsController::class, 'emailTemplates'])->name('notifications.email-templates');
+            Route::get('/notifications/sms-telegram', [AdminNotificationsController::class, 'smsTelegram'])->name('notifications.sms-telegram');
+            Route::get('/notifications/account-alerts', [AdminNotificationsController::class, 'accountAlerts'])->name('notifications.account-alerts');
+            Route::get('/notifications/admin-alerts', [AdminNotificationsController::class, 'adminAlerts'])->name('notifications.admin-alerts');
         });
     });
 
