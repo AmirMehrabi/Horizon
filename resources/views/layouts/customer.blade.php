@@ -271,10 +271,33 @@
         const walletBalanceButton = document.getElementById('wallet-balance-button');
         const walletBalanceDropdown = document.getElementById('wallet-balance-dropdown');
         
+        function toggleWalletDropdown(show) {
+            if (!walletBalanceDropdown) return;
+            
+            if (show) {
+                walletBalanceDropdown.classList.remove('hidden');
+                // Trigger reflow to ensure transition works
+                void walletBalanceDropdown.offsetWidth;
+                walletBalanceDropdown.style.opacity = '1';
+                walletBalanceDropdown.style.transform = 'translateY(0)';
+            } else {
+                walletBalanceDropdown.style.opacity = '0';
+                walletBalanceDropdown.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    walletBalanceDropdown.classList.add('hidden');
+                }, 120);
+            }
+        }
+        
         if (walletBalanceButton && walletBalanceDropdown) {
+            // Initialize dropdown as hidden
+            walletBalanceDropdown.style.opacity = '0';
+            walletBalanceDropdown.style.transform = 'translateY(-10px)';
+            
             walletBalanceButton.addEventListener('click', (e) => {
                 e.stopPropagation();
-                walletBalanceDropdown.classList.toggle('hidden');
+                const isHidden = walletBalanceDropdown.classList.contains('hidden');
+                toggleWalletDropdown(isHidden);
                 // Close user menu if open
                 if (userMenu) userMenu.classList.add('hidden');
             });
@@ -282,7 +305,7 @@
             // Close dropdown when clicking outside
             document.addEventListener('click', (e) => {
                 if (!walletBalanceButton.contains(e.target) && !walletBalanceDropdown.contains(e.target)) {
-                    walletBalanceDropdown.classList.add('hidden');
+                    toggleWalletDropdown(false);
                 }
             });
         }
@@ -373,14 +396,7 @@
     
     /* Wallet Balance Dropdown Animation */
     .wallet-dropdown {
-        opacity: 0;
-        transform: translateY(-10px);
         transition: opacity 120ms ease-out, transform 120ms ease-out;
-    }
-    
-    .wallet-dropdown:not(.hidden) {
-        opacity: 1;
-        transform: translateY(0);
     }
     
     /* Balance Update Animation */
