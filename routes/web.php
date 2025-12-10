@@ -155,6 +155,7 @@ Route::domain('panel.aviato.ir')
             // Storage Routes
             Route::prefix('storage')->name('storage.')->group(function () {
                 Route::get('/', function () { return view('customer.storage.index'); })->name('index');
+                Route::get('/snapshots', function () { return view('customer.storage.snapshots'); })->name('snapshots');
             });
             
             // Networks Routes
