@@ -12,6 +12,13 @@ class OpenStackKeyPair extends Model
 {
     use HasFactory, HasUuids;
 
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'openstack_key_pairs';
+
     protected $fillable = [
         'customer_id',
         'openstack_id',

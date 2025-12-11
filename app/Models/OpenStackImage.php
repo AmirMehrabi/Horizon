@@ -11,6 +11,13 @@ class OpenStackImage extends Model
 {
     use HasFactory, HasUuids;
 
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'openstack_images';
+
     protected $fillable = [
         'openstack_id',
         'name',

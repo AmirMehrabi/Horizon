@@ -14,6 +14,13 @@ class OpenStackInstance extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
 
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'openstack_instances';
+
     protected $fillable = [
         'customer_id',
         'name',

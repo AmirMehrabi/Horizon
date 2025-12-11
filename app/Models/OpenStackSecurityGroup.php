@@ -11,6 +11,13 @@ class OpenStackSecurityGroup extends Model
 {
     use HasFactory, HasUuids;
 
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'openstack_security_groups';
+
     protected $fillable = [
         'openstack_id',
         'name',

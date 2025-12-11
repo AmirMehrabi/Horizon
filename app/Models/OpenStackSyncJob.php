@@ -10,6 +10,13 @@ class OpenStackSyncJob extends Model
 {
     use HasFactory, HasUuids;
 
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'openstack_sync_jobs';
+
     protected $fillable = [
         'resource_type',
         'status',

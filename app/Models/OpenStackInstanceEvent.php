@@ -11,6 +11,13 @@ class OpenStackInstanceEvent extends Model
 {
     use HasFactory, HasUuids;
 
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'openstack_instance_events';
+
     public $timestamps = false;
 
     protected $fillable = [

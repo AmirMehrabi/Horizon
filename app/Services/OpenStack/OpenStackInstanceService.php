@@ -376,15 +376,21 @@ class OpenStackInstanceService
                     'network_id' => $externalNetwork->id,
                     'is_primary' => true,
                 ];
+            } else {
+                Log::warning('External network not found for public IP assignment', [
+                    'region' => $region,
+                    'instance_id' => $instance->id,
+                ]);
             }
         }
 
-        // If create_private_network is true, find or create private network
+        // If create_private_network is true, find private network
+        // Note: In production, you might want to create a private network per customer/project
         if ($data['create_private_network'] ?? true) {
             $privateNetwork = OpenStackNetwork::where('region', $region)
                 ->where('external', false)
-                ->where('shared', false)
                 ->where('status', 'ACTIVE')
+                ->orderBy('shared', 'desc') // Prefer shared networks
                 ->first();
 
             if ($privateNetwork) {
@@ -392,6 +398,32 @@ class OpenStackInstanceService
                     'network_id' => $privateNetwork->id,
                     'is_primary' => empty($networks), // Primary if no external network
                 ];
+            } else {
+                Log::warning('Private network not found', [
+                    'region' => $region,
+                    'instance_id' => $instance->id,
+                ]);
+            }
+        }
+
+        // Ensure at least one network is attached
+        if (empty($networks)) {
+            // Fallback: try to find any available network
+            $fallbackNetwork = OpenStackNetwork::where('region', $region)
+                ->where('status', 'ACTIVE')
+                ->first();
+
+            if ($fallbackNetwork) {
+                $networks[] = [
+                    'network_id' => $fallbackNetwork->id,
+                    'is_primary' => true,
+                ];
+                Log::info('Using fallback network for instance', [
+                    'instance_id' => $instance->id,
+                    'network_id' => $fallbackNetwork->id,
+                ]);
+            } else {
+                throw new \Exception('No networks available in region. Please sync networks first.');
             }
         }
 
