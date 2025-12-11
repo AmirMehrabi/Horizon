@@ -504,10 +504,66 @@ php artisan openstack:sync-resources --force
 ### Phase 2: Instance Creation (Week 3-4)
 
 #### 2.1 Instance Service
-- [ ] Create `OpenStackInstanceService`
-- [ ] Implement local instance creation (store in DB first)
-- [ ] Implement OpenStack provisioning logic
-- [ ] Handle instance metadata and user data
+- [x] Create `OpenStackInstanceService`
+- [x] Implement local instance creation (store in DB first)
+- [x] Implement OpenStack provisioning logic
+- [x] Handle instance metadata and user data
+
+**✅ Completed:**
+- Created `OpenStackInstanceService` (`app/Services/OpenStack/OpenStackInstanceService.php`):
+  - **Local-First Creation**: Instances are created in database first with status 'pending'
+  - **Flavor Resolution**: Automatically resolves flavors from prebuilt plans or custom specs
+  - **Image Resolution**: Maps OS selections (ubuntu, debian, etc.) to OpenStack images
+  - **Key Pair Management**: Creates or resolves SSH key pairs for authentication
+  - **Password Handling**: Encrypts passwords (not hashed) for OpenStack provisioning via cloud-init
+  - **Network Attachment**: Automatically attaches external and private networks
+  - **Security Group Assignment**: Attaches selected security groups
+  - **Cost Calculation**: Calculates hourly and monthly costs based on flavor pricing
+  - **Metadata Management**: Stores custom metadata for tracking and billing
+  - **Event Logging**: Logs all instance lifecycle events for audit trail
+
+- Created `ProvisionOpenStackInstance` job (`app/Jobs/ProvisionOpenStackInstance.php`):
+  - **Queue-Based Provisioning**: Runs asynchronously in background queue
+  - **Retry Logic**: 3 attempts with 30-second backoff between retries
+  - **OpenStack Integration**: Creates server in OpenStack with all configuration
+  - **Network Configuration**: Attaches networks, security groups, and key pairs
+  - **User Data Support**: Handles cloud-init scripts for automated setup
+  - **Password Injection**: Injects encrypted passwords via cloud-init for password-based auth
+  - **Error Handling**: Comprehensive error handling with status updates and event logging
+  - **Idempotency**: Checks if already provisioned to avoid duplicate creation
+
+- Created `StoreServerRequest` form request:
+  - **Comprehensive Validation**: Validates all form fields from the wizard
+  - **Conditional Rules**: Different rules based on plan type and access method
+  - **Persian Error Messages**: User-friendly error messages in Persian
+  - **Data Preparation**: Converts checkbox values to proper booleans
+
+- Updated `ServerController`:
+  - **Resource Loading**: Loads flavors, images, networks, and security groups for form
+  - **Instance Creation**: Uses service to create instances locally first
+  - **Job Dispatch**: Dispatches provisioning job after local creation
+  - **Real Data**: Updated index and show methods to use real instance data
+
+**Key Production Features:**
+- ✅ Local-first approach (instance in DB before OpenStack)
+- ✅ Transaction safety (all-or-nothing creation)
+- ✅ Comprehensive validation
+- ✅ Secure password handling (encrypted, not hashed)
+- ✅ Automatic resource resolution (flavors, images, networks)
+- ✅ Queue-based provisioning (non-blocking)
+- ✅ Retry mechanism for failed provisioning
+- ✅ Event logging for audit trail
+- ✅ Cost calculation and billing support
+- ✅ Metadata storage for tracking
+
+**Form Data Mapping:**
+- `os` → Resolves to `image_id` (maps ubuntu/debian/etc. to OpenStack images)
+- `plan` or `custom_*` → Resolves to `flavor_id` (prebuilt plans or custom specs)
+- `access_method` → `key_pair_id` or `root_password_hash`
+- `security_groups[]` → Attached security groups
+- `assign_public_ip` / `create_private_network` → Network attachments
+- `user_data` → Cloud-init script
+- `auto_billing` / `billing_cycle` → Billing configuration
 
 #### 2.2 Controller & Routes
 - [ ] Update `ServerController` with instance creation logic

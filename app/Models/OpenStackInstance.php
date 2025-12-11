@@ -24,7 +24,7 @@ class OpenStackInstance extends Model
         'flavor_id',
         'image_id',
         'key_pair_id',
-        'root_password_hash',
+        'root_password_hash', // Encrypted password (not hashed)
         'user_data',
         'config_drive',
         'region',
