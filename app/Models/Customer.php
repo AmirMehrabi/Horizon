@@ -242,15 +242,41 @@ class Customer extends Authenticatable
      */
     public function getStats(): array
     {
-        $machines = $this->machines();
+        $instances = $this->openStackInstances();
+        
+        // Get all instances for counting
+        $allInstances = $instances->get();
+        
+        // Calculate total monthly cost from active instances
+        $activeInstances = $allInstances->where('status', 'active');
+        $totalMonthlyCost = $activeInstances->sum(function ($instance) {
+            // If billing cycle is monthly, use monthly_cost, otherwise calculate from hourly
+            if ($instance->billing_cycle === 'monthly') {
+                return (float) ($instance->monthly_cost ?? 0);
+            } else {
+                // Convert hourly to monthly (approximate: hourly * 730)
+                return (float) (($instance->hourly_cost ?? 0) * 730);
+            }
+        });
+        
+        // Count instances by status
+        $statusCounts = $allInstances->groupBy('status')->map(function ($group) {
+            return $group->count();
+        });
         
         return [
-            'total_machines' => $machines->count(),
-            'active_machines' => $machines->where('status', 'active')->count(),
-            'avg_cpu_usage' => round($machines->avg('cpu_usage'), 1),
-            'avg_memory_usage' => round($machines->avg('memory_usage'), 1),
-            'total_monthly_cost' => 156.75, // Dummy data
-            'bandwidth_used' => '2.3 TB', // Dummy data
+            'total_machines' => $allInstances->count(),
+            'active_machines' => $statusCounts['active'] ?? 0,
+            'pending_machines' => $statusCounts['pending'] ?? 0,
+            'building_machines' => $statusCounts['building'] ?? 0,
+            'stopped_machines' => $statusCounts['stopped'] ?? 0,
+            'error_machines' => $statusCounts['error'] ?? 0,
+            'total_monthly_cost' => round($totalMonthlyCost, 2),
+            'total_hourly_cost' => round($activeInstances->sum('hourly_cost'), 4),
+            // CPU and memory usage would come from monitoring data (not available yet)
+            'avg_cpu_usage' => 0, // Placeholder - would come from monitoring
+            'avg_memory_usage' => 0, // Placeholder - would come from monitoring
+            'bandwidth_used' => '0 GB', // Placeholder - would come from monitoring
         ];
     }
 }
