@@ -159,7 +159,7 @@ class OpenStackConnectionService
     {
         if ($this->imageService === null) {
             try {
-                $this->imageService = $this->getClient()->imageV2();
+                $this->imageService = $this->getClient()->imagesV2();
             } catch (\Exception $e) {
                 Log::error('Failed to get Image service', [
                     'error' => $e->getMessage(),
