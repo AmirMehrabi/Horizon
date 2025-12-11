@@ -63,7 +63,7 @@ class OpenStackNetwork extends Model
      */
     public function instances(): BelongsToMany
     {
-        return $this->belongsToMany(OpenStackInstance::class, 'openstack_instance_networks')
+        return $this->belongsToMany(OpenStackInstance::class, 'openstack_instance_networks', 'network_id', 'instance_id')
                     ->withPivot(['fixed_ip', 'floating_ip', 'is_primary', 'subnet_id'])
                     ->withTimestamps();
     }

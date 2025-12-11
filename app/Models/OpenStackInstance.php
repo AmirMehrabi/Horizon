@@ -100,7 +100,7 @@ class OpenStackInstance extends Model
      */
     public function networks(): BelongsToMany
     {
-        return $this->belongsToMany(OpenStackNetwork::class, 'openstack_instance_networks')
+        return $this->belongsToMany(OpenStackNetwork::class, 'openstack_instance_networks', 'instance_id', 'network_id')
                     ->withPivot(['fixed_ip', 'floating_ip', 'is_primary', 'subnet_id'])
                     ->withTimestamps();
     }
@@ -110,7 +110,7 @@ class OpenStackInstance extends Model
      */
     public function securityGroups(): BelongsToMany
     {
-        return $this->belongsToMany(OpenStackSecurityGroup::class, 'openstack_instance_security_groups')
+        return $this->belongsToMany(OpenStackSecurityGroup::class, 'openstack_instance_security_groups', 'instance_id', 'security_group_id')
                     ->withTimestamps();
     }
 

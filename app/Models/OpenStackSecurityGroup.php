@@ -39,7 +39,7 @@ class OpenStackSecurityGroup extends Model
      */
     public function instances(): BelongsToMany
     {
-        return $this->belongsToMany(OpenStackInstance::class, 'openstack_instance_security_groups')
+        return $this->belongsToMany(OpenStackInstance::class, 'openstack_instance_security_groups', 'security_group_id', 'instance_id')
                     ->withTimestamps();
     }
 
