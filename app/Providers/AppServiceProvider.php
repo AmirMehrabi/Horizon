@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\OpenStack\OpenStackConnectionService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +12,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Register OpenStack Connection Service as singleton
+        $this->app->singleton(OpenStackConnectionService::class, function ($app) {
+            return new OpenStackConnectionService();
+        });
     }
 
     /**

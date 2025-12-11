@@ -34,10 +34,10 @@ return new class extends Migration
             // Timestamps
             $table->timestamp('created_at')->index();
             
-            // Indexes for performance
-            $table->index(['instance_id', 'event_type']);
-            $table->index(['instance_id', 'created_at']);
-            $table->index(['event_type', 'created_at']);
+            // Indexes for performance (using custom short names to avoid MySQL 64-char limit)
+            $table->index(['instance_id', 'event_type'], 'os_inst_evt_type_idx');
+            $table->index(['instance_id', 'created_at'], 'os_inst_evt_created_idx');
+            $table->index(['event_type', 'created_at'], 'os_evt_type_created_idx');
         });
     }
 

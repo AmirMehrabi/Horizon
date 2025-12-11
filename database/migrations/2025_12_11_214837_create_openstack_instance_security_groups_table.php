@@ -31,9 +31,9 @@ return new class extends Migration
             // Timestamps
             $table->timestamps();
             
-            // Indexes for performance
-            $table->index(['instance_id', 'security_group_id']);
-            $table->unique(['instance_id', 'security_group_id']); // Prevent duplicate assignments
+            // Indexes for performance (using custom short names to avoid MySQL 64-char limit)
+            $table->index(['instance_id', 'security_group_id'], 'os_inst_secgrp_idx');
+            $table->unique(['instance_id', 'security_group_id'], 'os_inst_secgrp_unique'); // Prevent duplicate assignments
         });
     }
 

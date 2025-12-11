@@ -19,16 +19,25 @@ composer require laravel/reverb
 Add to `.env`:
 
 ```env
-# OpenStack
-OPENSTACK_AUTH_URL=https://your-openstack:5000/v3
+# OpenStack Configuration
+OPENSTACK_AUTH_URL=http://185.206.95.239:5000/v3
 OPENSTACK_REGION=RegionOne
-OPENSTACK_USER_ID=your-user-id
-OPENSTACK_USERNAME=your-username
-OPENSTACK_PASSWORD=your-password
-OPENSTACK_PROJECT_ID=your-project-id
-OPENSTACK_PROJECT_NAME=your-project-name
-OPENSTACK_DOMAIN_ID=default
+OPENSTACK_USERNAME=admin
+OPENSTACK_PASSWORD=supsecret2
+OPENSTACK_PROJECT_NAME=admin
 OPENSTACK_DOMAIN_NAME=Default
+OPENSTACK_DOMAIN_ID=default
+
+# Optional: Override defaults
+# OPENSTACK_TIMEOUT=30
+# OPENSTACK_CONNECT_TIMEOUT=10
+# OPENSTACK_SYNC_INTERVAL=300
+# OPENSTACK_SYNC_ENABLED=true
+```
+
+**Note:** The auth URL is derived from your Horizon dashboard URL. If the default port 5000 doesn't work, try:
+- `http://185.206.95.239/identity/v3`
+- `http://185.206.95.239:35357/v3` (admin port)
 
 # Reverb
 REVERB_APP_ID=horizon-app

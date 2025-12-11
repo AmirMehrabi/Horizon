@@ -36,9 +36,9 @@ return new class extends Migration
             // Timestamps
             $table->timestamps();
             
-            // Indexes for performance
-            $table->index(['customer_id', 'region']);
-            $table->unique(['customer_id', 'name', 'region']); // Customer can't have duplicate key names per region
+            // Indexes for performance (using custom short names to avoid MySQL 64-char limit)
+            $table->index(['customer_id', 'region'], 'os_keypair_cust_region_idx');
+            $table->unique(['customer_id', 'name', 'region'], 'os_keypair_cust_name_region_unique'); // Customer can't have duplicate key names per region
         });
     }
 

@@ -45,10 +45,10 @@ return new class extends Migration
             // Timestamps
             $table->timestamps();
             
-            // Indexes for performance
-            $table->index(['instance_id', 'is_primary']);
-            $table->index(['network_id', 'fixed_ip']);
-            $table->unique(['instance_id', 'network_id']); // One network per instance
+            // Indexes for performance (using custom short names to avoid MySQL 64-char limit)
+            $table->index(['instance_id', 'is_primary'], 'os_inst_net_primary_idx');
+            $table->index(['network_id', 'fixed_ip'], 'os_net_fixedip_idx');
+            $table->unique(['instance_id', 'network_id'], 'os_inst_net_unique'); // One network per instance
         });
     }
 
