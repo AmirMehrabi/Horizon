@@ -12,6 +12,7 @@ use App\Models\OpenStackSecurityGroup;
 use App\Models\OpenStackSubnet;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class OpenStackSeeder extends Seeder
 {
@@ -362,13 +363,24 @@ class OpenStackSeeder extends Seeder
                         'region' => $region,
                     ]);
 
-                // Attach network
-                $instance->networks()->attach($network->id, [
+                // Attach network (using DB::table to handle UUID id)
+                DB::table('openstack_instance_networks')->insert([
+                    'id' => (string) Str::uuid(),
+                    'instance_id' => $instance->id,
+                    'network_id' => $network->id,
                     'is_primary' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
 
-                // Attach security group
-                $instance->securityGroups()->attach($securityGroup->id);
+                // Attach security group (using DB::table to handle UUID id)
+                DB::table('openstack_instance_security_groups')->insert([
+                    'id' => (string) Str::uuid(),
+                    'instance_id' => $instance->id,
+                    'security_group_id' => $securityGroup->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
 
                 $instances->push($instance);
             }
