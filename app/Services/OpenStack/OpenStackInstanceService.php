@@ -360,49 +360,71 @@ class OpenStackInstanceService
     protected function attachNetworks(OpenStackInstance $instance, array $data): void
     {
         $region = $instance->region;
-
-        // Get or create networks based on configuration
         $networks = [];
 
-        // If assign_public_ip is true, find external network
-        if ($data['assign_public_ip'] ?? true) {
-            $externalNetwork = OpenStackNetwork::where('region', $region)
-                ->where('external', true)
-                ->where('status', 'ACTIVE')
-                ->first();
+        // If network_ids are explicitly provided, use them
+        if (!empty($data['network_ids']) && is_array($data['network_ids'])) {
+            foreach ($data['network_ids'] as $index => $networkId) {
+                $network = OpenStackNetwork::where('id', $networkId)
+                    ->where('region', $region)
+                    ->where('status', 'ACTIVE')
+                    ->first();
 
-            if ($externalNetwork) {
-                $networks[] = [
-                    'network_id' => $externalNetwork->id,
-                    'is_primary' => true,
-                ];
-            } else {
-                Log::warning('External network not found for public IP assignment', [
-                    'region' => $region,
-                    'instance_id' => $instance->id,
-                ]);
+                if ($network) {
+                    $networks[] = [
+                        'network_id' => $network->id,
+                        'is_primary' => $index === 0, // First network is primary
+                    ];
+                } else {
+                    Log::warning('Network not found or not active', [
+                        'network_id' => $networkId,
+                        'region' => $region,
+                        'instance_id' => $instance->id,
+                    ]);
+                }
             }
-        }
+        } else {
+            // Auto-select networks based on configuration flags
+            // If assign_public_ip is true, find external network
+            if ($data['assign_public_ip'] ?? true) {
+                $externalNetwork = OpenStackNetwork::where('region', $region)
+                    ->where('external', true)
+                    ->where('status', 'ACTIVE')
+                    ->first();
 
-        // If create_private_network is true, find private network
-        // Note: In production, you might want to create a private network per customer/project
-        if ($data['create_private_network'] ?? true) {
-            $privateNetwork = OpenStackNetwork::where('region', $region)
-                ->where('external', false)
-                ->where('status', 'ACTIVE')
-                ->orderBy('shared', 'desc') // Prefer shared networks
-                ->first();
+                if ($externalNetwork) {
+                    $networks[] = [
+                        'network_id' => $externalNetwork->id,
+                        'is_primary' => true,
+                    ];
+                } else {
+                    Log::warning('External network not found for public IP assignment', [
+                        'region' => $region,
+                        'instance_id' => $instance->id,
+                    ]);
+                }
+            }
 
-            if ($privateNetwork) {
-                $networks[] = [
-                    'network_id' => $privateNetwork->id,
-                    'is_primary' => empty($networks), // Primary if no external network
-                ];
-            } else {
-                Log::warning('Private network not found', [
-                    'region' => $region,
-                    'instance_id' => $instance->id,
-                ]);
+            // If create_private_network is true, find private network
+            // Note: In production, you might want to create a private network per customer/project
+            if ($data['create_private_network'] ?? true) {
+                $privateNetwork = OpenStackNetwork::where('region', $region)
+                    ->where('external', false)
+                    ->where('status', 'ACTIVE')
+                    ->orderBy('shared', 'desc') // Prefer shared networks
+                    ->first();
+
+                if ($privateNetwork) {
+                    $networks[] = [
+                        'network_id' => $privateNetwork->id,
+                        'is_primary' => empty($networks), // Primary if no external network
+                    ];
+                } else {
+                    Log::warning('Private network not found', [
+                        'region' => $region,
+                        'instance_id' => $instance->id,
+                    ]);
+                }
             }
         }
 
@@ -441,23 +463,33 @@ class OpenStackInstanceService
     protected function attachSecurityGroups(OpenStackInstance $instance, array $data): void
     {
         $region = $instance->region;
-        $securityGroupIds = $data['security_groups'] ?? ['default'];
+        $securityGroupIds = $data['security_groups'] ?? [];
 
-        foreach ($securityGroupIds as $sgIdentifier) {
-            // Find security group by name or ID
-            $securityGroup = OpenStackSecurityGroup::where('region', $region)
-                ->where(function ($query) use ($sgIdentifier) {
-                    $query->where('name', $sgIdentifier)
-                          ->orWhere('id', $sgIdentifier);
-                })
+        // If no security groups provided, use default
+        if (empty($securityGroupIds)) {
+            $defaultSecurityGroup = OpenStackSecurityGroup::where('region', $region)
+                ->where('name', 'default')
+                ->first();
+
+            if ($defaultSecurityGroup) {
+                $instance->securityGroups()->attach($defaultSecurityGroup->id);
+                return;
+            }
+        }
+
+        foreach ($securityGroupIds as $sgId) {
+            // Find security group by ID (UUID)
+            $securityGroup = OpenStackSecurityGroup::where('id', $sgId)
+                ->where('region', $region)
                 ->first();
 
             if ($securityGroup) {
                 $instance->securityGroups()->attach($securityGroup->id);
             } else {
                 Log::warning('Security group not found', [
-                    'identifier' => $sgIdentifier,
+                    'security_group_id' => $sgId,
                     'region' => $region,
+                    'instance_id' => $instance->id,
                 ]);
             }
         }

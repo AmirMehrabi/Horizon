@@ -150,6 +150,15 @@ Route::domain('panel.aviato.ir')
                 Route::get('/create', [CustomerServerController::class, 'create'])->name('create');
                 Route::post('/', [CustomerServerController::class, 'store'])->name('store');
                 Route::get('/{id}', [CustomerServerController::class, 'show'])->name('show');
+                
+                // API endpoints for fetching resources
+                Route::prefix('api')->name('api.')->group(function () {
+                    Route::get('/flavors', [CustomerServerController::class, 'getFlavors'])->name('flavors');
+                    Route::get('/images', [CustomerServerController::class, 'getImages'])->name('images');
+                    Route::get('/networks', [CustomerServerController::class, 'getNetworks'])->name('networks');
+                    Route::get('/security-groups', [CustomerServerController::class, 'getSecurityGroups'])->name('security-groups');
+                    Route::get('/key-pairs', [CustomerServerController::class, 'getKeyPairs'])->name('key-pairs');
+                });
             });
             
             // Storage Routes

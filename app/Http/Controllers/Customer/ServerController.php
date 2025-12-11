@@ -124,5 +124,185 @@ class ServerController extends Controller
 
         return view('customer.servers.show', compact('instance'));
     }
+
+    /**
+     * API: Get available flavors
+     */
+    public function getFlavors(Request $request)
+    {
+        $region = $request->input('region', config('openstack.region'));
+        
+        $flavors = OpenStackFlavor::where('region', $region)
+            ->where('is_disabled', false)
+            ->where('is_public', true)
+            ->orderBy('vcpus')
+            ->orderBy('ram')
+            ->get()
+            ->map(function ($flavor) {
+                return [
+                    'id' => $flavor->id,
+                    'name' => $flavor->name,
+                    'description' => $flavor->description,
+                    'vcpus' => $flavor->vcpus,
+                    'ram' => $flavor->ram,
+                    'ram_gb' => $flavor->ram_in_gb,
+                    'disk' => $flavor->disk,
+                    'pricing_hourly' => $flavor->pricing_hourly,
+                    'pricing_monthly' => $flavor->pricing_monthly,
+                    'is_available' => $flavor->isAvailable(),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $flavors,
+        ]);
+    }
+
+    /**
+     * API: Get available images
+     */
+    public function getImages(Request $request)
+    {
+        $region = $request->input('region', config('openstack.region'));
+        $os = $request->input('os'); // Optional filter by OS type
+        
+        $query = OpenStackImage::where('region', $region)
+            ->where('status', 'active')
+            ->where(function ($query) {
+                $query->where('visibility', 'public')
+                      ->orWhere('visibility', 'shared');
+            });
+
+        // Filter by OS type if provided
+        if ($os && $os !== 'custom') {
+            $query->where(function ($q) use ($os) {
+                $osMap = [
+                    'ubuntu' => ['Ubuntu', 'ubuntu'],
+                    'debian' => ['Debian', 'debian'],
+                    'centos' => ['CentOS', 'centos'],
+                    'almalinux' => ['AlmaLinux', 'almalinux'],
+                    'windows' => ['Windows', 'windows'],
+                ];
+                
+                if (isset($osMap[$os])) {
+                    foreach ($osMap[$os] as $osName) {
+                        $q->orWhere('name', 'like', "%{$osName}%");
+                    }
+                }
+            });
+        }
+
+        $images = $query->orderBy('name')
+            ->get()
+            ->map(function ($image) {
+                return [
+                    'id' => $image->id,
+                    'name' => $image->name,
+                    'description' => $image->description,
+                    'status' => $image->status,
+                    'visibility' => $image->visibility,
+                    'size_gb' => $image->size_in_gb,
+                    'min_disk' => $image->min_disk,
+                    'min_ram' => $image->min_ram,
+                    'disk_format' => $image->disk_format,
+                    'is_available' => $image->isAvailable(),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $images,
+        ]);
+    }
+
+    /**
+     * API: Get available networks
+     */
+    public function getNetworks(Request $request)
+    {
+        $region = $request->input('region', config('openstack.region'));
+        
+        $networks = OpenStackNetwork::where('region', $region)
+            ->where('status', 'ACTIVE')
+            ->with('subnets')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($network) {
+                return [
+                    'id' => $network->id,
+                    'name' => $network->name,
+                    'description' => $network->description,
+                    'status' => $network->status,
+                    'shared' => $network->shared,
+                    'external' => $network->external,
+                    'is_active' => $network->isActive(),
+                    'subnets' => $network->subnets->map(function ($subnet) {
+                        return [
+                            'id' => $subnet->id,
+                            'name' => $subnet->name,
+                            'cidr' => $subnet->cidr,
+                            'ip_version' => $subnet->ip_version,
+                        ];
+                    }),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $networks,
+        ]);
+    }
+
+    /**
+     * API: Get available security groups
+     */
+    public function getSecurityGroups(Request $request)
+    {
+        $region = $request->input('region', config('openstack.region'));
+        
+        $securityGroups = OpenStackSecurityGroup::where('region', $region)
+            ->orderBy('name')
+            ->get()
+            ->map(function ($sg) {
+                return [
+                    'id' => $sg->id,
+                    'name' => $sg->name,
+                    'description' => $sg->description,
+                    'rules_count' => is_array($sg->rules) ? count($sg->rules) : 0,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $securityGroups,
+        ]);
+    }
+
+    /**
+     * API: Get customer's SSH key pairs
+     */
+    public function getKeyPairs(Request $request)
+    {
+        $customer = $request->user('customer');
+        $region = $request->input('region', config('openstack.region'));
+        
+        $keyPairs = \App\Models\OpenStackKeyPair::where('customer_id', $customer->id)
+            ->where('region', $region)
+            ->orderBy('name')
+            ->get()
+            ->map(function ($keyPair) {
+                return [
+                    'id' => $keyPair->id,
+                    'name' => $keyPair->name,
+                    'fingerprint' => $keyPair->fingerprint,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $keyPairs,
+        ]);
+    }
 }
 
