@@ -209,53 +209,30 @@ class Customer extends Authenticatable
     }
 
     /**
+     * Get the OpenStack instances associated with the customer.
+     */
+    public function openStackInstances()
+    {
+        return $this->hasMany(OpenStackInstance::class, 'customer_id');
+    }
+
+    /**
+     * Get the key pairs associated with the customer.
+     */
+    public function openStackKeyPairs()
+    {
+        return $this->hasMany(OpenStackKeyPair::class, 'customer_id');
+    }
+
+    /**
      * Get the machines associated with the customer.
      * This is a placeholder for the machine relationship.
+     * @deprecated Use openStackInstances() instead
      */
     public function machines()
     {
-        // This would be implemented when the Machine model is created
-        // return $this->hasMany(Machine::class);
-        
-        // For now, return dummy data
-        return collect([
-            (object) [
-                'id' => 1,
-                'name' => 'Production Server #1',
-                'type' => 'Droplet',
-                'status' => 'active',
-                'region' => 'NYC1',
-                'size' => 's-2vcpu-4gb',
-                'cpu_usage' => 45.2,
-                'memory_usage' => 67.8,
-                'disk_usage' => 23.1,
-                'created_at' => Carbon::now()->subDays(15),
-            ],
-            (object) [
-                'id' => 2,
-                'name' => 'Database Server',
-                'type' => 'Database',
-                'status' => 'active',
-                'region' => 'NYC1',
-                'size' => 'db-s-2vcpu-4gb',
-                'cpu_usage' => 23.7,
-                'memory_usage' => 34.2,
-                'disk_usage' => 56.8,
-                'created_at' => Carbon::now()->subDays(8),
-            ],
-            (object) [
-                'id' => 3,
-                'name' => 'Load Balancer',
-                'type' => 'Load Balancer',
-                'status' => 'active',
-                'region' => 'NYC1',
-                'size' => 'lb-small',
-                'cpu_usage' => 12.3,
-                'memory_usage' => 18.9,
-                'disk_usage' => 5.2,
-                'created_at' => Carbon::now()->subDays(3),
-            ],
-        ]);
+        // Legacy method for backward compatibility
+        return $this->openStackInstances();
     }
 
     /**
