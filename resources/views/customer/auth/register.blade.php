@@ -125,9 +125,6 @@
                         {{ __('Sign in here') }}
                     </a>
                 </p>
-                <a href="{{ url('/') }}" class="text-sm text-blue-600 hover:text-blue-500">
-                    ← {{ __('Back to main site') }}
-                </a>
             </div>
         </form>
 
