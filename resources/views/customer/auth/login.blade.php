@@ -19,10 +19,10 @@
     <div class="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full space-y-8">
             <div class="text-center">
-                <h2 class="text-2xl font-bold text-gray-900 mb-2">
+                <h2 class="text-xl font-bold text-gray-900 mb-2">
                     شماره موبایل خود را وارد کنید
                 </h2>
-                <p class="text-sm text-gray-500">
+                <p class=" text-gray-500">
                     تا کد تائید به شماره‌تان ارسال شود
                 </p>
             </div>
@@ -33,7 +33,6 @@
                     @csrf
                     
                     <div>
-                        <label for="phone_number" class="block text-sm font-semibold text-gray-700 mb-2">{{ __('Phone Number') }}</label>
                         <div class="flex {{ $isRtl ? 'flex-row-reverse' : '' }} rounded-lg border border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all @error('phone_number') border-red-400 bg-red-50 @enderror">
                             <select id="country_code" 
                                     name="country_code" 

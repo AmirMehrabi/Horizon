@@ -19,10 +19,10 @@
     <div class="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full space-y-8">
             <div class="text-center">
-                <h2 class="text-3xl font-bold text-gray-900 mb-2">
+                <h2 class="text-xl font-bold text-gray-900 mb-2">
                     یک حساب جدید ایجاد کنید
                 </h2>
-                <p class="text-sm text-gray-500">
+                <p class=" text-gray-500">
                     ثبت‌نام کنید تا به حساب خود دسترسی پیدا کنید
                 </p>
             </div>
