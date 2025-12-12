@@ -65,7 +65,7 @@
                     <div class="flex {{ $isRtl ? 'flex-row-reverse' : '' }} rounded-lg border border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all @error('phone_number') border-red-400 bg-red-50 @enderror">
                         <select id="country_code" 
                                 name="country_code" 
-                                class="px-4 py-3 bg-transparent border-0 {{ $isRtl ? 'border-l border-gray-300 rounded-r-lg' : 'border-r border-gray-300 rounded-l-lg' }} text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 @error('phone_number') border-red-400 @enderror"
+                                class="px-4 py-3 bg-transparent border-0 {{ $isRtl ? 'border-gray-300 rounded-r-lg' : 'border-r border-gray-300 rounded-l-lg' }} text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 @error('phone_number') border-red-400 @enderror"
                                 style="min-width: 100px;">
                             <option value="+98" selected>🇮🇷 +98</option>
                         </select>
