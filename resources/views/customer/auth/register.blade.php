@@ -20,10 +20,10 @@
         <div class="max-w-md w-full space-y-8">
             <div class="text-center">
                 <h2 class="text-3xl font-bold text-gray-900 mb-2">
-                    {{ __('Create Customer Account') }}
+                    یک حساب جدید ایجاد کنید
                 </h2>
                 <p class="text-sm text-gray-500">
-                    {{ __('Register to access your cloud resources') }}
+                    ثبت‌نام کنید تا به حساب خود دسترسی پیدا کنید
                 </p>
             </div>
 
