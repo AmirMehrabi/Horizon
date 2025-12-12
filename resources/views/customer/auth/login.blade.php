@@ -9,155 +9,162 @@
     $isRtl = $direction === 'rtl';
 @endphp
 
-<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-        <div>
-            <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100">
-                <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-            </div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                {{ __('Customer Portal') }}
-            </h2>
-            <p class="mt-2 text-center text-sm text-gray-600">
-                {{ __('Sign in with your phone number') }}
-            </p>
-        </div>
-
-        <!-- Phone Number Form -->
-        <div id="phoneForm">
-            <form class="mt-8 space-y-6" action="{{ route('customer.login') }}" method="POST" id="loginForm">
-                @csrf
-                
-                <div>
-                    <label for="phone_number" class="block text-sm font-medium text-gray-700">{{ __('Phone Number') }}</label>
-                    <input id="phone_number" 
-                           name="phone_number" 
-                           type="tel" 
-                           required 
-                           class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm @error('phone_number') border-red-300 @enderror" 
-                           placeholder="{{ __('Phone Number (e.g., +1234567890)') }}"
-                           value="{{ old('phone_number') }}">
-                    @error('phone_number')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-white">
+    <div class="max-w-md w-full">
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 sm:p-10">
+            <div class="text-center mb-8">
+                <div class="mx-auto h-14 w-14 flex items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 mb-4">
+                    <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
                 </div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">
+                    {{ __('Customer Portal') }}
+                </h2>
+                <p class="text-sm text-gray-500">
+                    {{ __('Sign in with your phone number') }}
+                </p>
+            </div>
 
-                <div>
-                    <button type="submit" 
-                            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                            id="submitBtn">
-                        <span class="absolute {{ $isRtl ? 'right-0 pr-3' : 'left-0 pl-3' }} inset-y-0 flex items-center">
-                            <svg class="h-5 w-5 text-blue-500 group-hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            <!-- Phone Number Form -->
+            <div id="phoneForm">
+                <form class="space-y-6" action="{{ route('customer.login') }}" method="POST" id="loginForm">
+                    @csrf
+                    
+                    <div>
+                        <label for="phone_number" class="block text-sm font-semibold text-gray-700 mb-2">{{ __('Phone Number') }}</label>
+                        <div class="flex rounded-lg border-2 border-gray-200 focus-within:border-cyan-500 focus-within:ring-2 focus-within:ring-cyan-500/20 transition-all @error('phone_number') border-red-400 @enderror">
+                            <select id="country_code" 
+                                    name="country_code" 
+                                    class="px-4 py-3.5 bg-gray-50 border-0 border-r-2 border-gray-200 rounded-l-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 focus:bg-gray-100 @error('phone_number') border-red-400 @enderror"
+                                    style="min-width: 100px;">
+                                <option value="+98" selected>🇮🇷 +98</option>
+                            </select>
+                            <input id="phone_number" 
+                                   name="phone_number" 
+                                   type="tel" 
+                                   required 
+                                   class="flex-1 px-4 py-3.5 border-0 rounded-r-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 @error('phone_number') text-red-600 @enderror" 
+                                   placeholder="912 345 6789"
+                                   value="{{ old('phone_number') }}"
+                                   maxlength="11">
+                        </div>
+                        <p class="mt-2 text-xs text-gray-500">{{ __('Enter your 11-digit mobile number') }}</p>
+                        @error('phone_number')
+                            <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
+                        @enderror
+                        <p id="phoneError" class="mt-2 text-sm text-red-600 font-medium hidden"></p>
+                    </div>
+
+                    <div>
+                        <button type="submit" 
+                                class="group relative w-full flex justify-center items-center py-3.5 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md"
+                                id="submitBtn">
+                            <span id="submitText">{{ __('Send Verification Code') }}</span>
+                            <svg class="animate-spin ml-3 h-5 w-5 text-white hidden" id="loadingSpinner" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                        </span>
-                        <span id="submitText">{{ __('Send Verification Code') }}</span>
-                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" id="loadingSpinner" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </button>
-                </div>
+                        </button>
+                    </div>
 
-                <div class="text-center space-y-2">
-                    <p class="text-sm text-gray-600">
-                        {{ __("Don't have an account?") }}
-                        <a href="{{ route('customer.register') }}" class="font-medium text-blue-600 hover:text-blue-500">
-                            {{ __('Register here') }}
-                        </a>
-                    </p>
-                </div>
+                    <div class="text-center pt-2">
+                        <p class="text-sm text-gray-600">
+                            {{ __("Don't have an account?") }}
+                            <a href="{{ route('customer.register') }}" class="font-semibold text-cyan-600 hover:text-cyan-700 transition-colors">
+                                {{ __('Register here') }}
+                            </a>
+                        </p>
+                    </div>
             </form>
         </div>
 
-        <!-- Verification Code Form (Hidden initially) -->
-        <div id="verificationForm" class="hidden">
-            <form class="mt-8 space-y-6" action="{{ route('customer.verify-login') }}" method="POST" id="verifyForm">
-                @csrf
-                
-                <div class="text-center">
-                    <p class="text-sm text-gray-600 mb-4">
-                        {{ __('We sent a verification code to') }}<br>
-                        <span class="font-medium" id="displayPhone"></span>
-                    </p>
-                </div>
+            <!-- Verification Code Form (Hidden initially) -->
+            <div id="verificationForm" class="hidden">
+                <form class="space-y-6" action="{{ route('customer.verify-login') }}" method="POST" id="verifyForm">
+                    @csrf
+                    
+                    <div class="text-center mb-6">
+                        <p class="text-sm text-gray-600 mb-2">
+                            {{ __('We sent a verification code to') }}
+                        </p>
+                        <span class="text-base font-semibold text-gray-900" id="displayPhone"></span>
+                    </div>
 
-                <div>
-                    <label for="code" class="block text-sm font-medium text-gray-700">{{ __('Verification Code') }}</label>
-                    <input id="code" 
-                           name="code" 
-                           type="text" 
-                           maxlength="6"
-                           pattern="[0-9]{6}"
-                           required 
-                           class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-center text-lg tracking-widest" 
-                           placeholder="000000"
-                           autocomplete="one-time-code">
-                    <div id="codeError" class="mt-1 text-sm text-red-600 hidden"></div>
-                </div>
+                    <div>
+                        <label for="code" class="block text-sm font-semibold text-gray-700 mb-2">{{ __('Verification Code') }}</label>
+                        <input id="code" 
+                               name="code" 
+                               type="text" 
+                               maxlength="6"
+                               pattern="[0-9]{6}"
+                               required 
+                               class="w-full px-4 py-3.5 border-2 border-gray-200 rounded-lg text-center text-2xl tracking-[0.5em] font-semibold text-gray-900 placeholder-gray-300 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all" 
+                               placeholder="000000"
+                               autocomplete="one-time-code">
+                        <div id="codeError" class="mt-2 text-sm text-red-600 font-medium hidden"></div>
+                    </div>
 
-                <div>
-                    <button type="submit" 
-                            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                            id="verifyBtn">
-                        <span id="verifyText">{{ __('Verify & Sign In') }}</span>
-                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" id="verifySpinner" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </button>
-                </div>
+                    <div>
+                        <button type="submit" 
+                                class="w-full flex justify-center items-center py-3.5 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md"
+                                id="verifyBtn">
+                            <span id="verifyText">{{ __('Verify & Sign In') }}</span>
+                            <svg class="animate-spin ml-3 h-5 w-5 text-white hidden" id="verifySpinner" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </button>
+                    </div>
 
-                <div class="text-center">
-                    <button type="button" 
-                            id="resendBtn"
-                            class="text-sm text-blue-600 hover:text-blue-500 disabled:text-gray-400 disabled:cursor-not-allowed">
-                        <span id="resendText">{{ __('Resend Code') }}</span>
-                        <span id="resendTimer" class="hidden"></span>
-                    </button>
-                </div>
+                    <div class="text-center space-y-3">
+                        <button type="button" 
+                                id="resendBtn"
+                                class="text-sm font-semibold text-cyan-600 hover:text-cyan-700 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors">
+                            <span id="resendText">{{ __('Resend Code') }}</span>
+                            <span id="resendTimer" class="hidden"></span>
+                        </button>
+                        <div>
+                            <button type="button" 
+                                    id="backToPhone"
+                                    class="text-sm text-gray-500 hover:text-gray-700 transition-colors">
+                                ← {{ __('Use different phone number') }}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
 
-                <div class="text-center">
-                    <button type="button" 
-                            id="backToPhone"
-                            class="text-sm text-gray-600 hover:text-gray-500">
-                        ← {{ __('Use different phone number') }}
-                    </button>
+            @if(session('success'))
+                <div class="mt-6 rounded-lg bg-green-50 border border-green-200 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="{{ $isRtl ? 'mr-3' : 'ml-3' }}">
+                            <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
+                        </div>
+                    </div>
                 </div>
-            </form>
+            @endif
+
+            @if(session('error'))
+                <div class="mt-6 rounded-lg bg-red-50 border border-red-200 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="{{ $isRtl ? 'mr-3' : 'ml-3' }}">
+                            <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
-
-        @if(session('success'))
-            <div class="rounded-md bg-green-50 p-4">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <div class="{{ $isRtl ? 'mr-3' : 'ml-3' }}">
-                        <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="rounded-md bg-red-50 p-4">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <div class="{{ $isRtl ? 'mr-3' : 'ml-3' }}">
-                        <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
-                    </div>
-                </div>
-            </div>
-        @endif
     </div>
 </div>
 
@@ -166,6 +173,60 @@
 let resendTimer = 60;
 let resendInterval;
 
+// Iran phone number validation
+function validateIranPhoneNumber(phone) {
+    // Remove all non-digit characters
+    const digits = phone.replace(/\D/g, '');
+    
+    // Iran mobile numbers: 09XX XXX XXXX (11 digits starting with 09)
+    // Or 9XX XXX XXXX (10 digits starting with 9, we'll add 0)
+    if (digits.length === 11 && digits.startsWith('09')) {
+        return true;
+    }
+    if (digits.length === 10 && digits.startsWith('9')) {
+        return true;
+    }
+    return false;
+}
+
+// Format phone number for display
+function formatIranPhoneNumber(phone) {
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length === 11 && digits.startsWith('09')) {
+        return `+98 ${digits.substring(1, 4)} ${digits.substring(4, 7)} ${digits.substring(7)}`;
+    }
+    if (digits.length === 10 && digits.startsWith('9')) {
+        return `+98 ${digits.substring(0, 3)} ${digits.substring(3, 6)} ${digits.substring(6)}`;
+    }
+    return phone;
+}
+
+// Format phone input
+const phoneInput = document.getElementById('phone_number');
+phoneInput.addEventListener('input', function(e) {
+    // Only allow digits
+    this.value = this.value.replace(/\D/g, '');
+    
+    // Auto-add leading 0 if user starts with 9
+    if (this.value.length === 1 && this.value === '9') {
+        this.value = '09' + this.value;
+    }
+    
+    // Limit to 11 digits
+    if (this.value.length > 11) {
+        this.value = this.value.substring(0, 11);
+    }
+    
+    // Validate and show error
+    const phoneError = document.getElementById('phoneError');
+    if (this.value.length > 0 && !validateIranPhoneNumber(this.value)) {
+        phoneError.textContent = '{{ __("Please enter a valid Iran mobile number (09XX XXX XXXX)") }}';
+        phoneError.classList.remove('hidden');
+    } else {
+        phoneError.classList.add('hidden');
+    }
+});
+
 // Handle phone form submission
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -173,11 +234,24 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     const submitBtn = document.getElementById('submitBtn');
     const submitText = document.getElementById('submitText');
     const loadingSpinner = document.getElementById('loadingSpinner');
+    const countryCode = document.getElementById('country_code').value;
     const phoneNumber = document.getElementById('phone_number').value;
+    const phoneError = document.getElementById('phoneError');
+    
+    // Validate phone number
+    if (!validateIranPhoneNumber(phoneNumber)) {
+        phoneError.textContent = '{{ __("Please enter a valid Iran mobile number (09XX XXX XXXX)") }}';
+        phoneError.classList.remove('hidden');
+        return;
+    }
+    
+    // Combine country code and phone number
+    const fullPhoneNumber = countryCode + phoneNumber.replace(/^0/, '');
     
     submitBtn.disabled = true;
     submitText.textContent = '{{ __("Sending Code...") }}';
     loadingSpinner.classList.remove('hidden');
+    phoneError.classList.add('hidden');
     
     try {
         const response = await fetch(this.action, {
@@ -188,7 +262,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                phone_number: phoneNumber
+                phone_number: fullPhoneNumber
             })
         });
         
@@ -198,15 +272,17 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             // Show verification form
             document.getElementById('phoneForm').classList.add('hidden');
             document.getElementById('verificationForm').classList.remove('hidden');
-            document.getElementById('displayPhone').textContent = phoneNumber;
+            document.getElementById('displayPhone').textContent = formatIranPhoneNumber(phoneNumber);
             document.getElementById('code').focus();
             startResendTimer();
         } else {
             // Show error
-            alert(data.message || '{{ __("An error occurred. Please try again.") }}');
+            phoneError.textContent = data.message || '{{ __("An error occurred. Please try again.") }}';
+            phoneError.classList.remove('hidden');
         }
     } catch (error) {
-        alert('{{ __("Network error. Please try again.") }}');
+        phoneError.textContent = '{{ __("Network error. Please try again.") }}';
+        phoneError.classList.remove('hidden');
     } finally {
         submitBtn.disabled = false;
         submitText.textContent = '{{ __("Send Verification Code") }}';
