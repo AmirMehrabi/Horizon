@@ -37,7 +37,7 @@
                                name="first_name" 
                                type="text" 
                                required 
-                               class="w-full px-4 py-3.5 border border-gray-200 bg-white rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all @error('first_name') border-red-400 bg-red-50 @enderror" 
+                               class="w-full px-4 py-3 border border-gray-200 bg-white rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all @error('first_name') border-red-400 bg-red-50 @enderror" 
                                placeholder="{{ __('First Name') }}"
                                value="{{ old('first_name') }}">
                         @error('first_name')
@@ -51,7 +51,7 @@
                                name="last_name" 
                                type="text" 
                                required 
-                               class="w-full px-4 py-3.5 border border-gray-200 bg-white rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all @error('last_name') border-red-400 bg-red-50 @enderror" 
+                               class="w-full px-4 py-3 border border-gray-200 bg-white rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all @error('last_name') border-red-400 bg-red-50 @enderror" 
                                placeholder="{{ __('Last Name') }}"
                                value="{{ old('last_name') }}">
                         @error('last_name')
@@ -65,7 +65,7 @@
                     <div class="flex {{ $isRtl ? 'flex-row-reverse' : '' }} rounded-lg border border-gray-200 bg-white focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600 transition-all @error('phone_number') border-red-400 bg-red-50 @enderror">
                         <select id="country_code" 
                                 name="country_code" 
-                                class="px-4 py-3.5 bg-transparent border-0 {{ $isRtl ? 'border-l border-gray-300 rounded-r-lg' : 'border-r border-gray-300 rounded-l-lg' }} text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 @error('phone_number') border-red-400 @enderror"
+                                class="px-4 py-3 bg-transparent border-0 {{ $isRtl ? 'border-l border-gray-300 rounded-r-lg' : 'border-r border-gray-300 rounded-l-lg' }} text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 @error('phone_number') border-red-400 @enderror"
                                 style="min-width: 100px;">
                             <option value="+98" selected>🇮🇷 +98</option>
                         </select>
@@ -73,7 +73,7 @@
                                name="phone_number" 
                                type="tel" 
                                required 
-                               class="flex-1 px-4 py-3.5 bg-transparent border-0 {{ $isRtl ? 'rounded-l-lg' : 'rounded-r-lg' }} text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 @error('phone_number') text-red-600 @enderror" 
+                               class="flex-1 px-4 py-3 bg-transparent border-0 {{ $isRtl ? 'rounded-l-lg' : 'rounded-r-lg' }} text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 @error('phone_number') text-red-600 @enderror" 
                                placeholder="912 345 6789"
                                value="{{ old('phone_number') }}"
                                maxlength="11">
@@ -90,7 +90,7 @@
                     <input id="email" 
                            name="email" 
                            type="email" 
-                           class="w-full px-4 py-3.5 border border-gray-200 bg-white rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all @error('email') border-red-400 bg-red-50 @enderror" 
+                           class="w-full px-4 py-3 border border-gray-200 bg-white rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all @error('email') border-red-400 bg-red-50 @enderror" 
                            placeholder="{{ __('Email Address') }}"
                            value="{{ old('email') }}">
                     @error('email')
@@ -103,7 +103,7 @@
                     <input id="company_name" 
                            name="company_name" 
                            type="text" 
-                           class="w-full px-4 py-3.5 border border-gray-200 bg-white rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all @error('company_name') border-red-400 bg-red-50 @enderror" 
+                           class="w-full px-4 py-3 border border-gray-200 bg-white rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all @error('company_name') border-red-400 bg-red-50 @enderror" 
                            placeholder="{{ __('Company Name') }}"
                            value="{{ old('company_name') }}">
                     @error('company_name')
@@ -113,7 +113,7 @@
 
                 <div>
                     <button type="submit" 
-                            class="w-full flex justify-center items-center py-3.5 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="w-full flex justify-center items-center py-3 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                             id="submitBtn">
                         <span id="submitText">{{ __('Create Account') }}</span>
                         <svg class="animate-spin ml-3 h-5 w-5 text-white hidden" id="loadingSpinner" fill="none" viewBox="0 0 24 24">
