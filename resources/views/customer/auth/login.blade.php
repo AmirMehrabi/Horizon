@@ -20,10 +20,10 @@
         <div class="max-w-md w-full space-y-8">
             <div class="text-center">
                 <h2 class="text-3xl font-bold text-gray-900 mb-2">
-                    {{ __('Customer Portal') }}
+                    شماره موبایل خود را وارد کنید
                 </h2>
                 <p class="text-sm text-gray-500">
-                    {{ __('Sign in with your phone number') }}
+                    تا کد تائید به شماره‌تان ارسال شود
                 </p>
             </div>
 
