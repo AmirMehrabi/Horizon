@@ -153,6 +153,13 @@ class CustomerVerificationCode extends Model
             ];
         }
 
+        // Delete any existing verified codes for this phone/type to avoid unique constraint violation
+        self::where('phone_number', $phoneNumber)
+            ->where('type', $type)
+            ->where('verified', true)
+            ->where('id', '!=', $verificationCode->id)
+            ->delete();
+
         // Mark as verified
         $verificationCode->update([
             'verified' => true,
