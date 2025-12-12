@@ -9,16 +9,23 @@
     $isRtl = $direction === 'rtl';
 @endphp
 
-<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-white">
-    <div class="max-w-md w-full space-y-8">
-        <div class="text-center">
-            <h2 class="text-3xl font-bold text-gray-900 mb-2">
-                {{ __('Create Customer Account') }}
-            </h2>
-            <p class="text-sm text-gray-500">
-                {{ __('Register to access your cloud resources') }}
-            </p>
-        </div>
+<div class="min-h-screen flex flex-col bg-white">
+    <!-- Logo Placeholder -->
+    <div class="w-full py-6 px-4 text-center">
+        <h1 class="text-4xl sm:text-5xl font-black text-black">آویاتو</h1>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">
+                    {{ __('Create Customer Account') }}
+                </h2>
+                <p class="text-sm text-gray-500">
+                    {{ __('Register to access your cloud resources') }}
+                </p>
+            </div>
 
         <form class="mt-8 space-y-5" action="{{ route('customer.register') }}" method="POST" id="registrationForm">
                 @csrf
@@ -172,6 +179,7 @@
                 </div>
             </div>
         @endif
+        </div>
     </div>
 </div>
 
