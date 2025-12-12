@@ -9,7 +9,7 @@
     $isRtl = $direction === 'rtl';
 @endphp
 
-<div class="min-h-screen flex flex-col bg-white">
+<div class="min-h-screen flex flex-col bg-gray-50">
     <!-- Logo Placeholder -->
     <div class="w-full py-6 px-4 text-center">
         <h1 class="text-4xl sm:text-5xl font-black text-black">آویاتو</h1>
@@ -37,7 +37,7 @@
                                name="first_name" 
                                type="text" 
                                required 
-                               class="w-full px-4 py-3.5 border border-gray-300 bg-gray-50 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600 transition-all @error('first_name') border-red-400 bg-red-50 @enderror" 
+                               class="w-full px-4 py-3.5 border border-gray-200 bg-white rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all @error('first_name') border-red-400 bg-red-50 @enderror" 
                                placeholder="{{ __('First Name') }}"
                                value="{{ old('first_name') }}">
                         @error('first_name')
@@ -51,7 +51,7 @@
                                name="last_name" 
                                type="text" 
                                required 
-                               class="w-full px-4 py-3.5 border border-gray-300 bg-gray-50 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600 transition-all @error('last_name') border-red-400 bg-red-50 @enderror" 
+                               class="w-full px-4 py-3.5 border border-gray-200 bg-white rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all @error('last_name') border-red-400 bg-red-50 @enderror" 
                                placeholder="{{ __('Last Name') }}"
                                value="{{ old('last_name') }}">
                         @error('last_name')
@@ -62,7 +62,7 @@
 
                 <div>
                     <label for="phone_number" class="block text-sm font-semibold text-gray-700 mb-2">{{ __('Phone Number') }} *</label>
-                    <div class="flex {{ $isRtl ? 'flex-row-reverse' : '' }} rounded-lg border border-gray-300 bg-gray-50 focus-within:border-blue-600 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-600 transition-all @error('phone_number') border-red-400 bg-red-50 @enderror">
+                    <div class="flex {{ $isRtl ? 'flex-row-reverse' : '' }} rounded-lg border border-gray-200 bg-white focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600 transition-all @error('phone_number') border-red-400 bg-red-50 @enderror">
                         <select id="country_code" 
                                 name="country_code" 
                                 class="px-4 py-3.5 bg-transparent border-0 {{ $isRtl ? 'border-l border-gray-300 rounded-r-lg' : 'border-r border-gray-300 rounded-l-lg' }} text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 @error('phone_number') border-red-400 @enderror"
@@ -90,7 +90,7 @@
                     <input id="email" 
                            name="email" 
                            type="email" 
-                           class="w-full px-4 py-3.5 border border-gray-300 bg-gray-50 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600 transition-all @error('email') border-red-400 bg-red-50 @enderror" 
+                           class="w-full px-4 py-3.5 border border-gray-200 bg-white rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all @error('email') border-red-400 bg-red-50 @enderror" 
                            placeholder="{{ __('Email Address') }}"
                            value="{{ old('email') }}">
                     @error('email')
@@ -103,7 +103,7 @@
                     <input id="company_name" 
                            name="company_name" 
                            type="text" 
-                           class="w-full px-4 py-3.5 border border-gray-300 bg-gray-50 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600 transition-all @error('company_name') border-red-400 bg-red-50 @enderror" 
+                           class="w-full px-4 py-3.5 border border-gray-200 bg-white rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all @error('company_name') border-red-400 bg-red-50 @enderror" 
                            placeholder="{{ __('Company Name') }}"
                            value="{{ old('company_name') }}">
                     @error('company_name')
