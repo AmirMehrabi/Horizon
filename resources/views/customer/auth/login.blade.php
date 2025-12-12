@@ -33,7 +33,7 @@
                     @csrf
                     
                     <div>
-                        <div class="flex {{ $isRtl ? 'flex-row-reverse' : '' }} rounded-lg border border-gray-200 bg-white hover:border-gray-300 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all @error('phone_number') border-red-400 bg-red-50 @enderror">
+                        <div class="flex {{ $isRtl ? 'flex-row-reverse' : '' }} rounded-lg border border-gray-300 bg-white hover:border-gray-400 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all @error('phone_number') border-red-400 bg-red-50 @enderror">
                             <select id="country_code" 
                                     name="country_code" 
                                     class="px-4 py-3 bg-transparent border-0 {{ $isRtl ? 'border-gray-300 rounded-r-lg' : 'border-r border-gray-300 rounded-l-lg' }} text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 @error('phone_number') border-red-400 @enderror"
@@ -98,7 +98,7 @@
                            maxlength="6"
                            pattern="[0-9]{6}"
                            required 
-                           class="w-full px-4 py-3 border border-gray-200 bg-white rounded-lg text-center text-2xl tracking-[0.5em] font-semibold text-gray-900 placeholder-gray-300 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all" 
+                           class="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg text-center text-2xl tracking-[0.5em] font-semibold text-gray-900 placeholder-gray-300 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all" 
                            placeholder="000000"
                            autocomplete="one-time-code">
                     <div id="codeError" class="mt-2 text-sm text-red-600 font-medium hidden"></div>
