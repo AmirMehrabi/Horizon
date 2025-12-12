@@ -55,21 +55,38 @@
 
                 <div>
                     <label for="phone_number" class="block text-sm font-semibold text-gray-700 mb-2">{{ __('Phone Number') }} *</label>
-                    <div class="flex rounded-lg border border-gray-300 bg-gray-50 focus-within:border-blue-600 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-600 transition-all @error('phone_number') border-red-400 bg-red-50 @enderror">
-                        <select id="country_code" 
-                                name="country_code" 
-                                class="px-4 py-3.5 bg-transparent border-0 border-r border-gray-300 rounded-l-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 @error('phone_number') border-red-400 @enderror"
-                                style="min-width: 100px;">
-                            <option value="+98" selected>🇮🇷 +98</option>
-                        </select>
-                        <input id="phone_number" 
-                               name="phone_number" 
-                               type="tel" 
-                               required 
-                               class="flex-1 px-4 py-3.5 bg-transparent border-0 rounded-r-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 @error('phone_number') text-red-600 @enderror" 
-                               placeholder="912 345 6789"
-                               value="{{ old('phone_number') }}"
-                               maxlength="11">
+                    <div class="flex rounded-lg border border-gray-300 bg-gray-50 focus-within:border-blue-600 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-600 transition-all @error('phone_number') border-red-400 bg-red-50 @enderror {{ $isRtl ? 'flex-row-reverse' : '' }}">
+                        @if($isRtl)
+                            <input id="phone_number" 
+                                   name="phone_number" 
+                                   type="tel" 
+                                   required 
+                                   class="flex-1 px-4 py-3.5 bg-transparent border-0 rounded-l-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 @error('phone_number') text-red-600 @enderror" 
+                                   placeholder="912 345 6789"
+                                   value="{{ old('phone_number') }}"
+                                   maxlength="11">
+                            <select id="country_code" 
+                                    name="country_code" 
+                                    class="px-4 py-3.5 bg-transparent border-0 border-l border-gray-300 rounded-r-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 @error('phone_number') border-red-400 @enderror"
+                                    style="min-width: 100px;">
+                                <option value="+98" selected>🇮🇷 +98</option>
+                            </select>
+                        @else
+                            <select id="country_code" 
+                                    name="country_code" 
+                                    class="px-4 py-3.5 bg-transparent border-0 border-r border-gray-300 rounded-l-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 @error('phone_number') border-red-400 @enderror"
+                                    style="min-width: 100px;">
+                                <option value="+98" selected>🇮🇷 +98</option>
+                            </select>
+                            <input id="phone_number" 
+                                   name="phone_number" 
+                                   type="tel" 
+                                   required 
+                                   class="flex-1 px-4 py-3.5 bg-transparent border-0 rounded-r-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 @error('phone_number') text-red-600 @enderror" 
+                                   placeholder="912 345 6789"
+                                   value="{{ old('phone_number') }}"
+                                   maxlength="11">
+                        @endif
                     </div>
                     <p class="mt-2 text-xs text-gray-500">{{ __('This will be used for SMS verification and login') }}</p>
                     @error('phone_number')
@@ -176,31 +193,93 @@ function validateIranPhoneNumber(phone) {
     return false;
 }
 
-// Format phone input
+// Format phone input - ensure "09" prefix is always present and non-removable
 const phoneInput = document.getElementById('phone_number');
+let isComposing = false;
+
+// Handle composition events (for IME input)
+phoneInput.addEventListener('compositionstart', function() {
+    isComposing = true;
+});
+
+phoneInput.addEventListener('compositionend', function() {
+    isComposing = false;
+    formatPhoneInput();
+});
+
 phoneInput.addEventListener('input', function(e) {
-    // Only allow digits
-    this.value = this.value.replace(/\D/g, '');
+    if (isComposing) return;
+    formatPhoneInput();
+});
+
+phoneInput.addEventListener('keydown', function(e) {
+    const cursorPos = this.selectionStart;
+    const value = this.value;
     
-    // Auto-add leading 0 if user starts with 9
-    if (this.value.length === 1 && this.value === '9') {
-        this.value = '09' + this.value;
+    // Prevent deletion of "09" prefix
+    if ((e.key === 'Backspace' || e.key === 'Delete') && cursorPos <= 2 && value.startsWith('09')) {
+        if (cursorPos < 2) {
+            e.preventDefault();
+            return false;
+        }
+    }
+});
+
+function formatPhoneInput() {
+    // Only allow digits
+    let digits = phoneInput.value.replace(/\D/g, '');
+    
+    // Always ensure it starts with "09"
+    if (!digits.startsWith('09')) {
+        if (digits.startsWith('9')) {
+            // If starts with 9, prepend 0
+            digits = '0' + digits;
+        } else if (digits.length > 0) {
+            // If doesn't start with 09, prepend 09
+            digits = '09' + digits.replace(/^0*/, '');
+        } else {
+            // If empty, set to 09
+            digits = '09';
+        }
     }
     
-    // Limit to 11 digits
-    if (this.value.length > 11) {
-        this.value = this.value.substring(0, 11);
+    // Limit to 11 digits (09XXXXXXXXX)
+    if (digits.length > 11) {
+        digits = digits.substring(0, 11);
+    }
+    
+    // Update the value
+    const cursorPos = phoneInput.selectionStart;
+    phoneInput.value = digits;
+    
+    // Restore cursor position (adjust if prefix was added)
+    if (cursorPos < 2 && digits.startsWith('09')) {
+        phoneInput.setSelectionRange(2, 2);
+    } else {
+        phoneInput.setSelectionRange(Math.min(cursorPos, digits.length), Math.min(cursorPos, digits.length));
     }
     
     // Validate and show error
     const phoneError = document.getElementById('phoneError');
-    if (this.value.length > 0 && !validateIranPhoneNumber(this.value)) {
+    if (digits.length > 2 && !validateIranPhoneNumber(digits)) {
         phoneError.textContent = '{{ __("Please enter a valid Iran mobile number (09XX XXX XXXX)") }}';
         phoneError.classList.remove('hidden');
     } else {
         phoneError.classList.add('hidden');
     }
-});
+}
+
+// Initialize with "09" if empty or doesn't start with 09
+const initialValue = phoneInput.value.replace(/\D/g, '');
+if (!initialValue || !initialValue.startsWith('09')) {
+    if (initialValue.startsWith('9')) {
+        phoneInput.value = '0' + initialValue;
+    } else {
+        phoneInput.value = '09';
+    }
+} else {
+    phoneInput.value = initialValue;
+}
 
 document.getElementById('registrationForm').addEventListener('submit', function(e) {
     const submitBtn = document.getElementById('submitBtn');
