@@ -172,20 +172,38 @@
 let resendTimer = 60;
 let resendInterval;
 
-// Iran phone number validation
+// Iran phone number validation with Farsi error messages
 function validateIranPhoneNumber(phone) {
-    // Remove all non-digit characters
     const digits = phone.replace(/\D/g, '');
     
-    // Iran mobile numbers: 09XX XXX XXXX (11 digits starting with 09)
-    // Or 9XX XXX XXXX (10 digits starting with 9, we'll add 0)
-    if (digits.length === 11 && digits.startsWith('09')) {
-        return true;
+    // Empty
+    if (digits.length === 0) {
+        return { valid: false, message: 'شماره موبایل را وارد کنید' };
     }
-    if (digits.length === 10 && digits.startsWith('9')) {
-        return true;
+    
+    // Must start with 09 or 9
+    if (!digits.startsWith('09') && !digits.startsWith('9')) {
+        return { valid: false, message: 'شماره موبایل باید با 09 یا 9 شروع شود' };
     }
-    return false;
+    
+    // If starts with 9, should be 10 digits total
+    if (digits.startsWith('9') && digits.length !== 10) {
+        if (digits.length < 10) {
+            return { valid: false, message: 'شماره موبایل باید 10 رقم باشد (شروع با 9)' };
+        }
+        return { valid: false, message: 'شماره موبایل نباید بیشتر از 10 رقم باشد' };
+    }
+    
+    // If starts with 09, should be 11 digits total
+    if (digits.startsWith('09') && digits.length !== 11) {
+        if (digits.length < 11) {
+            return { valid: false, message: 'شماره موبایل باید 11 رقم باشد (شروع با 09)' };
+        }
+        return { valid: false, message: 'شماره موبایل نباید بیشتر از 11 رقم باشد' };
+    }
+    
+    // Valid
+    return { valid: true, message: '' };
 }
 
 // Format phone number for display
@@ -200,93 +218,55 @@ function formatIranPhoneNumber(phone) {
     return phone;
 }
 
-// Format phone input - ensure "09" prefix is always present and non-removable
+// Phone input handling
 const phoneInput = document.getElementById('phone_number');
-let isComposing = false;
+const phoneError = document.getElementById('phoneError');
+let hasInteracted = false;
 
-// Handle composition events (for IME input)
-phoneInput.addEventListener('compositionstart', function() {
-    isComposing = true;
-});
-
-phoneInput.addEventListener('compositionend', function() {
-    isComposing = false;
-    formatPhoneInput();
-});
-
+// Only allow digits
 phoneInput.addEventListener('input', function(e) {
-    if (isComposing) return;
-    formatPhoneInput();
-});
-
-phoneInput.addEventListener('keydown', function(e) {
-    const cursorPos = this.selectionStart;
-    const value = this.value;
+    this.value = this.value.replace(/\D/g, '');
     
-    // Prevent deletion of "09" prefix
-    if ((e.key === 'Backspace' || e.key === 'Delete') && cursorPos <= 2 && value.startsWith('09')) {
-        if (cursorPos < 2) {
-            e.preventDefault();
-            return false;
-        }
+    // Limit to 11 digits max
+    if (this.value.length > 11) {
+        this.value = this.value.substring(0, 11);
     }
-});
-
-function formatPhoneInput() {
-    // Only allow digits
-    let digits = phoneInput.value.replace(/\D/g, '');
     
-    // Always ensure it starts with "09"
-    if (!digits.startsWith('09')) {
-        if (digits.startsWith('9')) {
-            // If starts with 9, prepend 0
-            digits = '0' + digits;
-        } else if (digits.length > 0) {
-            // If doesn't start with 09, prepend 09
-            digits = '09' + digits.replace(/^0*/, '');
+    // Only validate if user has started typing and is clearly wrong
+    const digits = this.value.replace(/\D/g, '');
+    if (hasInteracted && digits.length > 0) {
+        // Check if they're on wrong path (not starting with 09 or 9)
+        if (!digits.startsWith('09') && !digits.startsWith('9')) {
+            const validation = validateIranPhoneNumber(this.value);
+            if (!validation.valid) {
+                phoneError.textContent = validation.message;
+                phoneError.classList.remove('hidden');
+            } else {
+                phoneError.classList.add('hidden');
+            }
         } else {
-            // If empty, set to 09
-            digits = '09';
+            // Hide error if they're on right path
+            phoneError.classList.add('hidden');
         }
     }
-    
-    // Limit to 11 digits (09XXXXXXXXX)
-    if (digits.length > 11) {
-        digits = digits.substring(0, 11);
-    }
-    
-    // Update the value
-    const cursorPos = phoneInput.selectionStart;
-    phoneInput.value = digits;
-    
-    // Restore cursor position (adjust if prefix was added)
-    if (cursorPos < 2 && digits.startsWith('09')) {
-        phoneInput.setSelectionRange(2, 2);
-    } else {
-        phoneInput.setSelectionRange(Math.min(cursorPos, digits.length), Math.min(cursorPos, digits.length));
-    }
-    
-    // Validate and show error
-    const phoneError = document.getElementById('phoneError');
-    if (digits.length > 2 && !validateIranPhoneNumber(digits)) {
-        phoneError.textContent = '{{ __("Please enter a valid Iran mobile number (09XX XXX XXXX)") }}';
+});
+
+// Validate on blur (when user is done typing)
+phoneInput.addEventListener('blur', function() {
+    hasInteracted = true;
+    const validation = validateIranPhoneNumber(this.value);
+    if (!validation.valid) {
+        phoneError.textContent = validation.message;
         phoneError.classList.remove('hidden');
     } else {
         phoneError.classList.add('hidden');
     }
-}
+});
 
-// Initialize with "09" if empty or doesn't start with 09
-const initialValue = phoneInput.value.replace(/\D/g, '');
-if (!initialValue || !initialValue.startsWith('09')) {
-    if (initialValue.startsWith('9')) {
-        phoneInput.value = '0' + initialValue;
-    } else {
-        phoneInput.value = '09';
-    }
-} else {
-    phoneInput.value = initialValue;
-}
+// Mark as interacted on focus
+phoneInput.addEventListener('focus', function() {
+    hasInteracted = true;
+});
 
 // Handle phone form submission
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
@@ -300,14 +280,18 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     const phoneError = document.getElementById('phoneError');
     
     // Validate phone number
-    if (!validateIranPhoneNumber(phoneNumber)) {
-        phoneError.textContent = '{{ __("Please enter a valid Iran mobile number (09XX XXX XXXX)") }}';
+    const validation = validateIranPhoneNumber(phoneNumber);
+    if (!validation.valid) {
+        phoneError.textContent = validation.message;
         phoneError.classList.remove('hidden');
-        return;
+        e.preventDefault();
+        return false;
     }
     
     // Combine country code and phone number
-    const fullPhoneNumber = countryCode + phoneNumber.replace(/^0/, '');
+    // Remove leading 0 if starts with 09, otherwise use as is (starts with 9)
+    const digits = phoneNumber.replace(/\D/g, '');
+    const fullPhoneNumber = countryCode + (digits.startsWith('09') ? digits.substring(1) : digits);
     
     submitBtn.disabled = true;
     submitText.textContent = '{{ __("Sending Code...") }}';
