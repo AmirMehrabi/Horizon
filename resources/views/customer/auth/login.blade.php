@@ -9,7 +9,7 @@
     $isRtl = $direction === 'rtl';
 @endphp
 
-<div class="min-h-screen flex flex-col bg-gray-50">
+<div class="min-h-screen flex flex-col bg-[#faf9f5]">
     <!-- Logo Placeholder -->
     <div class="w-full py-6 px-4 text-center">
         <h1 class="text-4xl sm:text-5xl font-black text-black">آویاتو</h1>
