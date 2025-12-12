@@ -64,11 +64,11 @@ class CustomerVerificationCode extends Model
         ?string $ipAddress = null,
         ?string $userAgent = null
     ): self {
-        // Invalidate any existing unverified codes for this phone/type
+        // Delete any existing unverified codes for this phone/type to avoid unique constraint violation
         self::where('phone_number', $phoneNumber)
             ->where('type', $type)
             ->where('verified', false)
-            ->update(['verified' => true, 'verified_at' => now()]);
+            ->delete();
 
         // Generate a 6-digit code
         $code = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
