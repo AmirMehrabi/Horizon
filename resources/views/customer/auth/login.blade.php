@@ -10,21 +10,15 @@
 @endphp
 
 <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-white">
-    <div class="max-w-md w-full">
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 sm:p-10">
-            <div class="text-center mb-8">
-                <div class="mx-auto h-14 w-14 flex items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 mb-4">
-                    <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                </div>
-                <h2 class="text-3xl font-bold text-gray-900 mb-2">
-                    {{ __('Customer Portal') }}
-                </h2>
-                <p class="text-sm text-gray-500">
-                    {{ __('Sign in with your phone number') }}
-                </p>
-            </div>
+    <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">
+                {{ __('Customer Portal') }}
+            </h2>
+            <p class="text-sm text-gray-500">
+                {{ __('Sign in with your phone number') }}
+            </p>
+        </div>
 
             <!-- Phone Number Form -->
             <div id="phoneForm">
@@ -33,10 +27,10 @@
                     
                     <div>
                         <label for="phone_number" class="block text-sm font-semibold text-gray-700 mb-2">{{ __('Phone Number') }}</label>
-                        <div class="flex rounded-lg border-2 border-gray-200 focus-within:border-cyan-500 focus-within:ring-2 focus-within:ring-cyan-500/20 transition-all @error('phone_number') border-red-400 @enderror">
+                        <div class="flex rounded-lg border border-gray-300 bg-gray-50 focus-within:border-cyan-600 focus-within:bg-white focus-within:ring-1 focus-within:ring-cyan-600 transition-all @error('phone_number') border-red-400 bg-red-50 @enderror">
                             <select id="country_code" 
                                     name="country_code" 
-                                    class="px-4 py-3.5 bg-gray-50 border-0 border-r-2 border-gray-200 rounded-l-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 focus:bg-gray-100 @error('phone_number') border-red-400 @enderror"
+                                    class="px-4 py-3.5 bg-transparent border-0 border-r border-gray-300 rounded-l-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 @error('phone_number') border-red-400 @enderror"
                                     style="min-width: 100px;">
                                 <option value="+98" selected>🇮🇷 +98</option>
                             </select>
@@ -44,7 +38,7 @@
                                    name="phone_number" 
                                    type="tel" 
                                    required 
-                                   class="flex-1 px-4 py-3.5 border-0 rounded-r-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 @error('phone_number') text-red-600 @enderror" 
+                                   class="flex-1 px-4 py-3.5 bg-transparent border-0 rounded-r-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 @error('phone_number') text-red-600 @enderror" 
                                    placeholder="912 345 6789"
                                    value="{{ old('phone_number') }}"
                                    maxlength="11">
@@ -58,7 +52,7 @@
 
                     <div>
                         <button type="submit" 
-                                class="group relative w-full flex justify-center items-center py-3.5 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md"
+                                class="w-full flex justify-center items-center py-3.5 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                 id="submitBtn">
                             <span id="submitText">{{ __('Send Verification Code') }}</span>
                             <svg class="animate-spin ml-3 h-5 w-5 text-white hidden" id="loadingSpinner" fill="none" viewBox="0 0 24 24">
@@ -76,46 +70,46 @@
                             </a>
                         </p>
                     </div>
-            </form>
-        </div>
+                </form>
+            </div>
 
-            <!-- Verification Code Form (Hidden initially) -->
-            <div id="verificationForm" class="hidden">
-                <form class="space-y-6" action="{{ route('customer.verify-login') }}" method="POST" id="verifyForm">
-                    @csrf
-                    
-                    <div class="text-center mb-6">
-                        <p class="text-sm text-gray-600 mb-2">
-                            {{ __('We sent a verification code to') }}
-                        </p>
-                        <span class="text-base font-semibold text-gray-900" id="displayPhone"></span>
-                    </div>
+        <!-- Verification Code Form (Hidden initially) -->
+        <div id="verificationForm" class="hidden">
+            <form class="mt-8 space-y-6" action="{{ route('customer.verify-login') }}" method="POST" id="verifyForm">
+                @csrf
+                
+                <div class="text-center mb-6">
+                    <p class="text-sm text-gray-600 mb-2">
+                        {{ __('We sent a verification code to') }}
+                    </p>
+                    <span class="text-base font-semibold text-gray-900" id="displayPhone"></span>
+                </div>
 
-                    <div>
-                        <label for="code" class="block text-sm font-semibold text-gray-700 mb-2">{{ __('Verification Code') }}</label>
-                        <input id="code" 
-                               name="code" 
-                               type="text" 
-                               maxlength="6"
-                               pattern="[0-9]{6}"
-                               required 
-                               class="w-full px-4 py-3.5 border-2 border-gray-200 rounded-lg text-center text-2xl tracking-[0.5em] font-semibold text-gray-900 placeholder-gray-300 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all" 
-                               placeholder="000000"
-                               autocomplete="one-time-code">
-                        <div id="codeError" class="mt-2 text-sm text-red-600 font-medium hidden"></div>
-                    </div>
+                <div>
+                    <label for="code" class="block text-sm font-semibold text-gray-700 mb-2">{{ __('Verification Code') }}</label>
+                    <input id="code" 
+                           name="code" 
+                           type="text" 
+                           maxlength="6"
+                           pattern="[0-9]{6}"
+                           required 
+                           class="w-full px-4 py-3.5 border border-gray-300 bg-gray-50 rounded-lg text-center text-2xl tracking-[0.5em] font-semibold text-gray-900 placeholder-gray-300 focus:outline-none focus:border-cyan-600 focus:bg-white focus:ring-1 focus:ring-cyan-600 transition-all" 
+                           placeholder="000000"
+                           autocomplete="one-time-code">
+                    <div id="codeError" class="mt-2 text-sm text-red-600 font-medium hidden"></div>
+                </div>
 
-                    <div>
-                        <button type="submit" 
-                                class="w-full flex justify-center items-center py-3.5 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md"
-                                id="verifyBtn">
-                            <span id="verifyText">{{ __('Verify & Sign In') }}</span>
-                            <svg class="animate-spin ml-3 h-5 w-5 text-white hidden" id="verifySpinner" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                        </button>
-                    </div>
+                <div>
+                    <button type="submit" 
+                            class="w-full flex justify-center items-center py-3.5 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            id="verifyBtn">
+                        <span id="verifyText">{{ __('Verify & Sign In') }}</span>
+                        <svg class="animate-spin ml-3 h-5 w-5 text-white hidden" id="verifySpinner" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </div>
 
                     <div class="text-center space-y-3">
                         <button type="button" 
@@ -135,36 +129,35 @@
                 </form>
             </div>
 
-            @if(session('success'))
-                <div class="mt-6 rounded-lg bg-green-50 border border-green-200 p-4">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                            </svg>
-                        </div>
-                        <div class="{{ $isRtl ? 'mr-3' : 'ml-3' }}">
-                            <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
-                        </div>
+        @if(session('success'))
+            <div class="rounded-lg bg-green-50 border border-green-200 p-4">
+                <div class="flex">
+                    <div class="shrink-0">
+                        <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div class="{{ $isRtl ? 'mr-3' : 'ml-3' }}">
+                        <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
                     </div>
                 </div>
-            @endif
+            </div>
+        @endif
 
-            @if(session('error'))
-                <div class="mt-6 rounded-lg bg-red-50 border border-red-200 p-4">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                            </svg>
-                        </div>
-                        <div class="{{ $isRtl ? 'mr-3' : 'ml-3' }}">
-                            <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
-                        </div>
+        @if(session('error'))
+            <div class="rounded-lg bg-red-50 border border-red-200 p-4">
+                <div class="flex">
+                    <div class="shrink-0">
+                        <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div class="{{ $isRtl ? 'mr-3' : 'ml-3' }}">
+                        <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
                     </div>
                 </div>
-            @endif
-        </div>
+            </div>
+        @endif
     </div>
 </div>
 
