@@ -27,7 +27,7 @@
                     
                     <div>
                         <label for="phone_number" class="block text-sm font-semibold text-gray-700 mb-2">{{ __('Phone Number') }}</label>
-                        <div class="flex rounded-lg border border-gray-300 bg-gray-50 focus-within:border-cyan-600 focus-within:bg-white focus-within:ring-1 focus-within:ring-cyan-600 transition-all @error('phone_number') border-red-400 bg-red-50 @enderror">
+                        <div class="flex rounded-lg border border-gray-300 bg-gray-50 focus-within:border-blue-600 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-600 transition-all @error('phone_number') border-red-400 bg-red-50 @enderror">
                             <select id="country_code" 
                                     name="country_code" 
                                     class="px-4 py-3.5 bg-transparent border-0 border-r border-gray-300 rounded-l-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 @error('phone_number') border-red-400 @enderror"
@@ -52,7 +52,7 @@
 
                     <div>
                         <button type="submit" 
-                                class="w-full flex justify-center items-center py-3.5 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                class="w-full flex justify-center items-center py-3.5 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                 id="submitBtn">
                             <span id="submitText">{{ __('Send Verification Code') }}</span>
                             <svg class="animate-spin ml-3 h-5 w-5 text-white hidden" id="loadingSpinner" fill="none" viewBox="0 0 24 24">
@@ -65,7 +65,7 @@
                     <div class="text-center pt-2">
                         <p class="text-sm text-gray-600">
                             {{ __("Don't have an account?") }}
-                            <a href="{{ route('customer.register') }}" class="font-semibold text-cyan-600 hover:text-cyan-700 transition-colors">
+                            <a href="{{ route('customer.register') }}" class="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
                                 {{ __('Register here') }}
                             </a>
                         </p>
@@ -93,7 +93,7 @@
                            maxlength="6"
                            pattern="[0-9]{6}"
                            required 
-                           class="w-full px-4 py-3.5 border border-gray-300 bg-gray-50 rounded-lg text-center text-2xl tracking-[0.5em] font-semibold text-gray-900 placeholder-gray-300 focus:outline-none focus:border-cyan-600 focus:bg-white focus:ring-1 focus:ring-cyan-600 transition-all" 
+                           class="w-full px-4 py-3.5 border border-gray-300 bg-gray-50 rounded-lg text-center text-2xl tracking-[0.5em] font-semibold text-gray-900 placeholder-gray-300 focus:outline-none focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600 transition-all" 
                            placeholder="000000"
                            autocomplete="one-time-code">
                     <div id="codeError" class="mt-2 text-sm text-red-600 font-medium hidden"></div>
@@ -114,7 +114,7 @@
                     <div class="text-center space-y-3">
                         <button type="button" 
                                 id="resendBtn"
-                                class="text-sm font-semibold text-cyan-600 hover:text-cyan-700 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors">
+                                class="text-sm font-semibold text-blue-600 hover:text-blue-700 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors">
                             <span id="resendText">{{ __('Resend Code') }}</span>
                             <span id="resendTimer" class="hidden"></span>
                         </button>

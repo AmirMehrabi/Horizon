@@ -30,7 +30,7 @@
                                name="first_name" 
                                type="text" 
                                required 
-                               class="w-full px-4 py-3.5 border border-gray-300 bg-gray-50 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-cyan-600 focus:bg-white focus:ring-1 focus:ring-cyan-600 transition-all @error('first_name') border-red-400 bg-red-50 @enderror" 
+                               class="w-full px-4 py-3.5 border border-gray-300 bg-gray-50 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600 transition-all @error('first_name') border-red-400 bg-red-50 @enderror" 
                                placeholder="{{ __('First Name') }}"
                                value="{{ old('first_name') }}">
                         @error('first_name')
@@ -44,7 +44,7 @@
                                name="last_name" 
                                type="text" 
                                required 
-                               class="w-full px-4 py-3.5 border border-gray-300 bg-gray-50 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-cyan-600 focus:bg-white focus:ring-1 focus:ring-cyan-600 transition-all @error('last_name') border-red-400 bg-red-50 @enderror" 
+                               class="w-full px-4 py-3.5 border border-gray-300 bg-gray-50 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600 transition-all @error('last_name') border-red-400 bg-red-50 @enderror" 
                                placeholder="{{ __('Last Name') }}"
                                value="{{ old('last_name') }}">
                         @error('last_name')
@@ -55,7 +55,7 @@
 
                 <div>
                     <label for="phone_number" class="block text-sm font-semibold text-gray-700 mb-2">{{ __('Phone Number') }} *</label>
-                    <div class="flex rounded-lg border border-gray-300 bg-gray-50 focus-within:border-cyan-600 focus-within:bg-white focus-within:ring-1 focus-within:ring-cyan-600 transition-all @error('phone_number') border-red-400 bg-red-50 @enderror">
+                    <div class="flex rounded-lg border border-gray-300 bg-gray-50 focus-within:border-blue-600 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-600 transition-all @error('phone_number') border-red-400 bg-red-50 @enderror">
                         <select id="country_code" 
                                 name="country_code" 
                                 class="px-4 py-3.5 bg-transparent border-0 border-r border-gray-300 rounded-l-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 @error('phone_number') border-red-400 @enderror"
@@ -83,7 +83,7 @@
                     <input id="email" 
                            name="email" 
                            type="email" 
-                           class="w-full px-4 py-3.5 border border-gray-300 bg-gray-50 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-cyan-600 focus:bg-white focus:ring-1 focus:ring-cyan-600 transition-all @error('email') border-red-400 bg-red-50 @enderror" 
+                           class="w-full px-4 py-3.5 border border-gray-300 bg-gray-50 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600 transition-all @error('email') border-red-400 bg-red-50 @enderror" 
                            placeholder="{{ __('Email Address') }}"
                            value="{{ old('email') }}">
                     @error('email')
@@ -96,7 +96,7 @@
                     <input id="company_name" 
                            name="company_name" 
                            type="text" 
-                           class="w-full px-4 py-3.5 border border-gray-300 bg-gray-50 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-cyan-600 focus:bg-white focus:ring-1 focus:ring-cyan-600 transition-all @error('company_name') border-red-400 bg-red-50 @enderror" 
+                           class="w-full px-4 py-3.5 border border-gray-300 bg-gray-50 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600 transition-all @error('company_name') border-red-400 bg-red-50 @enderror" 
                            placeholder="{{ __('Company Name') }}"
                            value="{{ old('company_name') }}">
                     @error('company_name')
@@ -106,7 +106,7 @@
 
                 <div>
                     <button type="submit" 
-                            class="w-full flex justify-center items-center py-3.5 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="w-full flex justify-center items-center py-3.5 px-4 border border-transparent text-base font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                             id="submitBtn">
                         <span id="submitText">{{ __('Create Account') }}</span>
                         <svg class="animate-spin ml-3 h-5 w-5 text-white hidden" id="loadingSpinner" fill="none" viewBox="0 0 24 24">
@@ -119,7 +119,7 @@
                 <div class="text-center pt-2">
                     <p class="text-sm text-gray-600">
                         {{ __('Already have an account?') }}
-                        <a href="{{ route('customer.login') }}" class="font-semibold text-cyan-600 hover:text-cyan-700 transition-colors">
+                        <a href="{{ route('customer.login') }}" class="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
                             {{ __('Sign in here') }}
                         </a>
                     </p>
