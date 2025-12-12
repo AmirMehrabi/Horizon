@@ -62,38 +62,21 @@
 
                 <div>
                     <label for="phone_number" class="block text-sm font-semibold text-gray-700 mb-2">{{ __('Phone Number') }} *</label>
-                    <div class="flex rounded-lg border border-gray-300 bg-gray-50 focus-within:border-blue-600 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-600 transition-all @error('phone_number') border-red-400 bg-red-50 @enderror {{ $isRtl ? 'flex-row-reverse' : '' }}">
-                        @if($isRtl)
-                            <input id="phone_number" 
-                                   name="phone_number" 
-                                   type="tel" 
-                                   required 
-                                   class="flex-1 px-4 py-3.5 bg-transparent border-0 rounded-l-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 @error('phone_number') text-red-600 @enderror" 
-                                   placeholder="912 345 6789"
-                                   value="{{ old('phone_number') }}"
-                                   maxlength="11">
-                            <select id="country_code" 
-                                    name="country_code" 
-                                    class="px-4 py-3.5 bg-transparent border-0 border-l border-gray-300 rounded-r-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 @error('phone_number') border-red-400 @enderror"
-                                    style="min-width: 100px;">
-                                <option value="+98" selected>🇮🇷 +98</option>
-                            </select>
-                        @else
-                            <select id="country_code" 
-                                    name="country_code" 
-                                    class="px-4 py-3.5 bg-transparent border-0 border-r border-gray-300 rounded-l-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 @error('phone_number') border-red-400 @enderror"
-                                    style="min-width: 100px;">
-                                <option value="+98" selected>🇮🇷 +98</option>
-                            </select>
-                            <input id="phone_number" 
-                                   name="phone_number" 
-                                   type="tel" 
-                                   required 
-                                   class="flex-1 px-4 py-3.5 bg-transparent border-0 rounded-r-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 @error('phone_number') text-red-600 @enderror" 
-                                   placeholder="912 345 6789"
-                                   value="{{ old('phone_number') }}"
-                                   maxlength="11">
-                        @endif
+                    <div class="flex {{ $isRtl ? 'flex-row-reverse' : '' }} rounded-lg border border-gray-300 bg-gray-50 focus-within:border-blue-600 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-600 transition-all @error('phone_number') border-red-400 bg-red-50 @enderror">
+                        <select id="country_code" 
+                                name="country_code" 
+                                class="px-4 py-3.5 bg-transparent border-0 {{ $isRtl ? 'border-l border-gray-300 rounded-r-lg' : 'border-r border-gray-300 rounded-l-lg' }} text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 @error('phone_number') border-red-400 @enderror"
+                                style="min-width: 100px;">
+                            <option value="+98" selected>🇮🇷 +98</option>
+                        </select>
+                        <input id="phone_number" 
+                               name="phone_number" 
+                               type="tel" 
+                               required 
+                               class="flex-1 px-4 py-3.5 bg-transparent border-0 {{ $isRtl ? 'rounded-l-lg' : 'rounded-r-lg' }} text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 @error('phone_number') text-red-600 @enderror" 
+                               placeholder="912 345 6789"
+                               value="{{ old('phone_number') }}"
+                               maxlength="11">
                     </div>
                     <p class="mt-2 text-xs text-gray-500">{{ __('This will be used for SMS verification and login') }}</p>
                     @error('phone_number')
