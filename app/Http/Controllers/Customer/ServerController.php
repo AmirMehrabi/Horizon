@@ -110,6 +110,7 @@ class ServerController extends Controller
         $customer = $request->user('customer');
         
         $instances = OpenStackInstance::where('customer_id', $customer->id)
+            ->where('status', '!=', 'deleted')
             ->with(['flavor', 'image', 'networks'])
             ->orderBy('created_at', 'desc')
             ->paginate(12);
@@ -126,6 +127,7 @@ class ServerController extends Controller
         
         $instance = OpenStackInstance::where('id', $id)
             ->where('customer_id', $customer->id)
+            ->where('status', '!=', 'deleted')
             ->with(['flavor', 'image', 'keyPair', 'networks', 'securityGroups', 'events' => function ($query) {
                 $query->orderBy('created_at', 'desc')->limit(50);
             }])
@@ -376,6 +378,7 @@ class ServerController extends Controller
             
             $instance = OpenStackInstance::where('id', $id)
                 ->where('customer_id', $customer->id)
+                ->where('status', '!=', 'deleted')
                 ->firstOrFail();
 
             // Validate action

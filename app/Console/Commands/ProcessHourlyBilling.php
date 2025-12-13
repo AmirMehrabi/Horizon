@@ -31,7 +31,7 @@ class ProcessHourlyBilling extends Command
     {
         $this->info('Processing hourly billing...');
         
-        // Get all active instances with hourly billing
+        // Get all active instances with hourly billing (exclude deleted)
         $instances = OpenStackInstance::where('billing_cycle', 'hourly')
             ->where('status', 'active')
             ->where('auto_billing', true)

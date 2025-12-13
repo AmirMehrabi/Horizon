@@ -202,4 +202,12 @@ class OpenStackInstance extends Model
     {
         return $query->where('status', 'active');
     }
+
+    /**
+     * Scope to exclude deleted instances.
+     */
+    public function scopeNotDeleted($query)
+    {
+        return $query->where('status', '!=', 'deleted');
+    }
 }

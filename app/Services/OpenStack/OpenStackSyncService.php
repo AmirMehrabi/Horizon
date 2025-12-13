@@ -859,6 +859,13 @@ class OpenStackSyncService
                 'errors' => $stats['errors'],
             ]);
 
+            Log::info('Instance sync completed', [
+                'checked' => $stats['checked'],
+                'updated' => $stats['updated'],
+                'deleted' => $stats['deleted'] ?? 0,
+                'errors' => count($stats['errors']),
+            ]);
+
             return [
                 'success' => true,
                 'stats' => $stats,

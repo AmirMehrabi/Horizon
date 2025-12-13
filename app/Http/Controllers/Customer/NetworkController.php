@@ -38,8 +38,9 @@ class NetworkController extends Controller
         try {
             $customer = Auth::guard('customer')->user();
             
-            // Get customer's instance IDs
+            // Get customer's instance IDs (excluding deleted)
             $customerInstanceIds = OpenStackInstance::where('customer_id', $customer->id)
+                ->where('status', '!=', 'deleted')
                 ->pluck('id')
                 ->toArray();
             
@@ -83,8 +84,10 @@ class NetworkController extends Controller
                     return $sg->instances()->whereIn('openstack_instances.id', $customerInstanceIds)->exists();
                 });
 
-            // Get customer's instances for statistics
-            $instances = OpenStackInstance::where('customer_id', $customer->id)->get();
+            // Get customer's instances for statistics (excluding deleted)
+            $instances = OpenStackInstance::where('customer_id', $customer->id)
+                ->where('status', '!=', 'deleted')
+                ->get();
             
             // Get floating IPs
             $floatingIps = collect();
@@ -213,8 +216,9 @@ class NetworkController extends Controller
                 abort(404, 'Network not found');
             }
 
-            // Verify network belongs to customer
+            // Verify network belongs to customer (excluding deleted instances)
             $customerInstanceIds = OpenStackInstance::where('customer_id', $customer->id)
+                ->where('status', '!=', 'deleted')
                 ->pluck('id')
                 ->toArray();
             
@@ -257,6 +261,7 @@ class NetworkController extends Controller
         try {
             $customer = Auth::guard('customer')->user();
             $customerInstanceIds = OpenStackInstance::where('customer_id', $customer->id)
+                ->where('status', '!=', 'deleted')
                 ->pluck('id')
                 ->toArray();
             
@@ -290,6 +295,7 @@ class NetworkController extends Controller
         try {
             $customer = Auth::guard('customer')->user();
             $instances = OpenStackInstance::where('customer_id', $customer->id)
+                ->where('status', '!=', 'deleted')
                 ->with(['networks' => function ($query) {
                     $query->whereNotNull('floating_ip');
                 }])

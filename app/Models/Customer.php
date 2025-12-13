@@ -213,7 +213,8 @@ class Customer extends Authenticatable
      */
     public function openStackInstances()
     {
-        return $this->hasMany(OpenStackInstance::class, 'customer_id');
+        return $this->hasMany(OpenStackInstance::class, 'customer_id')
+                    ->where('status', '!=', 'deleted');
     }
 
     /**
