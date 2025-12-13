@@ -60,7 +60,12 @@ Route::domain('hub.aviato.ir')
             Route::post('/compute/{id}/reboot', [AdminComputeController::class, 'reboot'])->name('compute.reboot');
             Route::delete('/compute/{id}', [AdminComputeController::class, 'destroy'])->name('compute.destroy');
             Route::get('/images', [AdminImageManagementController::class, 'index'])->name('images.index');
+            Route::get('/images/create', [AdminImageManagementController::class, 'create'])->name('images.create');
+            Route::post('/images', [AdminImageManagementController::class, 'store'])->name('images.store');
             Route::get('/images/{id}', [AdminImageManagementController::class, 'show'])->name('images.show');
+            Route::put('/images/{id}', [AdminImageManagementController::class, 'update'])->name('images.update');
+            Route::delete('/images/{id}', [AdminImageManagementController::class, 'destroy'])->name('images.destroy');
+            Route::post('/images/{id}/toggle-status', [AdminImageManagementController::class, 'toggleStatus'])->name('images.toggle-status');
             
             // Network Management
             Route::get('/networks', [AdminNetworkManagementController::class, 'index'])->name('networks.index');
