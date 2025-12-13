@@ -35,3 +35,10 @@ Schedule::command('backups:process-scheduled')
     ->withoutOverlapping()
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/backups.log'));
+
+// Schedule backup snapshot status sync every 2 minutes
+Schedule::command('backups:sync-snapshots')
+    ->everyTwoMinutes()
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/backups-sync.log'));

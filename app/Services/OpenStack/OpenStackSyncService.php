@@ -10,6 +10,7 @@ use App\Models\OpenStackSecurityGroup;
 use App\Models\OpenStackSyncJob;
 use App\Models\OpenStackInstance;
 use App\Models\OpenStackInstanceEvent;
+use App\Models\BackupSnapshot;
 use App\Services\OpenStack\OpenStackInstanceService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -985,6 +986,115 @@ class OpenStackSyncService
             'migrating' => 'building',
             default => 'building', // Default to building for unknown statuses
         };
+    }
+
+    /**
+     * Sync backup snapshots status from OpenStack.
+     *
+     * @return array
+     */
+    public function syncBackupSnapshots(): array
+    {
+        try {
+            $imageService = $this->connection->getImageService();
+            
+            // Get all snapshots that need status checking
+            // This includes snapshots that are creating or have an OpenStack ID
+            $snapshots = BackupSnapshot::whereNotNull('openstack_snapshot_id')
+                ->whereIn('status', ['creating', 'available'])
+                ->get();
+
+            $stats = [
+                'checked' => 0,
+                'updated' => 0,
+                'errors' => [],
+            ];
+
+            foreach ($snapshots as $snapshot) {
+                try {
+                    $stats['checked']++;
+                    
+                    // Get image from OpenStack
+                    $image = $imageService->getImage(['id' => $snapshot->openstack_snapshot_id]);
+                    
+                    // Map OpenStack image status to our snapshot status
+                    $openstackStatus = strtolower($image->status ?? 'unknown');
+                    $newStatus = match($openstackStatus) {
+                        'active' => 'available',
+                        'queued', 'saving' => 'creating',
+                        'killed', 'deleted', 'deactivated' => 'error',
+                        default => 'creating',
+                    };
+                    
+                    // Update snapshot if status changed
+                    $updates = [];
+                    if ($snapshot->status !== $newStatus) {
+                        $updates['status'] = $newStatus;
+                    }
+                    
+                    // Update size if available and different
+                    if ($image->size && $snapshot->size != $image->size) {
+                        $updates['size'] = $image->size;
+                    }
+                    
+                    // Mark as completed if status is available
+                    if ($newStatus === 'available' && !$snapshot->completed_at) {
+                        $updates['completed_at'] = now();
+                    }
+                    
+                    // Update error message if status is error
+                    if ($newStatus === 'error' && $openstackStatus !== 'unknown') {
+                        $updates['error_message'] = "OpenStack status: {$openstackStatus}";
+                    }
+                    
+                    if (!empty($updates)) {
+                        $oldStatus = $snapshot->status;
+                        $snapshot->update($updates);
+                        $stats['updated']++;
+                        
+                        Log::info('Backup snapshot status updated', [
+                            'snapshot_id' => $snapshot->id,
+                            'old_status' => $oldStatus,
+                            'new_status' => $newStatus,
+                            'openstack_status' => $openstackStatus,
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    // If image not found, mark as error
+                    if (str_contains($e->getMessage(), 'not found') || str_contains($e->getMessage(), '404')) {
+                        $snapshot->update([
+                            'status' => 'error',
+                            'error_message' => 'Snapshot not found in OpenStack',
+                        ]);
+                        $stats['updated']++;
+                    } else {
+                        $stats['errors'][] = [
+                            'snapshot_id' => $snapshot->id,
+                            'error' => $e->getMessage(),
+                        ];
+                        Log::warning('Failed to sync backup snapshot', [
+                            'snapshot_id' => $snapshot->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+            }
+
+            return [
+                'success' => true,
+                'stats' => $stats,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Backup snapshots sync failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+            ];
+        }
     }
 
     /**
