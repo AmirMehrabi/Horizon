@@ -156,7 +156,20 @@ class ProvisionOpenStackInstance implements ShouldQueue
         // OpenStack SDK expects networks as array of objects with 'uuid' key
         $networks = [];
         if ($this->instance->networks->isNotEmpty()) {
-            foreach ($this->instance->networks as $network) {
+            Log::info('Processing networks for instance', [
+                'instance_id' => $this->instance->id,
+                'networks_count' => $this->instance->networks->count(),
+            ]);
+            
+            foreach ($this->instance->networks as $index => $network) {
+                Log::info('Processing network', [
+                    'index' => $index,
+                    'network_id' => $network->id,
+                    'network_name' => $network->name,
+                    'openstack_id' => $network->openstack_id,
+                    'openstack_id_type' => gettype($network->openstack_id),
+                ]);
+                
                 // Validate openstack_id is not empty and is a valid UUID format
                 $openstackId = $network->openstack_id ?? null;
                 if (!empty($openstackId) && is_string($openstackId)) {
@@ -167,6 +180,11 @@ class ProvisionOpenStackInstance implements ShouldQueue
                         $networkEntry = [];
                         $networkEntry['uuid'] = (string)$openstackId;
                         $networks[] = $networkEntry;
+                        
+                        Log::info('Added network to params', [
+                            'network_entry' => $networkEntry,
+                            'networks_array_so_far' => $networks,
+                        ]);
                     } else {
                         Log::warning('Network openstack_id is not a valid UUID format', [
                             'network_id' => $network->id,
@@ -180,6 +198,7 @@ class ProvisionOpenStackInstance implements ShouldQueue
                         'network_id' => $network->id,
                         'network_name' => $network->name,
                         'openstack_id' => $network->openstack_id,
+                        'openstack_id_type' => gettype($network->openstack_id),
                         'instance_id' => $this->instance->id,
                     ]);
                 }
@@ -191,6 +210,10 @@ class ProvisionOpenStackInstance implements ShouldQueue
         if (!empty($networks)) {
             // Re-index array to ensure clean numeric keys
             $params['networks'] = array_values($networks);
+            Log::info('Final networks array for params', [
+                'networks' => $params['networks'],
+                'networks_json' => json_encode($params['networks']),
+            ]);
         } else {
             Log::info('No valid networks specified, OpenStack will use default network', [
                 'instance_id' => $this->instance->id,
@@ -298,11 +321,32 @@ class ProvisionOpenStackInstance implements ShouldQueue
             'configDrive', 'personality'
         ];
         
+        // First, check for any empty keys in the params array itself
+        $hasEmptyKeys = false;
+        foreach ($params as $key => $value) {
+            if ($key === '' || (is_string($key) && trim($key) === '')) {
+                $hasEmptyKeys = true;
+                Log::error('Found empty key in params array!', [
+                    'key' => var_export($key, true),
+                    'value' => $value,
+                    'all_keys' => array_keys($params),
+                    'instance_id' => $this->instance->id,
+                ]);
+            }
+        }
+        
+        if ($hasEmptyKeys) {
+            // Rebuild params array without empty keys
+            $params = array_filter($params, function($key) {
+                return $key !== '' && (is_string($key) ? trim($key) !== '' : true);
+            }, ARRAY_FILTER_USE_KEY);
+        }
+        
         $cleanParams = [];
         foreach ($params as $key => $value) {
             // Skip empty keys or keys not in allowed list
-            if (empty($key) || trim($key) === '' || !in_array($key, $allowedParams)) {
-                if (!in_array($key, $allowedParams)) {
+            if (empty($key) || (is_string($key) && trim($key) === '') || !in_array($key, $allowedParams)) {
+                if (!in_array($key, $allowedParams) && $key !== '') {
                     Log::warning('Skipping unrecognized parameter', [
                         'key' => $key,
                         'value' => is_array($value) ? 'array' : $value,
