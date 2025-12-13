@@ -11,16 +11,16 @@
         return stripos($image->name, 'cirros') !== false;
     });
     
-    // Popular distros list
+    // Popular distros list with icon paths
     $popularDistros = [
-        ['id' => 'ubuntu', 'name' => 'Ubuntu', 'logo' => 'ubuntu'],
-        ['id' => 'debian', 'name' => 'Debian', 'logo' => 'debian'],
-        ['id' => 'centos', 'name' => 'CentOS', 'logo' => 'centos'],
-        ['id' => 'almalinux', 'name' => 'AlmaLinux', 'logo' => 'almalinux'],
-        ['id' => 'rocky', 'name' => 'Rocky Linux', 'logo' => 'rocky'],
-        ['id' => 'fedora', 'name' => 'Fedora', 'logo' => 'fedora'],
-        ['id' => 'opensuse', 'name' => 'openSUSE', 'logo' => 'opensuse'],
-        ['id' => 'arch', 'name' => 'Arch Linux', 'logo' => 'arch'],
+        ['id' => 'ubuntu', 'name' => 'Ubuntu', 'icon' => 'icons8-ubuntu-100.png'],
+        ['id' => 'debian', 'name' => 'Debian', 'icon' => 'icons8-debian-100.png'],
+        ['id' => 'centos', 'name' => 'CentOS', 'icon' => 'icons8-centos-100.png'],
+        ['id' => 'almalinux', 'name' => 'AlmaLinux', 'icon' => 'icons8-linux-100.png'],
+        ['id' => 'rocky', 'name' => 'Rocky Linux', 'icon' => 'icons8-linux-100.png'],
+        ['id' => 'fedora', 'name' => 'Fedora', 'icon' => 'icons8-fedora-100.png'],
+        ['id' => 'opensuse', 'name' => 'openSUSE', 'icon' => 'icons8-suse-100.png'],
+        ['id' => 'arch', 'name' => 'Arch Linux', 'icon' => 'icons8-arch-linux-100.png'],
     ];
 @endphp
 
@@ -106,17 +106,17 @@
                             <label class="relative cursor-pointer group">
                                 <input type="radio" name="os" value="{{ $distro['id'] }}" class="peer hidden" data-distro="{{ $distro['id'] }}" onchange="handleDistroChange('{{ $distro['id'] }}')">
                                 <div class="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all text-center">
-                                    <!-- Distro Logo Placeholder -->
-                                    <div class="w-12 h-12 mx-auto mb-2 rounded-lg bg-gray-100 flex items-center justify-center">
-                                        <span class="text-xs font-semibold text-gray-600">{{ substr($distro['name'], 0, 2) }}</span>
-                    </div>
+                                    <!-- Distro Logo -->
+                                    <div class="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
+                                        <img src="{{ asset('assets/os-icons/' . $distro['icon']) }}" alt="{{ $distro['name'] }}" class="w-full h-full object-contain">
+                                    </div>
                                     <div class="text-sm font-medium text-gray-700">{{ $distro['name'] }}</div>
                                     <div class="mt-2">
                                         <select name="image_id_{{ $distro['id'] }}" id="image-select-{{ $distro['id'] }}" class="w-full text-xs border border-gray-300 rounded px-2 py-1 hidden peer-checked:block" disabled>
                                             <option value="">انتخاب نسخه</option>
                                         </select>
-                </div>
-                </div>
+                                    </div>
+                                </div>
                             </label>
                         @endforeach
                         
@@ -124,11 +124,9 @@
                         <label class="relative cursor-pointer group">
                             <input type="radio" name="os" value="custom" class="peer hidden" data-distro="custom" onchange="handleDistroChange('custom')">
                             <div class="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all text-center">
-                                <div class="w-12 h-12 mx-auto mb-2 rounded-lg bg-gray-100 flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
-                                    </svg>
-                    </div>
+                                <div class="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
+                                    <img src="{{ asset('assets/os-icons/icons8-linux-100.png') }}" alt="Other" class="w-full h-full object-contain">
+                                </div>
                                 <div class="text-sm font-medium text-gray-700">سایر</div>
                                 <div class="mt-2">
                                     <select name="image_id" id="image-select-custom" class="w-full text-xs border border-gray-300 rounded px-2 py-1 hidden peer-checked:block" onchange="updateChecklist()">
@@ -139,9 +137,9 @@
                                             </option>
                                         @endforeach
                                     </select>
-                </div>
-            </div>
-                    </label>
+                                </div>
+                            </div>
+                        </label>
                 </div>
                     
                 @error('os')
