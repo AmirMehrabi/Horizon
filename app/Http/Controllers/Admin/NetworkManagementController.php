@@ -66,6 +66,14 @@ class NetworkManagementController extends Controller
                 abort(404, 'Network not found');
             }
 
+            // Ensure relationships are loaded
+            if (!$network->relationLoaded('subnets')) {
+                $network->load('subnets');
+            }
+            if (!$network->relationLoaded('instances')) {
+                $network->load('instances');
+            }
+
             return view('admin.networks.show', compact('network'));
         } catch (\Exception $e) {
             Log::error('Failed to load network', [

@@ -376,8 +376,8 @@
                         @endif
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        @if($network->subnets->isNotEmpty())
-                            @foreach($network->subnets as $subnet)
+                        @if($network->relationLoaded('subnets') && $network->getRelation('subnets')->isNotEmpty())
+                            @foreach($network->getRelation('subnets') as $subnet)
                                 <div>{{ $subnet->cidr ?? 'N/A' }}</div>
                             @endforeach
                         @else

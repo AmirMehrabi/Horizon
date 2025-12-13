@@ -106,8 +106,12 @@
                         <option value="private" {{ !$network->external ? 'selected' : '' }}>خصوصی</option>
                     </select>
                 </div>
-                @if($network->subnets->isNotEmpty())
-                @foreach($network->subnets as $subnet)
+                @php
+                    // Use the relationship if loaded, otherwise get it
+                    $networkSubnets = $network->relationLoaded('subnets') ? $network->getRelation('subnets') : $network->subnets()->get();
+                @endphp
+                @if($networkSubnets->isNotEmpty())
+                @foreach($networkSubnets as $subnet)
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">CIDR</label>
@@ -125,8 +129,8 @@
                     <p class="text-sm text-yellow-800">این شبکه Subnet ندارد</p>
                 </div>
                 @endif
-                @if($network->subnets->isNotEmpty())
-                @foreach($network->subnets as $subnet)
+                @if($networkSubnets->isNotEmpty())
+                @foreach($networkSubnets as $subnet)
                 <div>
                     <label class="flex items-center">
                         <input type="checkbox" name="enable_dhcp" value="1" {{ $subnet->enable_dhcp ? 'checked' : '' }} class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
@@ -150,7 +154,11 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Instance های متصل</h2>
             <div class="overflow-x-auto">
-                @if($network->instances->isNotEmpty())
+                @php
+                    // Use the relationship if loaded, otherwise get it
+                    $networkInstances = $network->relationLoaded('instances') ? $network->getRelation('instances') : $network->instances()->get();
+                @endphp
+                @if($networkInstances->isNotEmpty())
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
@@ -161,7 +169,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($network->instances as $instance)
+                        @foreach($networkInstances as $instance)
                         <tr>
                             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{{ $instance->name ?? 'Unnamed' }}</td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{{ $instance->pivot->fixed_ip ?? 'N/A' }}</td>
@@ -236,11 +244,11 @@
             <h2 class="text-lg font-semibold text-gray-900 mb-4">آمار</h2>
             <div class="space-y-4">
                 <div class="text-center p-4 bg-blue-50 rounded-lg">
-                    <p class="text-2xl font-bold text-gray-900">{{ $network->instances->count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $networkInstances->count() }}</p>
                     <p class="text-sm text-gray-500 mt-1">Instance های متصل</p>
                 </div>
                 <div class="text-center p-4 bg-green-50 rounded-lg">
-                    <p class="text-2xl font-bold text-gray-900">{{ $network->subnets->count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $networkSubnets->count() }}</p>
                     <p class="text-sm text-gray-500 mt-1">Subnet ها</p>
                 </div>
             </div>

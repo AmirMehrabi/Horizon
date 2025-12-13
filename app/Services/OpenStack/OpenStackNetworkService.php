@@ -76,7 +76,7 @@ class OpenStackNetworkService
             // This would need to be added to the model if needed
         }
 
-        return $query->orderBy('created_at', 'desc')->get();
+        return $query->with('subnets')->orderBy('created_at', 'desc')->get();
     }
 
     /**
@@ -92,7 +92,7 @@ class OpenStackNetworkService
         $network = OpenStackNetwork::where('openstack_id', $id)
             ->orWhere('id', $id)
             ->where('region', $region)
-            ->with('subnets')
+            ->with(['subnets', 'instances'])
             ->first();
 
         // If not found locally, try to fetch from OpenStack
@@ -102,7 +102,7 @@ class OpenStackNetworkService
                 $network = OpenStackNetwork::where('openstack_id', $id)
                     ->orWhere('id', $id)
                     ->where('region', $region)
-                    ->with('subnets')
+                    ->with(['subnets', 'instances'])
                     ->first();
             } catch (\Exception $e) {
                 Log::error('Failed to fetch network from OpenStack', [
