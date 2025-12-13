@@ -128,7 +128,47 @@ class ServerController extends Controller
             }])
             ->firstOrFail();
 
-        return view('customer.servers.show', compact('instance'));
+        // Format instance data for the view
+        $publicIps = $instance->public_ips ?? [];
+        $privateIps = $instance->private_ips ?? [];
+        
+        $server = [
+            'id' => $instance->id,
+            'name' => $instance->name ?? 'Unnamed Server',
+            'status' => $instance->status ?? 'unknown',
+            'os' => $instance->image->name ?? ($instance->image->description ?? 'Unknown'),
+            'vcpu' => $instance->flavor->vcpus ?? 0,
+            'ram' => $instance->flavor ? round($instance->flavor->ram / 1024, 1) : 0,
+            'storage' => $instance->flavor->disk ?? 0,
+            'type' => $instance->flavor->name ?? 'Unknown',
+            'region' => $instance->region ?? config('openstack.region', 'Unknown'),
+            'public_ip' => !empty($publicIps) ? $publicIps[0] : 'در حال اختصاص...',
+            'private_ip' => !empty($privateIps) ? $privateIps[0] : 'در حال اختصاص...',
+            'created_at' => $instance->created_at ? $instance->created_at->format('Y/m/d H:i') : 'Unknown',
+            // Resource usage (placeholder - should be fetched from OpenStack metrics)
+            'cpu_usage' => 0,
+            'ram_used' => 0,
+            'storage_used' => 0,
+            // Additional data
+            'floating_ips' => [],
+            'security_groups' => $instance->securityGroups ? $instance->securityGroups->map(function ($sg) {
+                return [
+                    'id' => $sg->id,
+                    'name' => $sg->name,
+                    'description' => $sg->description ?? '',
+                ];
+            })->toArray() : [],
+            'bandwidth' => [
+                'used' => 0,
+                'limit' => 1000,
+                'inbound' => 0,
+                'outbound' => 0,
+            ],
+            'volumes' => [],
+            'snapshots' => [],
+        ];
+
+        return view('customer.servers.show', compact('server', 'instance'));
     }
 
     /**
