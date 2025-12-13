@@ -72,6 +72,18 @@ class ProvisionOpenStackInstance implements ShouldQueue
                 'security_groups_structure' => $serverParams['securityGroups'] ?? 'not set',
             ]);
 
+            // DEBUG: Log the exact structure being sent
+            Log::error('DEBUG - Exact server params being sent', [
+                'params' => $serverParams,
+                'params_json' => json_encode($serverParams, JSON_PRETTY_PRINT),
+                'networks_check' => isset($serverParams['networks']) ? [
+                    'is_array' => is_array($serverParams['networks']),
+                    'count' => count($serverParams['networks']),
+                    'first_item' => $serverParams['networks'][0] ?? null,
+                    'first_item_keys' => isset($serverParams['networks'][0]) ? array_keys($serverParams['networks'][0]) : null,
+                ] : 'not set',
+            ]);
+            
             // Create server in OpenStack
             $server = $compute->createServer($serverParams);
 
