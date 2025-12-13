@@ -171,9 +171,9 @@ function updateSummary() {
     if (amountValue && !isNaN(amountValue)) {
         const amount = parseInt(amountValue);
         const newBalance = currentBalance + amount;
-        summaryNewBalance.textContent = newBalance.toLocaleString('fa-IR') + ' ریال';
+        summaryNewBalance.textContent = newBalance.toLocaleString('en-US') + ' ریال';
     } else {
-        summaryNewBalance.textContent = currentBalance.toLocaleString('fa-IR') + ' ریال';
+        summaryNewBalance.textContent = currentBalance.toLocaleString('en-US') + ' ریال';
     }
 }
 
