@@ -48,6 +48,7 @@ class NetworkController extends Controller
                     'customerNetworks' => collect([]),
                     'securityGroups' => collect([]),
                     'instances' => collect([]),
+                    'floatingIps' => collect([]),
                     'statistics' => [
                         'private_networks' => 0,
                         'security_groups' => 0,
@@ -85,17 +86,33 @@ class NetworkController extends Controller
             // Get customer's instances for statistics
             $instances = OpenStackInstance::where('customer_id', $customer->id)->get();
             
+            // Get floating IPs
+            $floatingIps = collect();
+            foreach ($instances as $instance) {
+                $instance->load(['networks' => function ($query) {
+                    $query->whereNotNull('floating_ip');
+                }]);
+                foreach ($instance->networks as $network) {
+                    if ($network->pivot->floating_ip) {
+                        $floatingIps->push([
+                            'ip' => $network->pivot->floating_ip,
+                            'instance' => $instance,
+                            'fixed_ip' => $network->pivot->fixed_ip,
+                            'network' => $network,
+                        ]);
+                    }
+                }
+            }
+            
             // Calculate statistics
             $statistics = [
                 'private_networks' => $customerNetworks->count(),
                 'security_groups' => $securityGroups->count(),
-                'floating_ips' => $instances->sum(function ($instance) {
-                    return $instance->networks()->whereNotNull('floating_ip')->count();
-                }),
+                'floating_ips' => $floatingIps->count(),
                 'bandwidth_usage' => 0, // TODO: Implement bandwidth tracking
             ];
 
-            return view('customer.networks.index', compact('customerNetworks', 'securityGroups', 'instances', 'statistics'));
+            return view('customer.networks.index', compact('customerNetworks', 'securityGroups', 'instances', 'statistics', 'floatingIps'));
         } catch (\Exception $e) {
             Log::error('Failed to load customer networks', [
                 'customer_id' => Auth::guard('customer')->id(),
@@ -106,6 +123,7 @@ class NetworkController extends Controller
                 'customerNetworks' => collect([]),
                 'securityGroups' => collect([]),
                 'instances' => collect([]),
+                'floatingIps' => collect([]),
                 'statistics' => [
                     'private_networks' => 0,
                     'security_groups' => 0,
