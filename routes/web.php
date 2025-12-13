@@ -172,7 +172,12 @@ Route::domain('panel.aviato.ir')
             
             // Networks Routes
             Route::prefix('networks')->name('networks.')->group(function () {
-                Route::get('/', function () { return view('customer.networks.index'); })->name('index');
+                Route::get('/', [\App\Http\Controllers\Customer\NetworkController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Customer\NetworkController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Customer\NetworkController::class, 'store'])->name('store');
+                Route::get('/{id}', [\App\Http\Controllers\Customer\NetworkController::class, 'show'])->name('show');
+                Route::get('/security-groups', [\App\Http\Controllers\Customer\NetworkController::class, 'securityGroups'])->name('security-groups');
+                Route::get('/floating-ips', [\App\Http\Controllers\Customer\NetworkController::class, 'floatingIps'])->name('floating-ips');
             });
             
             // Backups Routes

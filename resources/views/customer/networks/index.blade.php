@@ -5,6 +5,7 @@
 @php
     $direction = config('ui.direction', 'ltr');
     $isRtl = $direction === 'rtl';
+    use Illuminate\Support\Str;
 @endphp
 
 @section('header_content')
@@ -47,9 +48,27 @@
                         </svg>
                     </div>
                 </div>
+@if(session('success'))
+<div class="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+    {{ session('success') }}
+</div>
+@endif
+
+@if(session('error'))
+<div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+    {{ session('error') }}
+</div>
+@endif
+
+@if(isset($error))
+<div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+    {{ $error }}
+</div>
+@endif
+
                 <div class="{{ $isRtl ? 'mr-4' : 'ml-4' }}">
                     <p class="text-sm font-medium text-gray-500">شبکه‌های خصوصی</p>
-                    <p class="text-2xl font-semibold text-gray-900">۳</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ $statistics['private_networks'] ?? 0 }}</p>
                 </div>
             </div>
         </div>
@@ -66,7 +85,7 @@
                 </div>
                 <div class="{{ $isRtl ? 'mr-4' : 'ml-4' }}">
                     <p class="text-sm font-medium text-gray-500">گروه‌های امنیتی</p>
-                    <p class="text-2xl font-semibold text-gray-900">۵</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ $statistics['security_groups'] ?? 0 }}</p>
                 </div>
             </div>
         </div>
@@ -83,7 +102,7 @@
                 </div>
                 <div class="{{ $isRtl ? 'mr-4' : 'ml-4' }}">
                     <p class="text-sm font-medium text-gray-500">IP های شناور</p>
-                    <p class="text-2xl font-semibold text-gray-900">۲</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ $statistics['floating_ips'] ?? 0 }}</p>
                 </div>
             </div>
         </div>
@@ -100,7 +119,7 @@
                 </div>
                 <div class="{{ $isRtl ? 'mr-4' : 'ml-4' }}">
                     <p class="text-sm font-medium text-gray-500">مصرف پهنای باند</p>
-                    <p class="text-2xl font-semibold text-gray-900">۲۸۵ GB</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ number_format(($statistics['bandwidth_usage'] ?? 0) / 1024, 1) }} GB</p>
                 </div>
             </div>
         </div>
@@ -129,16 +148,35 @@
         <div id="networks-content" class="tab-content p-6">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-lg font-semibold text-gray-900">شبکه‌های خصوصی</h2>
-                <button onclick="openCreateNetworkModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
+                <a href="{{ route('customer.networks.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
                     ایجاد شبکه جدید
-                </button>
+                </a>
             </div>
 
+            @if($customerNetworks->isEmpty())
+            <div class="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">هیچ شبکه‌ای وجود ندارد</h3>
+                <p class="mt-1 text-sm text-gray-500">شبکه خصوصی جدیدی ایجاد کنید</p>
+                <div class="mt-6">
+                    <a href="{{ route('customer.networks.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                        ایجاد شبکه جدید
+                    </a>
+                </div>
+            </div>
+            @else
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Network 1 -->
+                @foreach($customerNetworks as $network)
+                @php
+                    $networkSubnets = $network->relationLoaded('subnets') ? $network->getRelation('subnets') : $network->subnets()->get();
+                    $networkInstances = $network->relationLoaded('instances') ? $network->getRelation('instances') : $network->instances()->get();
+                @endphp
+                <!-- Network Card -->
                 <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-3">
