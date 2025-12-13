@@ -4,6 +4,12 @@
     $isRtl = $direction === 'rtl';
     $isFarsi = $language === 'fa';
     $customer = auth('customer')->user();
+    $wallet = $customer ? $customer->getOrCreateWallet() : null;
+    $walletBalance = $wallet ? $wallet->balance : 0;
+    $walletFormatted = $wallet ? $wallet->formatted_balance : '0 ریال';
+    // Low balance threshold: less than 50,000 Rials (subtle warning)
+    $isLowBalance = $walletBalance < 50000 && $walletBalance > 0;
+    $isVeryLowBalance = $walletBalance <= 0;
 @endphp
 
 <!DOCTYPE html>
@@ -164,11 +170,14 @@
                     
                     <!-- Wallet Balance Indicator -->
                     <div class="relative">
-                        <button id="wallet-balance-button" class="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all duration-200 hover:scale-[1.02] wallet-balance-button" aria-label="منوی موجودی کیف پول" title="موجودی کیف پول شما">
+                        <button id="wallet-balance-button" class="flex items-center gap-2 px-3 py-1.5 rounded-sm transition-all duration-200 hover:scale-[1.02] wallet-balance-button {{ $isVeryLowBalance ? 'bg-red-50 text-red-700 hover:bg-red-100' : ($isLowBalance ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100' : 'bg-blue-50 text-blue-700 hover:bg-blue-100') }}" aria-label="منوی موجودی کیف پول" title="موجودی کیف پول شما">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
                             </svg>
-                            <span id="wallet-balance-text" class="text-sm font-medium">1,245,000 ریال</span>
+                            <span id="wallet-balance-text" class="text-sm font-medium">{{ $walletFormatted }}</span>
+                            @if($isLowBalance || $isVeryLowBalance)
+                            <span class="inline-flex items-center justify-center w-2 h-2 rounded-full {{ $isVeryLowBalance ? 'bg-red-500' : 'bg-yellow-500' }} animate-pulse"></span>
+                            @endif
                         </button>
                         
                         <!-- Wallet Balance Dropdown -->
@@ -182,7 +191,18 @@
                             <!-- Current Balance -->
                             <div class="px-4 py-4">
                                 <p class="text-xs text-gray-500 mb-1">موجودی فعلی</p>
-                                <p id="wallet-balance-large" class="text-2xl font-semibold text-gray-900 wallet-balance-value">1,245,000 ریال</p>
+                                <p id="wallet-balance-large" class="text-2xl font-semibold {{ $isVeryLowBalance ? 'text-red-600' : ($isLowBalance ? 'text-yellow-600' : 'text-gray-900') }} wallet-balance-value">{{ $walletFormatted }}</p>
+                                @if($isLowBalance || $isVeryLowBalance)
+                                <div class="mt-2 p-2 rounded-lg {{ $isVeryLowBalance ? 'bg-red-50 border border-red-200' : 'bg-yellow-50 border border-yellow-200' }}">
+                                    <p class="text-xs {{ $isVeryLowBalance ? 'text-red-700' : 'text-yellow-700' }}">
+                                        @if($isVeryLowBalance)
+                                        ⚠️ موجودی شما تمام شده است. لطفاً کیف پول خود را شارژ کنید.
+                                        @else
+                                        💡 موجودی شما در حال اتمام است. برای ادامه استفاده از سرویس‌ها، کیف پول خود را شارژ کنید.
+                                        @endif
+                                    </p>
+                                </div>
+                                @endif
                             </div>
                             
                             <!-- Quick Actions -->
@@ -473,6 +493,10 @@
             .then(data => {
                 const balanceText = document.getElementById('wallet-balance-text');
                 const balanceLarge = document.getElementById('wallet-balance-large');
+                const balanceButton = document.getElementById('wallet-balance-button');
+                const balance = parseFloat(data.balance) || 0;
+                const isLowBalance = balance < 50000 && balance > 0;
+                const isVeryLowBalance = balance <= 0;
                 
                 // Add pulse animation
                 if (balanceLarge) {
@@ -481,10 +505,42 @@
                 }
                 
                 if (balanceText) balanceText.textContent = data.formatted_balance;
-                if (balanceLarge) balanceLarge.textContent = data.formatted_balance;
+                if (balanceLarge) {
+                    balanceLarge.textContent = data.formatted_balance;
+                    // Update color based on balance
+                    balanceLarge.className = 'text-2xl font-semibold wallet-balance-value ' + 
+                        (isVeryLowBalance ? 'text-red-600' : (isLowBalance ? 'text-yellow-600' : 'text-gray-900'));
+                }
+                
+                // Update button styling
+                if (balanceButton) {
+                    balanceButton.className = 'flex items-center gap-2 px-3 py-1.5 rounded-sm transition-all duration-200 hover:scale-[1.02] wallet-balance-button ' +
+                        (isVeryLowBalance ? 'bg-red-50 text-red-700 hover:bg-red-100' : 
+                         (isLowBalance ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100' : 
+                          'bg-blue-50 text-blue-700 hover:bg-blue-100'));
+                    
+                    // Update or add warning dot
+                    let warningDot = balanceButton.querySelector('.animate-pulse');
+                    if (isLowBalance || isVeryLowBalance) {
+                        if (!warningDot) {
+                            warningDot = document.createElement('span');
+                            warningDot.className = 'inline-flex items-center justify-center w-2 h-2 rounded-full ' + 
+                                (isVeryLowBalance ? 'bg-red-500' : 'bg-yellow-500') + ' animate-pulse';
+                            balanceButton.appendChild(warningDot);
+                        } else {
+                            warningDot.className = 'inline-flex items-center justify-center w-2 h-2 rounded-full ' + 
+                                (isVeryLowBalance ? 'bg-red-500' : 'bg-yellow-500') + ' animate-pulse';
+                        }
+                    } else if (warningDot) {
+                        warningDot.remove();
+                    }
+                }
             })
             .catch(error => console.error('Error refreshing balance:', error));
         }
+        
+        // Initial balance load
+        refreshWalletBalance();
         
         // Refresh balance every 30 seconds
         setInterval(refreshWalletBalance, 30000);

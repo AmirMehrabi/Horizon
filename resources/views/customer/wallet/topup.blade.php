@@ -182,22 +182,27 @@ document.getElementById('topupForm')?.addEventListener('submit', function(e) {
     const amountInput = document.getElementById('amount');
     const paymentMethod = document.getElementById('payment_method');
     
+    // Get numeric value (remove commas and non-digits)
     const amountValue = amountInput.value.replace(/[^\d]/g, '');
     
+    // Validation
     if (!amountValue || parseInt(amountValue) < 10000) {
         e.preventDefault();
         alert('حداقل مبلغ شارژ ۱۰,۰۰۰ ریال است.');
-        return;
+        return false;
     }
     
     if (!paymentMethod.value) {
         e.preventDefault();
         alert('لطفاً روش پرداخت را انتخاب کنید.');
-        return;
+        return false;
     }
     
-    // For test payment, submit the form directly
-    // For other payment methods, you would redirect to payment gateway here
+    // Update the input value to numeric only for submission
+    amountInput.value = amountValue;
+    
+    // Form will submit normally after validation passes
+    return true;
 });
 </script>
 @endsection
