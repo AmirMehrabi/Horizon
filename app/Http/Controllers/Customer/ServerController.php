@@ -152,10 +152,20 @@ class ServerController extends Controller
             // Additional data
             'floating_ips' => [],
             'security_groups' => $instance->securityGroups ? $instance->securityGroups->map(function ($sg) {
+                // Format rules for display
+                $rulesText = 'هیچ قانونی تعریف نشده';
+                if (!empty($sg->rules) && is_array($sg->rules)) {
+                    $rulesCount = count($sg->rules);
+                    $rulesText = $rulesCount . ' قانون تعریف شده';
+                } elseif (!empty($sg->rules)) {
+                    $rulesText = 'قوانین تعریف شده';
+                }
+                
                 return [
                     'id' => $sg->id,
                     'name' => $sg->name,
                     'description' => $sg->description ?? '',
+                    'rules' => $rulesText,
                 ];
             })->toArray() : [],
             'bandwidth' => [
