@@ -518,7 +518,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set initial plan type (this will enable/disable fields appropriately)
     togglePlanType();
     
-    // Set initial access method
+    // Set initial access method (this will enable/disable fields appropriately)
     toggleAccessMethod();
     
     // Filter images based on initial OS selection
@@ -531,6 +531,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const initialPlanType = document.querySelector('input[name="plan_type"]:checked')?.value;
     if (initialPlanType === 'custom') {
         calculateCustomPrice();
+    }
+    
+    // Ensure all initially hidden fields are properly disabled
+    // This prevents browser validation on hidden fields
+    const passwordSection = document.getElementById('password-section');
+    if (passwordSection && passwordSection.classList.contains('hidden')) {
+        const rootPassword = document.getElementById('root_password');
+        const rootPasswordConfirm = document.getElementById('root_password_confirmation');
+        if (rootPassword) {
+            rootPassword.disabled = true;
+            rootPassword.removeAttribute('required');
+        }
+        if (rootPasswordConfirm) {
+            rootPasswordConfirm.disabled = true;
+            rootPasswordConfirm.removeAttribute('required');
+        }
     }
 });
 
