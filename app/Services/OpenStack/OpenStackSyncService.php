@@ -701,6 +701,7 @@ class OpenStackSyncService
             $stats = [
                 'checked' => 0,
                 'updated' => 0,
+                'deleted' => 0,
                 'errors' => [],
             ];
 
@@ -798,17 +799,53 @@ class OpenStackSyncService
                         $instance->update($updateData);
                     }
                 } catch (\Exception $e) {
-                    $stats['errors'][] = [
-                        'instance_id' => $instance->id,
-                        'openstack_server_id' => $instance->openstack_server_id,
-                        'error' => $e->getMessage(),
-                    ];
-                    Log::warning('Failed to sync instance status', [
-                        'instance_id' => $instance->id,
-                        'openstack_server_id' => $instance->openstack_server_id,
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString(),
-                    ]);
+                    // Check if the error is a 404 (instance not found in OpenStack)
+                    $errorMessage = $e->getMessage();
+                    $isNotFound = str_contains($errorMessage, '404') || 
+                                  str_contains($errorMessage, 'not found') || 
+                                  str_contains($errorMessage, 'could not be found') ||
+                                  str_contains($errorMessage, 'itemNotFound');
+                    
+                    if ($isNotFound && $instance->status !== 'deleted') {
+                        // Instance has been deleted in OpenStack, mark as deleted locally
+                        $oldStatus = $instance->status;
+                        $instance->update([
+                            'status' => 'deleted',
+                            'last_openstack_status' => 'deleted',
+                            'synced_at' => now(),
+                        ]);
+                        
+                        // Log the deletion event
+                        OpenStackInstanceEvent::create([
+                            'instance_id' => $instance->id,
+                            'event_type' => 'deleted',
+                            'message' => "Instance deleted in OpenStack (was {$oldStatus})",
+                            'source' => 'sync',
+                            'created_at' => now(),
+                        ]);
+                        
+                        $stats['updated']++;
+                        $stats['deleted'] = ($stats['deleted'] ?? 0) + 1;
+                        
+                        Log::info('Instance marked as deleted (not found in OpenStack)', [
+                            'instance_id' => $instance->id,
+                            'openstack_server_id' => $instance->openstack_server_id,
+                            'old_status' => $oldStatus,
+                        ]);
+                    } else {
+                        // Other errors - log as warning
+                        $stats['errors'][] = [
+                            'instance_id' => $instance->id,
+                            'openstack_server_id' => $instance->openstack_server_id,
+                            'error' => $errorMessage,
+                        ];
+                        Log::warning('Failed to sync instance status', [
+                            'instance_id' => $instance->id,
+                            'openstack_server_id' => $instance->openstack_server_id,
+                            'error' => $errorMessage,
+                            'trace' => $e->getTraceAsString(),
+                        ]);
+                    }
                 }
             }
 
@@ -817,6 +854,7 @@ class OpenStackSyncService
                 'completed_at' => now(),
                 'records_synced' => $stats['checked'],
                 'records_updated' => $stats['updated'],
+                'records_deleted' => $stats['deleted'] ?? 0,
                 'errors_count' => count($stats['errors']),
                 'errors' => $stats['errors'],
             ]);
