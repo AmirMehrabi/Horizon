@@ -171,7 +171,7 @@
             <!-- Image Selection -->
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">انتخاب تصویر</label>
-                <select name="image_id" id="image-select" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('image_id') border-red-400 bg-red-50 @enderror" required>
+                <select name="image_id" id="image-select" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('image_id') border-red-400 bg-red-50 @enderror">
                     <option value="">لطفاً ابتدا نوع سیستم عامل را انتخاب کنید</option>
                     @foreach($images as $image)
                         <option value="{{ $image->id }}" data-os-type="{{ strtolower($image->name) }}" {{ old('image_id') == $image->id ? 'selected' : '' }}>
@@ -429,14 +429,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">رمز عبور root</label>
-                            <input type="password" name="root_password" value="{{ old('root_password') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('root_password') border-red-400 bg-red-50 @enderror">
+                            <input type="password" name="root_password" id="root_password" value="{{ old('root_password') }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('root_password') border-red-400 bg-red-50 @enderror">
                             @error('root_password')
                                 <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
                             @enderror
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">تأیید رمز عبور</label>
-                            <input type="password" name="root_password_confirmation" value="{{ old('root_password_confirmation') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('root_password_confirmation') border-red-400 bg-red-50 @enderror">
+                            <input type="password" name="root_password_confirmation" id="root_password_confirmation" value="{{ old('root_password_confirmation') }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('root_password_confirmation') border-red-400 bg-red-50 @enderror">
                             @error('root_password_confirmation')
                                 <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
                             @enderror
@@ -542,8 +542,8 @@ function nextStep(step) {
             alert('لطفاً یک سیستم عامل انتخاب کنید');
             return;
         }
-        const imageSelected = document.getElementById('image-select').value;
-        if (!imageSelected) {
+        const imageSelect = document.getElementById('image-select');
+        if (!imageSelect || !imageSelect.value) {
             alert('لطفاً یک تصویر انتخاب کنید');
             return;
         }
@@ -567,15 +567,19 @@ function nextStep(step) {
     } else if (currentStep === 4) {
         const accessMethod = document.querySelector('input[name="access_method"]:checked')?.value;
         if (accessMethod === 'ssh_key') {
-            const sshKeyId = document.getElementById('ssh-key-select').value;
-            const sshPublicKey = document.getElementById('ssh-public-key-input').value.trim();
+            const sshKeySelect = document.getElementById('ssh-key-select');
+            const sshPublicKeyInput = document.getElementById('ssh-public-key-input');
+            const sshKeyId = sshKeySelect ? sshKeySelect.value : '';
+            const sshPublicKey = sshPublicKeyInput ? sshPublicKeyInput.value.trim() : '';
             if (!sshKeyId && !sshPublicKey) {
                 alert('لطفاً یک کلید SSH انتخاب کنید یا کلید عمومی خود را وارد کنید');
                 return;
             }
         } else if (accessMethod === 'password') {
-            const password = document.querySelector('input[name="root_password"]').value;
-            const passwordConfirm = document.querySelector('input[name="root_password_confirmation"]').value;
+            const rootPassword = document.getElementById('root_password');
+            const rootPasswordConfirm = document.getElementById('root_password_confirmation');
+            const password = rootPassword ? rootPassword.value : '';
+            const passwordConfirm = rootPasswordConfirm ? rootPasswordConfirm.value : '';
             if (!password || password.length < 8) {
                 alert('رمز عبور باید حداقل ۸ کاراکتر باشد');
                 return;
@@ -680,24 +684,79 @@ function toggleAccessMethod() {
     const sshSection = document.getElementById('ssh-key-section');
     const passwordSection = document.getElementById('password-section');
     
+    // Get all SSH key related fields
+    const sshKeySelect = document.getElementById('ssh-key-select');
+    const sshPublicKeyInput = document.getElementById('ssh-public-key-input');
+    
+    // Get all password related fields
+    const rootPassword = document.getElementById('root_password');
+    const rootPasswordConfirm = document.getElementById('root_password_confirmation');
+    
     if (accessMethod === 'ssh_key') {
         sshSection.classList.remove('hidden');
         passwordSection.classList.add('hidden');
+        
+        // Enable SSH key fields
+        if (sshKeySelect) sshKeySelect.disabled = false;
+        if (sshPublicKeyInput) {
+            sshPublicKeyInput.disabled = false;
+            sshPublicKeyInput.removeAttribute('required');
+        }
+        
+        // Disable password fields
+        if (rootPassword) {
+            rootPassword.disabled = true;
+            rootPassword.value = '';
+            rootPassword.removeAttribute('required');
+        }
+        if (rootPasswordConfirm) {
+            rootPasswordConfirm.disabled = true;
+            rootPasswordConfirm.value = '';
+            rootPasswordConfirm.removeAttribute('required');
+        }
+        
+        // Update SSH key input requirement based on selection
+        toggleSshKeyInput();
     } else {
         sshSection.classList.add('hidden');
         passwordSection.classList.remove('hidden');
+        
+        // Disable SSH key fields
+        if (sshKeySelect) {
+            sshKeySelect.disabled = true;
+            sshKeySelect.value = '';
+        }
+        if (sshPublicKeyInput) {
+            sshPublicKeyInput.disabled = true;
+            sshPublicKeyInput.value = '';
+            sshPublicKeyInput.removeAttribute('required');
+        }
+        
+        // Enable password fields
+        if (rootPassword) {
+            rootPassword.disabled = false;
+            rootPassword.setAttribute('required', 'required');
+        }
+        if (rootPasswordConfirm) {
+            rootPasswordConfirm.disabled = false;
+            rootPasswordConfirm.setAttribute('required', 'required');
+        }
     }
 }
 
 function toggleSshKeyInput() {
     const sshKeySelect = document.getElementById('ssh-key-select');
     const sshPublicKeyInput = document.getElementById('ssh-public-key-input');
+    const accessMethod = document.querySelector('input[name="access_method"]:checked')?.value;
     
-    if (sshKeySelect.value === 'new' || sshKeySelect.value === '') {
-        sshPublicKeyInput.required = true;
-    } else {
-        sshPublicKeyInput.required = false;
-        sshPublicKeyInput.value = '';
+    // Only modify if SSH key method is selected and field is not disabled
+    if (accessMethod === 'ssh_key' && sshPublicKeyInput && !sshPublicKeyInput.disabled) {
+        if (sshKeySelect.value === 'new' || sshKeySelect.value === '') {
+            sshPublicKeyInput.setAttribute('required', 'required');
+        } else {
+            sshPublicKeyInput.removeAttribute('required');
+            sshPublicKeyInput.value = '';
+        }
     }
 }
 
@@ -760,19 +819,65 @@ function calculateCustomPrice() {
 
 // Form submission handler
 document.getElementById('vps-wizard-form').addEventListener('submit', function(e) {
-    // Final validation before submission
+    // Ensure all disabled fields are properly handled before submission
+    const planType = document.querySelector('input[name="plan_type"]:checked')?.value;
+    
+    // Disable custom plan fields if prebuilt is selected
+    if (planType === 'prebuilt') {
+        const customVcpu = document.getElementById('custom_vcpu');
+        const customRam = document.getElementById('custom_ram');
+        const customStorage = document.getElementById('custom_storage');
+        const customBandwidth = document.getElementById('custom_bandwidth');
+        if (customVcpu) customVcpu.disabled = true;
+        if (customRam) customRam.disabled = true;
+        if (customStorage) customStorage.disabled = true;
+        if (customBandwidth) customBandwidth.disabled = true;
+    }
+    
+    // Handle access method fields
     const accessMethod = document.querySelector('input[name="access_method"]:checked')?.value;
     if (accessMethod === 'ssh_key') {
-        const sshKeyId = document.getElementById('ssh-key-select').value;
-        const sshPublicKey = document.getElementById('ssh-public-key-input').value.trim();
+        // Disable password fields
+        const rootPassword = document.getElementById('root_password');
+        const rootPasswordConfirm = document.getElementById('root_password_confirmation');
+        if (rootPassword) {
+            rootPassword.disabled = true;
+            rootPassword.removeAttribute('required');
+        }
+        if (rootPasswordConfirm) {
+            rootPasswordConfirm.disabled = true;
+            rootPasswordConfirm.removeAttribute('required');
+        }
+        
+        // Validate SSH key
+        const sshKeySelect = document.getElementById('ssh-key-select');
+        const sshPublicKeyInput = document.getElementById('ssh-public-key-input');
+        const sshKeyId = sshKeySelect ? sshKeySelect.value : '';
+        const sshPublicKey = sshPublicKeyInput ? sshPublicKeyInput.value.trim() : '';
         if (!sshKeyId && !sshPublicKey) {
             e.preventDefault();
             alert('لطفاً یک کلید SSH انتخاب کنید یا کلید عمومی خود را وارد کنید');
             return false;
         }
     } else if (accessMethod === 'password') {
-        const password = document.querySelector('input[name="root_password"]').value;
-        const passwordConfirm = document.querySelector('input[name="root_password_confirmation"]').value;
+        // Disable SSH key fields
+        const sshKeySelect = document.getElementById('ssh-key-select');
+        const sshPublicKeyInput = document.getElementById('ssh-public-key-input');
+        if (sshKeySelect) {
+            sshKeySelect.disabled = true;
+            sshKeySelect.value = '';
+        }
+        if (sshPublicKeyInput) {
+            sshPublicKeyInput.disabled = true;
+            sshPublicKeyInput.value = '';
+            sshPublicKeyInput.removeAttribute('required');
+        }
+        
+        // Validate password
+        const rootPassword = document.getElementById('root_password');
+        const rootPasswordConfirm = document.getElementById('root_password_confirmation');
+        const password = rootPassword ? rootPassword.value : '';
+        const passwordConfirm = rootPasswordConfirm ? rootPasswordConfirm.value : '';
         if (!password || password.length < 8) {
             e.preventDefault();
             alert('رمز عبور باید حداقل ۸ کاراکتر باشد');
