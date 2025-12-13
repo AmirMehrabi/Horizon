@@ -265,28 +265,28 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">تعداد vCPU</label>
-                        <input type="number" name="custom_vcpu" min="1" max="32" value="{{ old('custom_vcpu', 1) }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('custom_vcpu') border-red-400 bg-red-50 @enderror" oninput="calculateCustomPrice()">
+                        <input type="number" name="custom_vcpu" id="custom_vcpu" min="1" max="32" value="{{ old('custom_vcpu', 1) }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('custom_vcpu') border-red-400 bg-red-50 @enderror" oninput="calculateCustomPrice()">
                         @error('custom_vcpu')
                             <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">RAM (GB)</label>
-                        <input type="number" name="custom_ram" min="1" max="128" value="{{ old('custom_ram', 2) }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('custom_ram') border-red-400 bg-red-50 @enderror" oninput="calculateCustomPrice()">
+                        <input type="number" name="custom_ram" id="custom_ram" min="1" max="128" value="{{ old('custom_ram', 2) }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('custom_ram') border-red-400 bg-red-50 @enderror" oninput="calculateCustomPrice()">
                         @error('custom_ram')
                             <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">فضای ذخیره‌سازی (GB)</label>
-                        <input type="number" name="custom_storage" min="20" max="1000" value="{{ old('custom_storage', 20) }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('custom_storage') border-red-400 bg-red-50 @enderror" oninput="calculateCustomPrice()">
+                        <input type="number" name="custom_storage" id="custom_storage" min="20" max="1000" value="{{ old('custom_storage', 20) }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('custom_storage') border-red-400 bg-red-50 @enderror" oninput="calculateCustomPrice()">
                         @error('custom_storage')
                             <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">پهنای باند (TB)</label>
-                        <input type="number" name="custom_bandwidth" min="0.1" max="10" step="0.5" value="{{ old('custom_bandwidth', 1) }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('custom_bandwidth') border-red-400 bg-red-50 @enderror" oninput="calculateCustomPrice()">
+                        <input type="number" name="custom_bandwidth" id="custom_bandwidth" min="0.1" max="10" step="0.5" value="{{ old('custom_bandwidth', 1) }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('custom_bandwidth') border-red-400 bg-red-50 @enderror" oninput="calculateCustomPrice()">
                         @error('custom_bandwidth')
                             <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
                         @enderror
@@ -515,7 +515,7 @@ const region = '{{ config("openstack.region") }}';
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Set initial plan type
+    // Set initial plan type (this will enable/disable fields appropriately)
     togglePlanType();
     
     // Set initial access method
@@ -528,7 +528,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Calculate initial custom price if custom plan is selected
-    if (document.querySelector('input[name="plan_type"]:checked')?.value === 'custom') {
+    const initialPlanType = document.querySelector('input[name="plan_type"]:checked')?.value;
+    if (initialPlanType === 'custom') {
         calculateCustomPrice();
     }
 });
@@ -638,12 +639,38 @@ function togglePlanType() {
     const prebuiltPlans = document.getElementById('prebuilt-plans');
     const customPlan = document.getElementById('custom-plan');
     
+    // Get custom plan input fields
+    const customVcpu = document.getElementById('custom_vcpu');
+    const customRam = document.getElementById('custom_ram');
+    const customStorage = document.getElementById('custom_storage');
+    const customBandwidth = document.getElementById('custom_bandwidth');
+    
     if (planType === 'prebuilt') {
         prebuiltPlans.classList.remove('hidden');
         customPlan.classList.add('hidden');
+        
+        // Disable custom plan fields to prevent validation when hidden
+        if (customVcpu) customVcpu.disabled = true;
+        if (customRam) customRam.disabled = true;
+        if (customStorage) customStorage.disabled = true;
+        if (customBandwidth) customBandwidth.disabled = true;
+        
+        // Clear any selected flavor_id when switching to prebuilt (if needed)
+        // The form will use flavor_id directly
     } else {
         prebuiltPlans.classList.add('hidden');
         customPlan.classList.remove('hidden');
+        
+        // Enable custom plan fields
+        if (customVcpu) customVcpu.disabled = false;
+        if (customRam) customRam.disabled = false;
+        if (customStorage) customStorage.disabled = false;
+        if (customBandwidth) customBandwidth.disabled = false;
+        
+        // Clear flavor_id selection when switching to custom
+        const flavorInputs = document.querySelectorAll('input[name="flavor_id"]');
+        flavorInputs.forEach(input => input.checked = false);
+        
         calculateCustomPrice();
     }
 }
