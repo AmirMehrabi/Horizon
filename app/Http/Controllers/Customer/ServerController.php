@@ -365,5 +365,92 @@ class ServerController extends Controller
             'data' => $keyPairs,
         ]);
     }
+
+    /**
+     * Perform server action (start, stop, reboot, etc.)
+     */
+    public function action(Request $request, $id, $action)
+    {
+        try {
+            $customer = $request->user('customer');
+            
+            $instance = OpenStackInstance::where('id', $id)
+                ->where('customer_id', $customer->id)
+                ->firstOrFail();
+
+            // Validate action
+            $allowedActions = ['start', 'stop', 'restart', 'soft-reboot', 'hard-reboot', 'delete', 'rescue-mode'];
+            if (!in_array($action, $allowedActions)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'عملیات نامعتبر است.',
+                ], 400);
+            }
+
+            // Map action names to service methods
+            switch ($action) {
+                case 'start':
+                    $this->instanceService->start($instance);
+                    $message = 'دستور شروع سرور ارسال شد.';
+                    break;
+                
+                case 'stop':
+                    $this->instanceService->stop($instance);
+                    $message = 'دستور توقف سرور ارسال شد.';
+                    break;
+                
+                case 'restart':
+                case 'soft-reboot':
+                    $this->instanceService->reboot($instance, 'SOFT');
+                    $message = 'دستور راه‌اندازی مجدد نرم ارسال شد.';
+                    break;
+                
+                case 'hard-reboot':
+                    $this->instanceService->reboot($instance, 'HARD');
+                    $message = 'دستور راه‌اندازی مجدد سخت ارسال شد.';
+                    break;
+                
+                case 'rescue-mode':
+                    $this->instanceService->rescue($instance);
+                    $message = 'دستور فعال‌سازی حالت نجات ارسال شد.';
+                    break;
+                
+                case 'delete':
+                    $this->instanceService->delete($instance);
+                    $message = 'دستور حذف سرور ارسال شد.';
+                    break;
+                
+                default:
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'عملیات پشتیبانی نمی‌شود.',
+                    ], 400);
+            }
+
+            Log::info('Server action executed', [
+                'instance_id' => $instance->id,
+                'customer_id' => $customer->id,
+                'action' => $action,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to execute server action', [
+                'instance_id' => $id,
+                'action' => $action,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'خطا در اجرای عملیات: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }
 

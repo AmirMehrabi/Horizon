@@ -174,21 +174,21 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">عملیات قدرت</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <button onclick="performAction('start')" class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-green-50 hover:border-green-300 transition-colors">
+                <button onclick="performAction('start', event)" class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-green-50 hover:border-green-300 transition-colors">
                     <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     <span class="text-sm font-medium text-gray-700">شروع</span>
                 </button>
-                <button onclick="performAction('stop')" class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-red-50 hover:border-red-300 transition-colors">
+                <button onclick="performAction('stop', event)" class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-red-50 hover:border-red-300 transition-colors">
                     <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10h6v4H9z"></path>
                     </svg>
                     <span class="text-sm font-medium text-gray-700">توقف</span>
                 </button>
-                <button onclick="performAction('restart')" class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors">
+                <button onclick="performAction('restart', event)" class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors">
                     <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
@@ -201,7 +201,7 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">راه‌اندازی مجدد</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button onclick="performAction('soft-reboot')" class="flex items-center justify-between px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                <button onclick="performAction('soft-reboot', event)" class="flex items-center justify-between px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                     <div>
                         <p class="text-sm font-medium text-gray-900">راه‌اندازی مجدد نرم</p>
                         <p class="text-xs text-gray-500 mt-1">راه‌اندازی مجدد از طریق سیستم عامل</p>
@@ -210,7 +210,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
                 </button>
-                <button onclick="performAction('hard-reboot')" class="flex items-center justify-between px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                <button onclick="performAction('hard-reboot', event)" class="flex items-center justify-between px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                     <div>
                         <p class="text-sm font-medium text-gray-900">راه‌اندازی مجدد سخت</p>
                         <p class="text-xs text-gray-500 mt-1">راه‌اندازی مجدد فوری از طریق Hypervisor</p>
@@ -226,7 +226,7 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">عملیات پیشرفته</h2>
             <div class="space-y-4">
-                <button onclick="performAction('rescue-mode')" class="w-full flex items-center justify-between px-4 py-3 border border-gray-300 rounded-lg hover:bg-yellow-50 hover:border-yellow-300 transition-colors">
+                <button onclick="performAction('rescue-mode', event)" class="w-full flex items-center justify-between px-4 py-3 border border-gray-300 rounded-lg hover:bg-yellow-50 hover:border-yellow-300 transition-colors">
                     <div class="flex items-center">
                         <svg class="w-5 h-5 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
@@ -450,11 +450,84 @@ function showTab(tabName) {
     activeTab.classList.add('border-blue-500', 'text-blue-600');
 }
 
-function performAction(action) {
-    if (confirm(`آیا از انجام عملیات "${action}" مطمئن هستید؟`)) {
-        // TODO: Implement actual action
-        alert(`عملیات ${action} در حال انجام است...`);
+function performAction(action, event) {
+    // Map action names to Persian labels
+    const actionLabels = {
+        'start': 'شروع',
+        'stop': 'توقف',
+        'restart': 'راه‌اندازی مجدد',
+        'soft-reboot': 'راه‌اندازی مجدد نرم',
+        'hard-reboot': 'راه‌اندازی مجدد سخت',
+        'rescue-mode': 'حالت نجات',
+    };
+    
+    const actionLabel = actionLabels[action] || action;
+    const confirmMessage = `آیا از انجام عملیات "${actionLabel}" مطمئن هستید؟`;
+    
+    if (!confirm(confirmMessage)) {
+        return;
     }
+    
+    // Disable button and show loading state
+    const button = event ? event.target.closest('button') : null;
+    let originalContent = '';
+    if (button) {
+        originalContent = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<span class="text-sm">در حال انجام...</span>';
+    }
+    
+    // Get server ID from the page
+    const serverId = '{{ $server["id"] }}';
+    const baseUrl = '{{ route("customer.servers.action", ["id" => ":id", "action" => ":action"]) }}';
+    const url = baseUrl.replace(':id', serverId).replace(':action', action);
+    
+    // Get CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    
+    // Make AJAX request
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.message || 'خطا در انجام عملیات');
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            showNotification(data.message || 'عملیات با موفقیت انجام شد.', 'success');
+            
+            // Reload page after a short delay to show updated status
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showNotification(data.message || 'خطا در انجام عملیات.', 'error');
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = originalContent;
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification(error.message || 'خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.', 'error');
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = originalContent;
+        }
+    });
 }
 
 function showResizeModal() {
@@ -470,9 +543,47 @@ function showRestoreModal() {
 }
 
 function showDeleteModal() {
-    if (confirm('آیا از حذف دائمی این سرور مطمئن هستید؟ این عملیات قابل بازگشت نیست.')) {
-        alert('سرور در حال حذف است...');
+    if (!confirm('آیا از حذف دائمی این سرور مطمئن هستید؟ این عملیات قابل بازگشت نیست.')) {
+        return;
     }
+    
+    // Get server ID from the page
+    const serverId = '{{ $server["id"] }}';
+    const baseUrl = '{{ route("customer.servers.action", ["id" => ":id", "action" => "delete"]) }}';
+    const url = baseUrl.replace(':id', serverId);
+    
+    // Get CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    
+    // Show loading state
+    showNotification('در حال حذف سرور...', 'info');
+    
+    // Make AJAX request
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message || 'سرور با موفقیت حذف شد.', 'success');
+            // Redirect to servers list after a delay
+            setTimeout(() => {
+                window.location.href = '{{ route("customer.servers.index") }}';
+            }, 2000);
+        } else {
+            showNotification(data.message || 'خطا در حذف سرور.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.', 'error');
+    });
 }
 
 function openVNCConsole() {
@@ -521,6 +632,26 @@ function deleteSnapshot(snapshotId) {
     if (confirm('آیا از حذف این Snapshot مطمئن هستید؟')) {
         alert('Snapshot در حال حذف است...');
     }
+}
+
+// Notification helper function
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 ${type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500'} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300`;
+    notification.style.right = '2rem';
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateY(-20px)';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
 }
 </script>
 @endsection

@@ -575,5 +575,178 @@ class OpenStackInstanceService
 
         $this->logEvent($instance, 'building', "Instance provisioning started in OpenStack (ID: {$openstackServerId})", 'openstack');
     }
+
+    /**
+     * Start a server instance.
+     */
+    public function start(OpenStackInstance $instance): void
+    {
+        if (empty($instance->openstack_server_id)) {
+            throw new \Exception('Instance has not been provisioned in OpenStack yet.');
+        }
+
+        try {
+            $compute = $this->connection->getComputeService();
+            $server = $compute->getServer(['id' => $instance->openstack_server_id]);
+            $server->start();
+
+            $this->updateStatus($instance, 'building', 'starting');
+            $this->logEvent($instance, 'start_requested', 'Server start requested', 'customer');
+        } catch (\Exception $e) {
+            Log::error('Failed to start server', [
+                'instance_id' => $instance->id,
+                'openstack_server_id' => $instance->openstack_server_id,
+                'error' => $e->getMessage(),
+            ]);
+            throw new \Exception('Failed to start server: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * Stop a server instance.
+     */
+    public function stop(OpenStackInstance $instance): void
+    {
+        if (empty($instance->openstack_server_id)) {
+            throw new \Exception('Instance has not been provisioned in OpenStack yet.');
+        }
+
+        try {
+            $compute = $this->connection->getComputeService();
+            $server = $compute->getServer(['id' => $instance->openstack_server_id]);
+            $server->stop();
+
+            $this->updateStatus($instance, 'building', 'stopping');
+            $this->logEvent($instance, 'stop_requested', 'Server stop requested', 'customer');
+        } catch (\Exception $e) {
+            Log::error('Failed to stop server', [
+                'instance_id' => $instance->id,
+                'openstack_server_id' => $instance->openstack_server_id,
+                'error' => $e->getMessage(),
+            ]);
+            throw new \Exception('Failed to stop server: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * Reboot a server instance (soft or hard).
+     */
+    public function reboot(OpenStackInstance $instance, string $type = 'SOFT'): void
+    {
+        if (empty($instance->openstack_server_id)) {
+            throw new \Exception('Instance has not been provisioned in OpenStack yet.');
+        }
+
+        if (!in_array($type, ['SOFT', 'HARD'])) {
+            throw new \Exception('Invalid reboot type. Must be SOFT or HARD.');
+        }
+
+        try {
+            $compute = $this->connection->getComputeService();
+            $server = $compute->getServer(['id' => $instance->openstack_server_id]);
+            $server->reboot(['type' => $type]);
+
+            $this->updateStatus($instance, 'building', 'rebooting');
+            $this->logEvent($instance, 'reboot_requested', "Server reboot requested (type: {$type})", 'customer');
+        } catch (\Exception $e) {
+            Log::error('Failed to reboot server', [
+                'instance_id' => $instance->id,
+                'openstack_server_id' => $instance->openstack_server_id,
+                'type' => $type,
+                'error' => $e->getMessage(),
+            ]);
+            throw new \Exception('Failed to reboot server: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * Delete a server instance.
+     */
+    public function delete(OpenStackInstance $instance): void
+    {
+        if (empty($instance->openstack_server_id)) {
+            // If not provisioned in OpenStack, just delete locally
+            $this->logEvent($instance, 'deleted', 'Instance deleted (not provisioned in OpenStack)', 'customer');
+            $instance->delete();
+            return;
+        }
+
+        try {
+            $compute = $this->connection->getComputeService();
+            $server = $compute->getServer(['id' => $instance->openstack_server_id]);
+            $server->delete();
+
+            $this->updateStatus($instance, 'deleting', 'deleting');
+            $this->logEvent($instance, 'delete_requested', 'Server deletion requested', 'customer');
+        } catch (\Exception $e) {
+            Log::error('Failed to delete server', [
+                'instance_id' => $instance->id,
+                'openstack_server_id' => $instance->openstack_server_id,
+                'error' => $e->getMessage(),
+            ]);
+            throw new \Exception('Failed to delete server: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * Enable rescue mode for a server instance.
+     * 
+     * @param OpenStackInstance $instance
+     * @param string|null $rescueImageId Optional image ID to use for rescue mode
+     */
+    public function rescue(OpenStackInstance $instance, ?string $rescueImageId = null): void
+    {
+        if (empty($instance->openstack_server_id)) {
+            throw new \Exception('Instance has not been provisioned in OpenStack yet.');
+        }
+
+        try {
+            $compute = $this->connection->getComputeService();
+            $server = $compute->getServer(['id' => $instance->openstack_server_id]);
+            
+            $rescueParams = [];
+            if ($rescueImageId) {
+                $rescueParams['rescueImageRef'] = $rescueImageId;
+            }
+            
+            $server->rescue($rescueParams);
+
+            $this->updateStatus($instance, 'building', 'rescuing');
+            $this->logEvent($instance, 'rescue_requested', 'Server rescue mode requested', 'customer');
+        } catch (\Exception $e) {
+            Log::error('Failed to enable rescue mode', [
+                'instance_id' => $instance->id,
+                'openstack_server_id' => $instance->openstack_server_id,
+                'error' => $e->getMessage(),
+            ]);
+            throw new \Exception('Failed to enable rescue mode: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * Disable rescue mode for a server instance.
+     */
+    public function unrescue(OpenStackInstance $instance): void
+    {
+        if (empty($instance->openstack_server_id)) {
+            throw new \Exception('Instance has not been provisioned in OpenStack yet.');
+        }
+
+        try {
+            $compute = $this->connection->getComputeService();
+            $server = $compute->getServer(['id' => $instance->openstack_server_id]);
+            $server->unrescue();
+
+            $this->updateStatus($instance, 'building', 'unrescuing');
+            $this->logEvent($instance, 'unrescue_requested', 'Server unrescue requested', 'customer');
+        } catch (\Exception $e) {
+            Log::error('Failed to disable rescue mode', [
+                'instance_id' => $instance->id,
+                'openstack_server_id' => $instance->openstack_server_id,
+                'error' => $e->getMessage(),
+            ]);
+            throw new \Exception('Failed to disable rescue mode: ' . $e->getMessage(), 0, $e);
+        }
+    }
 }
 

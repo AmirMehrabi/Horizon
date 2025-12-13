@@ -153,6 +153,7 @@ Route::domain('panel.aviato.ir')
                 Route::get('/create', [CustomerServerController::class, 'create'])->name('create');
                 Route::post('/', [CustomerServerController::class, 'store'])->name('store');
                 Route::get('/{id}', [CustomerServerController::class, 'show'])->name('show');
+                Route::post('/{id}/action/{action}', [CustomerServerController::class, 'action'])->name('action');
                 
                 // API endpoints for fetching resources
                 Route::prefix('api')->name('api.')->group(function () {
