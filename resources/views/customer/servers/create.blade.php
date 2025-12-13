@@ -101,7 +101,7 @@
                     <h2 class="text-lg font-semibold text-gray-900 mb-4">انتخاب سیستم عامل</h2>
                     
                     <!-- Popular Distributions Grid -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-4">
                         @foreach($popularDistros as $distro)
                             <label class="relative cursor-pointer group">
                                 <input type="radio" name="os" value="{{ $distro['id'] }}" class="peer hidden" data-distro="{{ $distro['id'] }}" onchange="handleDistroChange('{{ $distro['id'] }}')">
@@ -169,36 +169,65 @@
             </div>
 
             <!-- Prebuilt Plans (Flavors) -->
-                    <div id="prebuilt-plans" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div id="prebuilt-plans" class="border border-gray-200 rounded-lg overflow-hidden">
+                <!-- Table Header -->
+                <div class="hidden md:grid md:grid-cols-5 gap-4 bg-gray-50 px-6 py-3 border-b border-gray-200">
+                    <div class="text-sm font-semibold text-gray-700">نام پلن</div>
+                    <div class="text-sm font-semibold text-gray-700">vCPU</div>
+                    <div class="text-sm font-semibold text-gray-700">RAM</div>
+                    <div class="text-sm font-semibold text-gray-700">Storage</div>
+                    <div class="text-sm font-semibold text-gray-700 text-left">قیمت ماهانه</div>
+                </div>
+                
+                <!-- Table Rows -->
                 @forelse($flavors as $flavor)
-                    <label class="relative cursor-pointer">
-                                <input type="radio" name="flavor_id" value="{{ $flavor->id }}" class="peer hidden" data-flavor-id="{{ $flavor->id }}" data-hourly="{{ $flavor->pricing_hourly ?? 0 }}" data-monthly="{{ $flavor->pricing_monthly ?? 0 }}" {{ old('flavor_id') == $flavor->id ? 'checked' : '' }} onchange="updatePricing(); updateChecklist();">
-                                <div class="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <h3 class="text-base font-semibold text-gray-900">{{ $flavor->name }}</h3>
-                                <svg class="w-5 h-5 text-blue-600 hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                                    <div class="space-y-1 text-sm text-gray-600 mb-3">
-                                        <div class="flex justify-between">
-                                            <span>vCPU:</span>
-                                            <span class="font-medium">{{ $flavor->vcpus }}</span>
-                            </div>
-                                        <div class="flex justify-between">
-                                            <span>RAM:</span>
-                                            <span class="font-medium">{{ number_format($flavor->ram_in_gb, 1) }} GB</span>
+                    <label class="block cursor-pointer">
+                        <input type="radio" name="flavor_id" value="{{ $flavor->id }}" class="peer hidden" data-flavor-id="{{ $flavor->id }}" data-hourly="{{ $flavor->pricing_hourly ?? 0 }}" data-monthly="{{ $flavor->pricing_monthly ?? 0 }}" {{ old('flavor_id') == $flavor->id ? 'checked' : '' }} onchange="updatePricing(); updateChecklist();">
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 px-6 py-4 border-b border-gray-200 hover:bg-gray-50 peer-checked:bg-blue-50 peer-checked:border-l-4 peer-checked:border-l-blue-600 transition-all">
+                            <!-- Plan Name -->
+                            <div class="flex items-center">
+                                <div class="flex items-center gap-3 w-full">
+                                    <div class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center shrink-0 peer-checked:border-blue-600 peer-checked:bg-blue-600 transition-colors">
+                                        <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <span class="text-sm font-medium text-gray-900 block">{{ $flavor->name }}</span>
+                                        <div class="md:hidden mt-1 flex gap-4 text-xs text-gray-600">
+                                            <span>{{ $flavor->vcpus }} vCPU</span>
+                                            <span>{{ number_format($flavor->ram_in_gb, 1) }} GB RAM</span>
+                                            <span>{{ $flavor->disk }} GB</span>
                                         </div>
-                                        <div class="flex justify-between">
-                                            <span>Storage:</span>
-                                            <span class="font-medium">{{ $flavor->disk }} GB</span>
-                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- vCPU -->
+                            <div class="hidden md:flex items-center text-sm text-gray-700">
+                                <span>{{ $flavor->vcpus }}</span>
+                            </div>
+                            <!-- RAM -->
+                            <div class="hidden md:flex items-center text-sm text-gray-700">
+                                <span>{{ number_format($flavor->ram_in_gb, 1) }} GB</span>
+                            </div>
+                            <!-- Storage -->
+                            <div class="hidden md:flex items-center text-sm text-gray-700">
+                                <span>{{ $flavor->disk }} GB</span>
+                            </div>
+                            <!-- Monthly Price -->
+                            <div class="flex items-center justify-between md:justify-end">
+                                <span class="md:hidden text-xs text-gray-600">قیمت:</span>
+                                @if($flavor->pricing_monthly)
+                                    <span class="text-lg font-bold text-gray-900">{{ number_format($flavor->pricing_monthly) }} تومان</span>
+                                @else
+                                    <span class="text-sm text-gray-500">-</span>
+                                @endif
                             </div>
                         </div>
                     </label>
                 @empty
-                    <div class="col-span-full text-center py-8 text-gray-500">
-                                <p>هیچ پلنی در دسترس نیست</p>
+                    <div class="px-6 py-8 text-center text-gray-500">
+                        <p>هیچ پلنی در دسترس نیست</p>
                     </div>
                 @endforelse
             </div>
