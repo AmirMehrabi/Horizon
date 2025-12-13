@@ -709,9 +709,39 @@ class OpenStackSyncService
                     // Get server from OpenStack
                     $server = $compute->getServer(['id' => $instance->openstack_server_id]);
                     
+                    // Retrieve server details to ensure we have the latest status
+                    $server->retrieve();
+                    
+                    // Get status - try multiple ways to access it
+                    $openstackStatus = null;
+                    if (isset($server->status)) {
+                        $openstackStatus = $server->status;
+                    } elseif (method_exists($server, 'getStatus')) {
+                        $openstackStatus = $server->getStatus();
+                    } elseif (isset($server->{'status'})) {
+                        $openstackStatus = $server->{'status'};
+                    }
+                    
+                    if (empty($openstackStatus)) {
+                        Log::warning('Could not retrieve server status from OpenStack', [
+                            'instance_id' => $instance->id,
+                            'openstack_server_id' => $instance->openstack_server_id,
+                            'server_class' => get_class($server),
+                            'server_properties' => array_keys(get_object_vars($server)),
+                        ]);
+                        continue;
+                    }
+                    
                     // Map OpenStack status to our status
-                    $openstackStatus = strtolower($server->status ?? '');
+                    $openstackStatus = strtolower(trim($openstackStatus));
                     $mappedStatus = $this->mapOpenStackStatus($openstackStatus);
+                    
+                    Log::info('Syncing instance status', [
+                        'instance_id' => $instance->id,
+                        'current_status' => $instance->status,
+                        'openstack_status' => $openstackStatus,
+                        'mapped_status' => $mappedStatus,
+                    ]);
                     
                     // Update if status changed
                     if ($instance->status !== $mappedStatus) {
@@ -741,6 +771,7 @@ class OpenStackSyncService
                         'instance_id' => $instance->id,
                         'openstack_server_id' => $instance->openstack_server_id,
                         'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
                     ]);
                 }
             }
