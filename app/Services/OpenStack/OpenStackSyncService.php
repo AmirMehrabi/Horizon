@@ -475,7 +475,7 @@ class OpenStackSyncService
         if (!empty($network->subnets)) {
             foreach ($network->subnets as $subnetId) {
                 try {
-                    $subnet = $networkingService->getSubnet(['id' => $subnetId]);
+                    $subnet = $networkingService->getSubnet($subnetId);
                     $this->syncSubnet($subnet, $networkModel->id, $region, $stats);
                 } catch (\Exception $e) {
                     $stats['errors'][] = [

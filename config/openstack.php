@@ -30,7 +30,7 @@ return [
 
     'user_id' => env('OPENSTACK_USER_ID'),
     'username' => env('OPENSTACK_USERNAME', 'admin'),
-    'password' => env('OPENSTACK_PASSWORD', 'supsecret2'),
+    'password' => env('OPENSTACK_PASSWORD', 'supsecret02'),
 
     /*
     |--------------------------------------------------------------------------

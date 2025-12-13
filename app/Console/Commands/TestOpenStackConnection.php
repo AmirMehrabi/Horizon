@@ -13,7 +13,7 @@ class TestOpenStackConnection extends Command
      * @var string
      */
     protected $signature = 'openstack:test-connection
-                            {--verbose : Show detailed connection information}';
+                            {--detailed : Show detailed connection information}';
 
     /**
      * The console command description.
@@ -31,7 +31,7 @@ class TestOpenStackConnection extends Command
         $this->newLine();
 
         // Display configuration
-        if ($this->option('verbose')) {
+        if ($this->option('detailed')) {
             $this->displayConfiguration();
             $this->newLine();
         }
@@ -79,7 +79,7 @@ class TestOpenStackConnection extends Command
             $this->error('❌ Connection test failed with exception:');
             $this->error($e->getMessage());
 
-            if ($this->option('verbose')) {
+            if ($this->option('detailed')) {
                 $this->newLine();
                 $this->error('Stack trace:');
                 $this->line($e->getTraceAsString());
