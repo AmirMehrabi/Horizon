@@ -274,7 +274,7 @@ class OpenStackImageService
 
             // Get file extension from URL
             $path = parse_url($url, PHP_URL_PATH);
-            $extension = strtolower(pathinfo($path, PATH_INFO_EXTENSION));
+            $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
             $allowedExtensions = ['qcow2', 'raw', 'iso', 'vhd', 'vmdk', 'vdi'];
 
             if (!in_array($extension, $allowedExtensions)) {

@@ -50,7 +50,17 @@ Route::domain('hub.aviato.ir')
             Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
             Route::get('/dashboard', [AdminDashboardController::class, 'index']);
             Route::get('/users', [AdminUserManagementController::class, 'index'])->name('users.index');
-            Route::get('/projects', [AdminProjectManagementController::class, 'index'])->name('projects.index');
+            // Project Management Routes
+            Route::get('/projects', [\App\Http\Controllers\Admin\ProjectController::class, 'index'])->name('projects.index');
+            Route::get('/projects/create', [\App\Http\Controllers\Admin\ProjectController::class, 'create'])->name('projects.create');
+            Route::post('/projects', [\App\Http\Controllers\Admin\ProjectController::class, 'store'])->name('projects.store');
+            Route::get('/projects/{id}', [\App\Http\Controllers\Admin\ProjectController::class, 'show'])->name('projects.show');
+            Route::get('/projects/{id}/edit', [\App\Http\Controllers\Admin\ProjectController::class, 'edit'])->name('projects.edit');
+            Route::put('/projects/{id}', [\App\Http\Controllers\Admin\ProjectController::class, 'update'])->name('projects.update');
+            Route::delete('/projects/{id}', [\App\Http\Controllers\Admin\ProjectController::class, 'destroy'])->name('projects.destroy');
+            Route::post('/projects/{id}/sync', [\App\Http\Controllers\Admin\ProjectController::class, 'sync'])->name('projects.sync');
+            Route::post('/projects/{id}/quota', [\App\Http\Controllers\Admin\ProjectController::class, 'updateQuota'])->name('projects.quota.update');
+            Route::post('/projects/{id}/users', [\App\Http\Controllers\Admin\ProjectController::class, 'assignUsers'])->name('projects.users.assign');
             Route::get('/compute', [AdminComputeController::class, 'index'])->name('compute.index');
             Route::get('/compute/create', [AdminComputeController::class, 'create'])->name('compute.create');
             Route::post('/compute', [AdminComputeController::class, 'store'])->name('compute.store');
