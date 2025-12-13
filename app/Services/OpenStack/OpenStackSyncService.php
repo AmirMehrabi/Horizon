@@ -693,8 +693,9 @@ class OpenStackSyncService
             $instanceService = app(OpenStackInstanceService::class);
 
             // Get all instances that have been provisioned in OpenStack
+            // Sync all instances, not just pending/building, so we can update stopped instances when they're started
             $instances = OpenStackInstance::whereNotNull('openstack_server_id')
-                ->whereIn('status', ['pending', 'building'])
+                ->whereNotIn('status', ['deleted'])
                 ->get();
 
             $stats = [
@@ -761,6 +762,9 @@ class OpenStackSyncService
                     
                     // Update if status changed
                     if ($instance->status !== $mappedStatus) {
+                        // Capture old status before updating
+                        $oldStatus = $instance->status;
+                        
                         // Update status and IP addresses together
                         $updateData['status'] = $mappedStatus;
                         $instance->update($updateData);
@@ -769,8 +773,8 @@ class OpenStackSyncService
                         OpenStackInstanceEvent::create([
                             'instance_id' => $instance->id,
                             'event_type' => $mappedStatus,
-                            'message' => "Instance status changed to {$mappedStatus}",
-                            'source' => 'openstack',
+                            'message' => "Instance status changed from {$oldStatus} to {$mappedStatus}",
+                            'source' => 'sync',
                             'created_at' => now(),
                         ]);
                         
@@ -778,13 +782,13 @@ class OpenStackSyncService
                         
                         Log::info('Instance status updated from sync', [
                             'instance_id' => $instance->id,
-                            'old_status' => $instance->status,
+                            'old_status' => $oldStatus,
                             'new_status' => $mappedStatus,
                             'openstack_status' => $openstackStatus,
                             'ip_addresses' => $ipAddresses,
                         ]);
                     } else {
-                        // Just update the status-related fields and IP addresses
+                        // Just update the status-related fields and IP addresses (synced_at, last_openstack_status, IPs)
                         $instance->update($updateData);
                     }
                 } catch (\Exception $e) {
