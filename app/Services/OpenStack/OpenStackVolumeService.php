@@ -27,13 +27,33 @@ class OpenStackVolumeService
     {
         try {
             $compute = $this->connection->getComputeService();
-            $server = $compute->getServer(['id' => $serverId]);
+            
+            // Get server and verify it exists
+            try {
+                $server = $compute->getServer(['id' => $serverId]);
+            } catch (\Exception $e) {
+                throw new \Exception("Server not found: {$serverId} - " . $e->getMessage());
+            }
+            
+            if (!$server || !isset($server->id)) {
+                throw new \Exception("Server not found or invalid: {$serverId}");
+            }
 
-            // Create image snapshot from server
+            // Verify server status (should be ACTIVE or STOPPED for snapshots)
+            $serverStatus = $server->status ?? null;
+            if (!in_array(strtoupper($serverStatus ?? ''), ['ACTIVE', 'STOPPED', 'SHUTOFF'])) {
+                Log::warning('Server may not be in optimal state for snapshot', [
+                    'server_id' => $serverId,
+                    'status' => $serverStatus,
+                ]);
+            }
+
+            // Prepare image data - OpenStack Nova API expects specific format
             $imageData = [
                 'name' => $name,
             ];
 
+            // Add metadata if description provided
             if ($description) {
                 $imageData['metadata'] = [
                     'description' => $description,
@@ -42,25 +62,136 @@ class OpenStackVolumeService
                 ];
             }
 
-            $image = $server->createImage($imageData);
+            Log::info('Creating snapshot', [
+                'server_id' => $serverId,
+                'name' => $name,
+                'server_status' => $serverStatus,
+            ]);
+
+            // Create image snapshot from server
+            // Note: createImage may return null, a string ID, or an Image object depending on OpenStack version
+            try {
+                $imageResult = $server->createImage($imageData);
+            } catch (\Exception $e) {
+                Log::warning('createImage threw exception, may still have succeeded', [
+                    'error' => $e->getMessage(),
+                ]);
+                $imageResult = null;
+            }
+
+            $imageId = null;
+            $imageName = $name;
+            $imageStatus = 'queued';
+            $imageSize = null;
+
+            // Handle different return types from createImage
+            if ($imageResult === null) {
+                // Some OpenStack versions return null but the image ID is in response headers
+                // We need to wait a bit and then search for the image by name
+                Log::info('createImage returned null, searching for image by name', [
+                    'name' => $name,
+                ]);
+                
+                // Wait a moment for the image to be created (retry up to 5 times)
+                $imageService = $this->connection->getImageService();
+                $found = false;
+                $maxRetries = 5;
+                $retryCount = 0;
+                
+                while (!$found && $retryCount < $maxRetries) {
+                    sleep(2);
+                    $retryCount++;
+                    
+                    try {
+                        // Try to find the image by name (most recent first)
+                        $images = iterator_to_array($imageService->listImages(['name' => $name]));
+                        
+                        if (count($images) > 0) {
+                            // Get the most recent one (should be the one we just created)
+                            usort($images, function($a, $b) {
+                                $timeA = $a->createdAt ?? 0;
+                                $timeB = $b->createdAt ?? 0;
+                                return $timeB <=> $timeA; // Descending order
+                            });
+                            
+                            $image = $images[0];
+                            $imageId = $image->id;
+                            $imageName = $image->name ?? $name;
+                            $imageStatus = $image->status ?? 'queued';
+                            $imageSize = $image->size ?? null;
+                            $found = true;
+                            
+                            Log::info('Found image after retry', [
+                                'image_id' => $imageId,
+                                'retry_count' => $retryCount,
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        Log::debug('Error searching for image', [
+                            'retry_count' => $retryCount,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+                
+                if (!$found) {
+                    throw new \Exception("Image creation initiated but image not found after {$maxRetries} retries. The snapshot may still be processing in the background.");
+                }
+            } elseif (is_string($imageResult)) {
+                // If createImage returns just the ID string
+                $imageId = $imageResult;
+                
+                // Try to fetch the image details
+                try {
+                    $imageService = $this->connection->getImageService();
+                    $image = $imageService->getImage(['id' => $imageId]);
+                    $imageName = $image->name ?? $name;
+                    $imageStatus = $image->status ?? 'queued';
+                    $imageSize = $image->size ?? null;
+                } catch (\Exception $e) {
+                    // Image might not be immediately available
+                    Log::info('Image not immediately available, using ID only', [
+                        'image_id' => $imageId,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            } elseif (is_object($imageResult)) {
+                // If createImage returns an Image object
+                if (isset($imageResult->id)) {
+                    $imageId = $imageResult->id;
+                    $imageName = $imageResult->name ?? $name;
+                    $imageStatus = $imageResult->status ?? 'queued';
+                    $imageSize = $imageResult->size ?? null;
+                } else {
+                    throw new \Exception("Image object returned but missing ID property");
+                }
+            } else {
+                throw new \Exception("Unexpected return type from createImage: " . gettype($imageResult));
+            }
+
+            if (!$imageId) {
+                throw new \Exception("Failed to determine image ID from createImage response");
+            }
 
             Log::info('Instance snapshot created', [
                 'server_id' => $serverId,
-                'image_id' => $image->id,
-                'name' => $name,
+                'image_id' => $imageId,
+                'name' => $imageName,
+                'status' => $imageStatus,
             ]);
 
             return [
-                'id' => $image->id,
-                'name' => $image->name,
-                'status' => $image->status ?? 'queued',
-                'size' => $image->size ?? null,
+                'id' => $imageId,
+                'name' => $imageName,
+                'status' => $imageStatus,
+                'size' => $imageSize,
             ];
         } catch (\Exception $e) {
             Log::error('Failed to create instance snapshot', [
                 'server_id' => $serverId,
                 'name' => $name,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
             throw new \Exception('Failed to create snapshot: ' . $e->getMessage(), 0, $e);
         }
