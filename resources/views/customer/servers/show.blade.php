@@ -78,7 +78,7 @@
 
 <!-- Overview Tab -->
 <div id="content-overview" class="tab-content">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Server Info -->
         <div class="lg:col-span-2 space-y-6">
             <!-- Resource Usage -->
