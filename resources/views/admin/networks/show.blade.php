@@ -181,7 +181,14 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                                <a href="{{ route('admin.compute.show', $instance->openstack_id) }}" class="text-blue-600 hover:text-blue-900">مشاهده</a>
+                                @php
+                                    $instanceId = $instance->openstack_id ?? $instance->id ?? null;
+                                @endphp
+                                @if($instanceId)
+                                <a href="{{ route('admin.compute.show', $instanceId) }}" class="text-blue-600 hover:text-blue-900">مشاهده</a>
+                                @else
+                                <span class="text-gray-400">N/A</span>
+                                @endif
                             </td>
                         </tr>
                         @endforeach
