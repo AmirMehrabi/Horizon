@@ -371,8 +371,9 @@
 
                 <!-- Instance Name -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">نام سرور (اختیاری)</label>
-                            <input type="text" name="name" value="{{ old('name') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" placeholder="سرور من">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">نام سرور <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" id="server-name" value="{{ old('name') }}" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" placeholder="سرور من" onchange="updateChecklist()" oninput="updateChecklist()">
+                    <p class="text-xs text-gray-500 mt-1">نام سرور الزامی است</p>
                 </div>
 
                 <!-- Description -->
@@ -640,29 +641,31 @@ function updateChecklist() {
         networkCheck.querySelector('svg').classList.add('text-gray-400');
     }
     
-    // Check Access
+    // Check Access (requires both access method and server name)
     const accessCheck = document.getElementById('checklist-access');
-        const accessMethod = document.querySelector('input[name="access_method"]:checked')?.value;
-        if (accessMethod === 'ssh_key') {
+    const serverName = document.getElementById('server-name')?.value.trim();
+    const accessMethod = document.querySelector('input[name="access_method"]:checked')?.value;
+    
+    let accessMethodValid = false;
+    
+    if (accessMethod === 'ssh_key') {
         const sshKeyId = document.getElementById('ssh-key-select')?.value;
         const sshPublicKey = document.getElementById('ssh-public-key-input')?.value.trim();
         if (sshKeyId || sshPublicKey) {
-            accessCheck.querySelector('svg').classList.remove('text-gray-400');
-            accessCheck.querySelector('svg').classList.add('text-green-500');
-        } else {
-            accessCheck.querySelector('svg').classList.remove('text-green-500');
-            accessCheck.querySelector('svg').classList.add('text-gray-400');
-            }
-        } else if (accessMethod === 'password') {
+            accessMethodValid = true;
+        }
+    } else if (accessMethod === 'password') {
         const password = document.getElementById('root_password')?.value;
         const passwordConfirm = document.getElementById('root_password_confirmation')?.value;
         if (password && password.length >= 8 && password === passwordConfirm) {
-            accessCheck.querySelector('svg').classList.remove('text-gray-400');
-            accessCheck.querySelector('svg').classList.add('text-green-500');
-        } else {
-            accessCheck.querySelector('svg').classList.remove('text-green-500');
-            accessCheck.querySelector('svg').classList.add('text-gray-400');
+            accessMethodValid = true;
         }
+    }
+    
+    // Access is valid only if both access method and server name are provided
+    if (accessMethodValid && serverName && serverName.length > 0) {
+        accessCheck.querySelector('svg').classList.remove('text-gray-400');
+        accessCheck.querySelector('svg').classList.add('text-green-500');
     } else {
         accessCheck.querySelector('svg').classList.remove('text-green-500');
         accessCheck.querySelector('svg').classList.add('text-gray-400');
