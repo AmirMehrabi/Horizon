@@ -147,11 +147,14 @@ class ProvisionOpenStackInstance implements ShouldQueue
             foreach ($this->instance->networks as $network) {
                 // Validate openstack_id is not empty and is a valid UUID format
                 $openstackId = $network->openstack_id ?? null;
-                if (!empty($openstackId) && is_string($openstackId) && trim($openstackId) !== '') {
+                if (!empty($openstackId) && is_string($openstackId)) {
                     $openstackId = trim($openstackId);
                     // Ensure it looks like a UUID (basic validation)
                     if (preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $openstackId)) {
-                        $networks[] = ['uuid' => $openstackId];
+                        // Create a fresh array to avoid any key issues
+                        $networkEntry = [];
+                        $networkEntry['uuid'] = (string)$openstackId;
+                        $networks[] = $networkEntry;
                     } else {
                         Log::warning('Network openstack_id is not a valid UUID format', [
                             'network_id' => $network->id,
@@ -174,7 +177,8 @@ class ProvisionOpenStackInstance implements ShouldQueue
         // Only add networks parameter if we have valid networks
         // If no networks, OpenStack will use default network
         if (!empty($networks)) {
-            $params['networks'] = $networks;
+            // Re-index array to ensure clean numeric keys
+            $params['networks'] = array_values($networks);
         } else {
             Log::info('No valid networks specified, OpenStack will use default network', [
                 'instance_id' => $this->instance->id,
@@ -187,9 +191,14 @@ class ProvisionOpenStackInstance implements ShouldQueue
         if ($this->instance->securityGroups->isNotEmpty()) {
             foreach ($this->instance->securityGroups as $sg) {
                 $sgName = $sg->name ?? null;
-                if (!empty($sgName) && is_string($sgName) && trim($sgName) !== '') {
-                    // OpenStack SDK expects security groups as array of objects: [{'name': 'default'}]
-                    $securityGroups[] = ['name' => trim($sgName)];
+                if (!empty($sgName) && is_string($sgName)) {
+                    $sgName = trim($sgName);
+                    if ($sgName !== '') {
+                        // Create a fresh array to avoid any key issues
+                        $sgEntry = [];
+                        $sgEntry['name'] = (string)$sgName;
+                        $securityGroups[] = $sgEntry;
+                    }
                 } else {
                     Log::warning('Security group missing name, skipping', [
                         'security_group_id' => $sg->id,
@@ -202,7 +211,8 @@ class ProvisionOpenStackInstance implements ShouldQueue
         
         // Only add security groups parameter if we have valid security groups
         if (!empty($securityGroups)) {
-            $params['securityGroups'] = $securityGroups;
+            // Re-index array to ensure clean numeric keys
+            $params['securityGroups'] = array_values($securityGroups);
         }
 
         // Add key pair if available
@@ -269,14 +279,24 @@ class ProvisionOpenStackInstance implements ShouldQueue
         }
 
         // Clean up params: remove any null or empty values that might cause issues
+        // Only include parameters that the OpenStack SDK expects
+        $allowedParams = [
+            'name', 'flavorId', 'imageId', 'networks', 'securityGroups', 
+            'keyName', 'userData', 'metadata', 'availabilityZone', 
+            'configDrive', 'personality'
+        ];
+        
         $cleanParams = [];
         foreach ($params as $key => $value) {
-            // Skip empty keys
-            if (empty($key) || trim($key) === '') {
-                Log::warning('Skipping parameter with empty key', [
-                    'value' => $value,
-                    'instance_id' => $this->instance->id,
-                ]);
+            // Skip empty keys or keys not in allowed list
+            if (empty($key) || trim($key) === '' || !in_array($key, $allowedParams)) {
+                if (!in_array($key, $allowedParams)) {
+                    Log::warning('Skipping unrecognized parameter', [
+                        'key' => $key,
+                        'value' => is_array($value) ? 'array' : $value,
+                        'instance_id' => $this->instance->id,
+                    ]);
+                }
                 continue;
             }
             
@@ -329,10 +349,21 @@ class ProvisionOpenStackInstance implements ShouldQueue
                 }
             }
             
-            $cleanParams[$key] = $value;
+            // Final validation: ensure key is not empty and value is valid
+            if (!empty($key) && trim($key) !== '' && $value !== null) {
+                $cleanParams[trim($key)] = $value;
+            }
         }
         
-        return $cleanParams;
+        // Final check: ensure no empty keys exist
+        $finalParams = [];
+        foreach ($cleanParams as $key => $value) {
+            if (!empty($key) && trim($key) !== '') {
+                $finalParams[trim($key)] = $value;
+            }
+        }
+        
+        return $finalParams;
     }
 
     /**
