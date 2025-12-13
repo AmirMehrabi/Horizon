@@ -496,12 +496,17 @@ class OpenStackSyncService
      */
     protected function syncSubnet($subnet, string $networkId, string $region, array &$stats): void
     {
+        // Handle CIDR - some subnets (like IPv6 or special types) may not have CIDR
+        $cidr = $subnet->cidr ?? null;
+        // For IPv6 subnets without CIDR, we might have subnetpool_id instead
+        // If no CIDR and no subnetpool, we'll store null (now allowed)
+        
         $data = [
             'openstack_id' => $subnet->id,
             'network_id' => $networkId,
             'name' => $subnet->name ?? 'Unnamed',
             'description' => $subnet->description ?? null,
-            'cidr' => $subnet->cidr ?? null,
+            'cidr' => $cidr,
             'ip_version' => $subnet->ipVersion ?? 4,
             'gateway_ip' => $subnet->gatewayIp ?? null,
             'enable_dhcp' => $subnet->enableDhcp ?? true,
@@ -571,11 +576,13 @@ class OpenStackSyncService
                 }
 
                 // Mark security groups as deleted if they no longer exist in OpenStack
+                // Use status update instead of delete to avoid foreign key constraint violations
                 $openstackIds = collect($openstackSecurityGroups)->pluck('id')->toArray();
                 $deleted = OpenStackSecurityGroup::where('region', $region)
                     ->whereNotIn('openstack_id', $openstackIds)
                     ->whereNotNull('openstack_id')
-                    ->delete();
+                    ->where('status', '!=', 'DELETED')
+                    ->update(['status' => 'DELETED']);
 
                 $stats['deleted'] = $deleted;
 
@@ -648,6 +655,7 @@ class OpenStackSyncService
             'name' => $sg->name ?? 'Unnamed',
             'description' => $sg->description ?? null,
             'rules' => $rules,
+            'status' => 'ACTIVE', // Mark as active when synced from OpenStack
             'region' => $region,
             'synced_at' => now(),
         ];

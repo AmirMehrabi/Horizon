@@ -23,6 +23,7 @@ class OpenStackSecurityGroup extends Model
         'name',
         'description',
         'rules',
+        'status',
         'region',
         'synced_at',
     ];
