@@ -9,6 +9,7 @@ use App\Models\OpenStackSubnet;
 use App\Models\OpenStackSecurityGroup;
 use App\Models\OpenStackSyncJob;
 use App\Models\OpenStackInstance;
+use App\Models\OpenStackInstanceEvent;
 use App\Services\OpenStack\OpenStackInstanceService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -736,16 +737,43 @@ class OpenStackSyncService
                     $openstackStatus = strtolower(trim($openstackStatus));
                     $mappedStatus = $this->mapOpenStackStatus($openstackStatus);
                     
+                    // Extract IP addresses
+                    $ipAddresses = $this->extractIpAddresses($server, $instance);
+                    
                     Log::info('Syncing instance status', [
                         'instance_id' => $instance->id,
                         'current_status' => $instance->status,
                         'openstack_status' => $openstackStatus,
                         'mapped_status' => $mappedStatus,
+                        'ip_addresses' => $ipAddresses,
                     ]);
+                    
+                    // Prepare update data
+                    $updateData = [
+                        'last_openstack_status' => $openstackStatus,
+                        'synced_at' => now(),
+                    ];
+                    
+                    // Add IP addresses if we have them
+                    if (!empty($ipAddresses)) {
+                        $updateData['ip_addresses'] = $ipAddresses;
+                    }
                     
                     // Update if status changed
                     if ($instance->status !== $mappedStatus) {
-                        $instanceService->updateStatus($instance, $mappedStatus, $openstackStatus);
+                        // Update status and IP addresses together
+                        $updateData['status'] = $mappedStatus;
+                        $instance->update($updateData);
+                        
+                        // Log the status change event
+                        OpenStackInstanceEvent::create([
+                            'instance_id' => $instance->id,
+                            'event_type' => $mappedStatus,
+                            'message' => "Instance status changed to {$mappedStatus}",
+                            'source' => 'openstack',
+                            'created_at' => now(),
+                        ]);
+                        
                         $stats['updated']++;
                         
                         Log::info('Instance status updated from sync', [
@@ -753,13 +781,11 @@ class OpenStackSyncService
                             'old_status' => $instance->status,
                             'new_status' => $mappedStatus,
                             'openstack_status' => $openstackStatus,
+                            'ip_addresses' => $ipAddresses,
                         ]);
                     } else {
-                        // Just update the last_openstack_status and synced_at
-                        $instance->update([
-                            'last_openstack_status' => $openstackStatus,
-                            'synced_at' => now(),
-                        ]);
+                        // Just update the status-related fields and IP addresses
+                        $instance->update($updateData);
                     }
                 } catch (\Exception $e) {
                     $stats['errors'][] = [
@@ -809,6 +835,76 @@ class OpenStackSyncService
                 'job_id' => $syncJob->id,
             ];
         }
+    }
+
+    /**
+     * Extract IP addresses from OpenStack server object.
+     *
+     * @param mixed $server OpenStack Server object
+     * @param OpenStackInstance $instance Local instance model
+     * @return array Array with 'public' and 'private' keys
+     */
+    protected function extractIpAddresses($server, OpenStackInstance $instance): array
+    {
+        $publicIps = [];
+        $privateIps = [];
+        
+        try {
+            // Get addresses from server object
+            $addresses = $server->addresses ?? [];
+            
+            if (empty($addresses) || !is_array($addresses)) {
+                // Try to get addresses via listAddresses method
+                if (method_exists($server, 'listAddresses')) {
+                    $addresses = $server->listAddresses();
+                }
+            }
+            
+            // Get networks to determine which are external (public)
+            $networks = $instance->networks;
+            $externalNetworks = $networks->filter(function ($network) {
+                return $network->external ?? false;
+            })->pluck('openstack_id')->toArray();
+            
+            // Process addresses
+            foreach ($addresses as $networkName => $networkAddresses) {
+                if (!is_array($networkAddresses)) {
+                    continue;
+                }
+                
+                // Find the network by name to check if it's external
+                $network = $networks->firstWhere('name', $networkName);
+                $isExternal = $network ? ($network->external ?? false) : false;
+                
+                foreach ($networkAddresses as $address) {
+                    $ip = is_array($address) ? ($address['addr'] ?? null) : ($address->addr ?? null);
+                    $version = is_array($address) ? ($address['version'] ?? 4) : ($address->version ?? 4);
+                    
+                    if ($ip && $version == 4) {
+                        if ($isExternal) {
+                            $publicIps[] = $ip;
+                        } else {
+                            $privateIps[] = $ip;
+                        }
+                    }
+                }
+            }
+            
+            // Remove duplicates
+            $publicIps = array_unique($publicIps);
+            $privateIps = array_unique($privateIps);
+            
+        } catch (\Exception $e) {
+            Log::warning('Failed to extract IP addresses from server', [
+                'instance_id' => $instance->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+        
+        return [
+            'public' => array_values($publicIps),
+            'private' => array_values($privateIps),
+        ];
     }
 
     /**
