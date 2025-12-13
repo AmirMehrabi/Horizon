@@ -451,8 +451,18 @@ class OpenStackInstanceService
 
         // Attach networks
         foreach ($networks as $networkData) {
-            $instance->networks()->attach($networkData['network_id'], [
+            // Generate UUID for pivot table id
+            $pivotId = Str::uuid();
+            
+            // Use DB::table() to insert with UUID primary key
+            // Laravel's attach() doesn't support setting pivot table primary keys
+            DB::table('openstack_instance_networks')->insert([
+                'id' => $pivotId,
+                'instance_id' => $instance->id,
+                'network_id' => $networkData['network_id'],
                 'is_primary' => $networkData['is_primary'] ?? false,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
     }
@@ -472,7 +482,16 @@ class OpenStackInstanceService
                 ->first();
 
             if ($defaultSecurityGroup) {
-                $instance->securityGroups()->attach($defaultSecurityGroup->id);
+                // Generate UUID for pivot table id
+                $pivotId = Str::uuid();
+                
+                DB::table('openstack_instance_security_groups')->insert([
+                    'id' => $pivotId,
+                    'instance_id' => $instance->id,
+                    'security_group_id' => $defaultSecurityGroup->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
                 return;
             }
         }
@@ -484,7 +503,16 @@ class OpenStackInstanceService
                 ->first();
 
             if ($securityGroup) {
-                $instance->securityGroups()->attach($securityGroup->id);
+                // Generate UUID for pivot table id
+                $pivotId = Str::uuid();
+                
+                DB::table('openstack_instance_security_groups')->insert([
+                    'id' => $pivotId,
+                    'instance_id' => $instance->id,
+                    'security_group_id' => $securityGroup->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
             } else {
                 Log::warning('Security group not found', [
                     'security_group_id' => $sgId,
