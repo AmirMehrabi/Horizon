@@ -38,27 +38,47 @@ class NetworkController extends Controller
         try {
             $customer = Auth::guard('customer')->user();
             
-            // Get customer's networks (private networks only)
-            $filters = [
-                'type' => 'private',
-                'customer_id' => $customer->id,
-            ];
-
-            $networks = $this->networkService->getAllNetworks($filters);
-            
-            // Filter to only networks associated with customer's instances
+            // Get customer's instance IDs
             $customerInstanceIds = OpenStackInstance::where('customer_id', $customer->id)
                 ->pluck('id')
                 ->toArray();
             
-            $customerNetworks = $networks->filter(function ($network) use ($customerInstanceIds) {
-                return $network->instances()->whereIn('openstack_instances.id', $customerInstanceIds)->exists();
+            if (empty($customerInstanceIds)) {
+                return view('customer.networks.index', [
+                    'customerNetworks' => collect([]),
+                    'securityGroups' => collect([]),
+                    'instances' => collect([]),
+                    'statistics' => [
+                        'private_networks' => 0,
+                        'security_groups' => 0,
+                        'floating_ips' => 0,
+                        'bandwidth_usage' => 0,
+                    ],
+                ]);
+            }
+            
+            // Get all networks and filter to only those connected to customer's instances
+            $filters = ['type' => 'private'];
+            $allNetworks = $this->networkService->getAllNetworks($filters);
+            
+            // Filter networks that have at least one customer instance connected
+            $customerNetworks = $allNetworks->filter(function ($network) use ($customerInstanceIds) {
+                $networkInstances = $network->instances()->get();
+                return $networkInstances->whereIn('id', $customerInstanceIds)->isNotEmpty();
+            })->map(function ($network) use ($customerInstanceIds) {
+                // Load relationships and filter instances to only customer's instances
+                $network->load(['subnets', 'instances']);
+                $network->setRelation('instances', $network->instances()->whereIn('openstack_instances.id', $customerInstanceIds)->get());
+                return $network;
             });
 
-            // Get security groups
+            // Get security groups used by customer's instances
             $securityGroups = OpenStackSecurityGroup::where('region', config('openstack.region'))
                 ->get()
                 ->filter(function ($sg) use ($customerInstanceIds) {
+                    if (empty($customerInstanceIds)) {
+                        return false;
+                    }
                     return $sg->instances()->whereIn('openstack_instances.id', $customerInstanceIds)->exists();
                 });
 
@@ -118,19 +138,24 @@ class NetworkController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'cidr' => 'nullable|string',
+            'cidr' => 'nullable|string|regex:/^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$/',
             'gateway_ip' => 'nullable|ip',
             'enable_dhcp' => 'nullable|boolean',
         ]);
 
         try {
+            $cidr = $request->input('cidr');
+            if (empty($cidr) && $request->has('custom_cidr')) {
+                $cidr = $request->input('custom_cidr');
+            }
+
             $data = [
                 'name' => $request->input('name'),
                 'description' => $request->input('description'),
                 'external' => false, // Customer can only create private networks
                 'shared' => false,
                 'admin_state_up' => true,
-                'cidr' => $request->input('cidr'),
+                'cidr' => $cidr,
                 'gateway_ip' => $request->input('gateway_ip'),
                 'enable_dhcp' => $request->input('enable_dhcp', true),
             ];
