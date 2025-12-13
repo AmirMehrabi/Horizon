@@ -59,15 +59,17 @@ class ProvisionOpenStackInstance implements ShouldQueue
             $serverParams = $this->prepareServerParams();
 
             // Log parameters for debugging (excluding sensitive data)
+            // Log the full structure to identify the issue
+            $logParams = $serverParams;
+            if (isset($logParams['userData'])) {
+                $logParams['userData'] = '[REDACTED - base64 encoded]';
+            }
             Log::info('Preparing to create server in OpenStack', [
                 'instance_id' => $this->instance->id,
-                'name' => $serverParams['name'] ?? null,
-                'flavorId' => $serverParams['flavorId'] ?? null,
-                'imageId' => $serverParams['imageId'] ?? null,
-                'networks_count' => isset($serverParams['networks']) ? count($serverParams['networks']) : 0,
-                'security_groups_count' => isset($serverParams['securityGroups']) ? count($serverParams['securityGroups']) : 0,
-                'has_keyName' => isset($serverParams['keyName']),
-                'has_userData' => isset($serverParams['userData']),
+                'params_structure' => $logParams,
+                'params_keys' => array_keys($serverParams),
+                'networks_structure' => $serverParams['networks'] ?? 'not set',
+                'security_groups_structure' => $serverParams['securityGroups'] ?? 'not set',
             ]);
 
             // Create server in OpenStack
@@ -116,12 +118,20 @@ class ProvisionOpenStackInstance implements ShouldQueue
     {
         $this->instance->load(['flavor', 'image', 'keyPair', 'networks', 'securityGroups']);
 
+        // Validate relationships exist
+        if (!$this->instance->flavor) {
+            throw new \Exception('Instance flavor not found. Please ensure flavor is properly associated.');
+        }
+        if (!$this->instance->image) {
+            throw new \Exception('Instance image not found. Please ensure image is properly associated.');
+        }
+
         // Validate required OpenStack IDs
         if (empty($this->instance->flavor->openstack_id)) {
-            throw new \Exception('Flavor missing OpenStack ID. Please sync flavors first.');
+            throw new \Exception('Flavor missing OpenStack ID. Please sync flavors first. Flavor: ' . $this->instance->flavor->name);
         }
         if (empty($this->instance->image->openstack_id)) {
-            throw new \Exception('Image missing OpenStack ID. Please sync images first.');
+            throw new \Exception('Image missing OpenStack ID. Please sync images first. Image: ' . $this->instance->image->name);
         }
 
         $params = [
@@ -132,13 +142,24 @@ class ProvisionOpenStackInstance implements ShouldQueue
 
         // Add networks - filter out networks without openstack_id
         // OpenStack SDK expects networks as array of objects with 'uuid' key
+        $networks = [];
         if ($this->instance->networks->isNotEmpty()) {
-            $networks = [];
             foreach ($this->instance->networks as $network) {
                 // Validate openstack_id is not empty and is a valid UUID format
-                $openstackId = trim($network->openstack_id ?? '');
-                if (!empty($openstackId) && strlen($openstackId) > 0) {
-                    $networks[] = ['uuid' => $openstackId];
+                $openstackId = $network->openstack_id ?? null;
+                if (!empty($openstackId) && is_string($openstackId) && trim($openstackId) !== '') {
+                    $openstackId = trim($openstackId);
+                    // Ensure it looks like a UUID (basic validation)
+                    if (preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $openstackId)) {
+                        $networks[] = ['uuid' => $openstackId];
+                    } else {
+                        Log::warning('Network openstack_id is not a valid UUID format', [
+                            'network_id' => $network->id,
+                            'network_name' => $network->name,
+                            'openstack_id' => $openstackId,
+                            'instance_id' => $this->instance->id,
+                        ]);
+                    }
                 } else {
                     Log::warning('Network missing or invalid openstack_id, skipping', [
                         'network_id' => $network->id,
@@ -148,34 +169,40 @@ class ProvisionOpenStackInstance implements ShouldQueue
                     ]);
                 }
             }
-            if (!empty($networks)) {
-                $params['networks'] = $networks;
-            } else {
-                Log::warning('No valid networks found for instance', [
-                    'instance_id' => $this->instance->id,
-                    'networks_count' => $this->instance->networks->count(),
-                ]);
-            }
+        }
+        
+        // Only add networks parameter if we have valid networks
+        // If no networks, OpenStack will use default network
+        if (!empty($networks)) {
+            $params['networks'] = $networks;
+        } else {
+            Log::info('No valid networks specified, OpenStack will use default network', [
+                'instance_id' => $this->instance->id,
+            ]);
         }
 
-        // Add security groups - filter out security groups without openstack_id
-        // OpenStack SDK expects security groups as array of name strings
+        // Add security groups - filter out security groups without name
+        // OpenStack SDK expects security groups as array of objects with 'name' property
+        $securityGroups = [];
         if ($this->instance->securityGroups->isNotEmpty()) {
-            $securityGroups = [];
             foreach ($this->instance->securityGroups as $sg) {
-                if (!empty($sg->name)) {
-                    // OpenStack SDK expects security groups as array of name strings
-                    $securityGroups[] = $sg->name;
+                $sgName = $sg->name ?? null;
+                if (!empty($sgName) && is_string($sgName) && trim($sgName) !== '') {
+                    // OpenStack SDK expects security groups as array of objects: [{'name': 'default'}]
+                    $securityGroups[] = ['name' => trim($sgName)];
                 } else {
                     Log::warning('Security group missing name, skipping', [
                         'security_group_id' => $sg->id,
+                        'security_group_name' => $sg->name,
                         'instance_id' => $this->instance->id,
                     ]);
                 }
             }
-            if (!empty($securityGroups)) {
-                $params['securityGroups'] = $securityGroups;
-            }
+        }
+        
+        // Only add security groups parameter if we have valid security groups
+        if (!empty($securityGroups)) {
+            $params['securityGroups'] = $securityGroups;
         }
 
         // Add key pair if available
@@ -197,9 +224,17 @@ class ProvisionOpenStackInstance implements ShouldQueue
             $params['userData'] = base64_encode($this->instance->user_data);
         }
 
-        // Add metadata
-        if ($this->instance->metadata) {
-            $params['metadata'] = $this->instance->metadata;
+        // Add metadata - ensure it's a proper array without empty keys
+        if ($this->instance->metadata && is_array($this->instance->metadata)) {
+            $cleanMetadata = [];
+            foreach ($this->instance->metadata as $key => $value) {
+                if (!empty($key) && trim($key) !== '' && $value !== null) {
+                    $cleanMetadata[trim($key)] = $value;
+                }
+            }
+            if (!empty($cleanMetadata)) {
+                $params['metadata'] = $cleanMetadata;
+            }
         }
 
         // Add availability zone
@@ -233,7 +268,71 @@ class ProvisionOpenStackInstance implements ShouldQueue
             }
         }
 
-        return $params;
+        // Clean up params: remove any null or empty values that might cause issues
+        $cleanParams = [];
+        foreach ($params as $key => $value) {
+            // Skip empty keys
+            if (empty($key) || trim($key) === '') {
+                Log::warning('Skipping parameter with empty key', [
+                    'value' => $value,
+                    'instance_id' => $this->instance->id,
+                ]);
+                continue;
+            }
+            
+            // Skip null values and empty strings (except for userData which can be empty)
+            if ($value === null || ($value === '' && $key !== 'userData')) {
+                continue;
+            }
+            
+            // For arrays, ensure they're not empty and properly structured
+            if (is_array($value)) {
+                if (empty($value)) {
+                    continue;
+                }
+                
+                // Validate array structure for networks and security groups
+                if ($key === 'networks') {
+                    $validNetworks = [];
+                    foreach ($value as $network) {
+                        if (is_array($network) && isset($network['uuid']) && !empty($network['uuid'])) {
+                            $validNetworks[] = $network;
+                        } else {
+                            Log::warning('Invalid network structure in params', [
+                                'network' => $network,
+                                'instance_id' => $this->instance->id,
+                            ]);
+                        }
+                    }
+                    if (!empty($validNetworks)) {
+                        $cleanParams[$key] = $validNetworks;
+                    }
+                    continue;
+                }
+                
+                if ($key === 'securityGroups') {
+                    $validSecurityGroups = [];
+                    foreach ($value as $sg) {
+                        if (is_array($sg) && isset($sg['name']) && !empty($sg['name'])) {
+                            $validSecurityGroups[] = $sg;
+                        } else {
+                            Log::warning('Invalid security group structure in params', [
+                                'security_group' => $sg,
+                                'instance_id' => $this->instance->id,
+                            ]);
+                        }
+                    }
+                    if (!empty($validSecurityGroups)) {
+                        $cleanParams[$key] = $validSecurityGroups;
+                    }
+                    continue;
+                }
+            }
+            
+            $cleanParams[$key] = $value;
+        }
+        
+        return $cleanParams;
     }
 
     /**
