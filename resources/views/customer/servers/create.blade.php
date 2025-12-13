@@ -314,20 +314,20 @@
                     <label class="block text-sm font-medium text-gray-700 mb-3">روش دسترسی</label>
                     <div class="space-y-3">
                         <label class="flex items-center">
-                                    <input type="radio" name="access_method" value="ssh_key" class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" checked onchange="toggleAccessMethod(); updateChecklist();">
+                            <input type="radio" name="access_method" value="ssh_key" class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" {{ old('access_method', 'password') === 'ssh_key' ? 'checked' : '' }} onchange="toggleAccessMethod(); updateChecklist();">
                             <span class="mr-2 text-sm text-gray-700">کلید SSH</span>
                         </label>
                         <label class="flex items-center">
-                                    <input type="radio" name="access_method" value="password" class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" onchange="toggleAccessMethod(); updateChecklist();">
+                            <input type="radio" name="access_method" value="password" class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" {{ old('access_method', 'password') === 'password' ? 'checked' : '' }} onchange="toggleAccessMethod(); updateChecklist();">
                             <span class="mr-2 text-sm text-gray-700">رمز عبور root</span>
                         </label>
                     </div>
                 </div>
 
                 <!-- SSH Key -->
-                <div id="ssh-key-section">
+                <div id="ssh-key-section" class="hidden">
                     <label class="block text-sm font-medium text-gray-700 mb-2">کلید SSH</label>
-                            <select name="ssh_key_id" id="ssh-key-select" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 mb-2" onchange="toggleSshKeyInput(); updateChecklist();">
+                    <select name="ssh_key_id" id="ssh-key-select" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 mb-2" onchange="toggleSshKeyInput(); updateChecklist();">
                         <option value="">انتخاب کلید SSH موجود</option>
                         <option value="new">ایجاد کلید جدید</option>
                         @foreach($keyPairs as $keyPair)
@@ -336,22 +336,37 @@
                             </option>
                         @endforeach
                     </select>
-                            <p class="text-xs text-gray-500 mb-2">یا کلید SSH عمومی خود را وارد کنید</p>
-                            <textarea name="ssh_public_key" id="ssh-public-key-input" rows="4" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm" placeholder="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ..." onchange="updateChecklist()">{{ old('ssh_public_key') }}</textarea>
+                    <p class="text-xs text-gray-500 mb-2">یا کلید SSH عمومی خود را وارد کنید</p>
+                    <textarea name="ssh_public_key" id="ssh-public-key-input" rows="4" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm" placeholder="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ..." onchange="updateChecklist()">{{ old('ssh_public_key') }}</textarea>
                 </div>
 
                 <!-- Root Password -->
-                <div id="password-section" class="hidden">
+                <div id="password-section">
+                    <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-blue-900 mb-1">رمز عبور پیش‌فرض</p>
+                                <p class="text-sm text-blue-800">
+                                    رمز عبور پیش‌فرض سرور شما: <span class="font-mono font-bold bg-blue-100 px-2 py-1 rounded">qwerty123</span>
+                                </p>
+                                <p class="text-xs text-blue-700 mt-2">می‌توانید این رمز عبور را تغییر دهید یا از رمز عبور دلخواه خود استفاده کنید.</p>
+                            </div>
+                        </div>
+                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">رمز عبور root</label>
-                                    <input type="password" name="root_password" id="root_password" value="{{ old('root_password') }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" onchange="updateChecklist()">
+                            <input type="password" name="root_password" id="root_password" value="{{ old('root_password', 'qwerty123') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" onchange="updateChecklist()">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">تأیید رمز عبور</label>
-                                    <input type="password" name="root_password_confirmation" id="root_password_confirmation" value="{{ old('root_password_confirmation') }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" onchange="updateChecklist()">
+                            <input type="password" name="root_password_confirmation" id="root_password_confirmation" value="{{ old('root_password_confirmation', 'qwerty123') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" onchange="updateChecklist()">
                         </div>
                     </div>
+                    <p class="text-xs text-gray-500 mt-2">رمز عبور باید حداقل ۸ کاراکتر باشد</p>
                 </div>
 
                 <!-- Instance Name -->
@@ -770,11 +785,11 @@ function toggleAccessMethod() {
         
         if (rootPassword) {
             rootPassword.disabled = true;
-            rootPassword.value = '';
+            rootPassword.removeAttribute('required');
         }
         if (rootPasswordConfirm) {
             rootPasswordConfirm.disabled = true;
-            rootPasswordConfirm.value = '';
+            rootPasswordConfirm.removeAttribute('required');
         }
         
         toggleSshKeyInput();
@@ -789,10 +804,25 @@ function toggleAccessMethod() {
         if (sshPublicKeyInput) {
             sshPublicKeyInput.disabled = true;
             sshPublicKeyInput.value = '';
+            sshPublicKeyInput.removeAttribute('required');
         }
         
-        if (rootPassword) rootPassword.disabled = false;
-        if (rootPasswordConfirm) rootPasswordConfirm.disabled = false;
+        if (rootPassword) {
+            rootPassword.disabled = false;
+            // Set default password if empty
+            if (!rootPassword.value) {
+                rootPassword.value = 'qwerty123';
+            }
+            rootPassword.setAttribute('required', 'required');
+        }
+        if (rootPasswordConfirm) {
+            rootPasswordConfirm.disabled = false;
+            // Set default password if empty
+            if (!rootPasswordConfirm.value) {
+                rootPasswordConfirm.value = 'qwerty123';
+            }
+            rootPasswordConfirm.setAttribute('required', 'required');
+        }
     }
     
     updateChecklist();
