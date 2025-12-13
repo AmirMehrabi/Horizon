@@ -70,7 +70,7 @@
 <!-- Notifications List -->
 <div class="space-y-4">
     @forelse($notifications as $notification)
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 {{ !$notification['read'] ? 'border-l-4 border-l-blue-500' : '' }}">
+    <div data-notification-id="{{ $notification['id'] }}" class="notification-item bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow {{ !$notification['read'] ? 'border-l-4 border-l-blue-500' : '' }} {{ $notification['action_url'] ? 'cursor-pointer' : '' }}" @if($notification['action_url']) onclick="window.location.href='{{ $notification['action_url'] }}'" @endif>
         <div class="flex items-start gap-4">
             <!-- Icon -->
             <div class="flex-shrink-0">
@@ -137,6 +137,37 @@
     </div>
     @endforelse
 </div>
+
+@push('scripts')
+<script>
+    // Mark notifications as read when clicked
+    document.querySelectorAll('.notification-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            const notificationId = this.getAttribute('data-notification-id');
+            const isRead = this.querySelector('.bg-blue-100') !== null;
+            
+            if (!isRead && notificationId) {
+                // Mark as read via AJAX
+                fetch(`{{ route('customer.notifications.read', ['id' => '']) }}${notificationId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                }).then(() => {
+                    // Update UI
+                    this.classList.remove('border-l-4', 'border-l-blue-500');
+                    const newBadge = this.querySelector('.bg-blue-100');
+                    if (newBadge) {
+                        newBadge.remove();
+                    }
+                }).catch(err => console.error('Error marking notification as read:', err));
+            }
+        });
+    });
+</script>
+@endpush
 @endsection
 
 

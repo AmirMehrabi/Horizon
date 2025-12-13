@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
@@ -86,6 +87,21 @@ class WalletController extends Controller
                     );
                     
                     DB::commit();
+                    
+                    // Create notification for wallet topup
+                    Notification::createForCustomer(
+                        $customer->id,
+                        Notification::TYPE_WALLET,
+                        'شارژ کیف پول',
+                        "موجودی کیف پول شما به مبلغ " . number_format($amount, 0) . " ریال شارژ شد.",
+                        'dollar',
+                        route('customer.wallet.index'),
+                        [
+                            'transaction_id' => $transaction->id,
+                            'amount' => $amount,
+                            'balance_after' => $wallet->fresh()->balance,
+                        ]
+                    );
                     
                     Log::info('Wallet topup completed', [
                         'customer_id' => $customer->id,

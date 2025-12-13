@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Notification;
 use App\Models\OpenStackInstance;
 use App\Models\Wallet;
 use Illuminate\Console\Command;
@@ -62,6 +63,32 @@ class ProcessHourlyBilling extends Command
                         'available' => $wallet->balance,
                     ]);
                     
+                    // Create notification for insufficient balance
+                    // Check if we already notified about this instance in the last 6 hours
+                    $recentNotification = Notification::where('customer_id', $instance->customer_id)
+                        ->where('type', Notification::TYPE_BILLING)
+                        ->where('title', 'خطا در پرداخت هزینه ساعتی')
+                        ->whereJsonContains('metadata->instance_id', $instance->id)
+                        ->where('created_at', '>', now()->subHours(6))
+                        ->exists();
+
+                    if (!$recentNotification) {
+                        Notification::createForCustomer(
+                            $instance->customer_id,
+                            Notification::TYPE_BILLING,
+                            'خطا در پرداخت هزینه ساعتی',
+                            "پرداخت هزینه ساعتی سرور \"{$instance->name}\" به دلیل موجودی ناکافی انجام نشد. موجودی مورد نیاز: " . number_format($hourlyCost, 0) . " ریال. موجودی فعلی: " . number_format($wallet->balance, 0) . " ریال.",
+                            'dollar',
+                            '/customer/wallet/topup',
+                            [
+                                'instance_id' => $instance->id,
+                                'instance_name' => $instance->name,
+                                'required' => $hourlyCost,
+                                'available' => $wallet->balance,
+                            ]
+                        );
+                    }
+                    
                     // Optionally, you could suspend the instance here
                     // $instance->update(['status' => 'suspended']);
                     
@@ -70,7 +97,7 @@ class ProcessHourlyBilling extends Command
                 }
                 
                 // Deduct hourly cost
-                $wallet->debit(
+                $transaction = $wallet->debit(
                     $hourlyCost,
                     "هزینه ساعتی سرور: {$instance->name}",
                     OpenStackInstance::class,

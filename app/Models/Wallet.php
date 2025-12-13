@@ -91,7 +91,7 @@ class Wallet extends Model
             $this->decrement('balance', $amount);
             $balanceAfter = $this->balance;
 
-            return WalletTransaction::create([
+            $transaction = WalletTransaction::create([
                 'wallet_id' => $this->id,
                 'customer_id' => $this->customer_id,
                 'type' => 'debit',
@@ -104,7 +104,66 @@ class Wallet extends Model
                 'status' => 'completed',
                 'metadata' => $metadata,
             ]);
+
+            // Check and notify for low balance after debit
+            $this->checkAndNotifyLowBalance();
+
+            return $transaction;
         });
+    }
+
+    /**
+     * Check balance and create notification if low.
+     */
+    public function checkAndNotifyLowBalance(): void
+    {
+        $lowBalanceThreshold = 50000; // 50,000 Rials
+        $veryLowBalanceThreshold = 0;
+
+        // Refresh to get latest balance
+        $this->refresh();
+        $balance = $this->balance;
+
+        // Check if we should notify (only if balance is low and we haven't notified recently)
+        if ($balance <= $veryLowBalanceThreshold) {
+            // Check if we already notified about zero balance in the last 24 hours
+            $recentNotification = \App\Models\Notification::where('customer_id', $this->customer_id)
+                ->where('type', \App\Models\Notification::TYPE_WALLET)
+                ->where('title', 'موجودی کیف پول تمام شده است')
+                ->where('created_at', '>', now()->subHours(24))
+                ->exists();
+
+            if (!$recentNotification) {
+                \App\Models\Notification::createForCustomer(
+                    $this->customer_id,
+                    \App\Models\Notification::TYPE_WALLET,
+                    'موجودی کیف پول تمام شده است',
+                    'موجودی کیف پول شما تمام شده است. لطفاً برای ادامه استفاده از سرویس‌ها، کیف پول خود را شارژ کنید.',
+                    'dollar',
+                    '/customer/wallet/topup',
+                    ['balance' => $balance]
+                );
+            }
+        } elseif ($balance < $lowBalanceThreshold && $balance > 0) {
+            // Check if we already notified about low balance in the last 24 hours
+            $recentNotification = \App\Models\Notification::where('customer_id', $this->customer_id)
+                ->where('type', \App\Models\Notification::TYPE_WALLET)
+                ->where('title', 'هشدار موجودی کم')
+                ->where('created_at', '>', now()->subHours(24))
+                ->exists();
+
+            if (!$recentNotification) {
+                \App\Models\Notification::createForCustomer(
+                    $this->customer_id,
+                    \App\Models\Notification::TYPE_WALLET,
+                    'هشدار موجودی کم',
+                    "موجودی کیف پول شما در حال اتمام است (" . number_format($balance, 0) . " ریال). برای ادامه استفاده از سرویس‌ها، کیف پول خود را شارژ کنید.",
+                    'dollar',
+                    '/customer/wallet/topup',
+                    ['balance' => $balance]
+                );
+            }
+        }
     }
 
     /**

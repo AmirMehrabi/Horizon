@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
@@ -12,59 +14,38 @@ class NotificationController extends Controller
      */
     public function getNotifications()
     {
-        // Dummy notifications
-        $notifications = [
-            [
-                'id' => 1,
-                'title' => 'صورتحساب جدید',
-                'description' => 'صورتحساب ماهانه شما آماده است',
-                'type' => 'billing',
-                'type_icon' => 'dollar',
-                'time' => '۵ دقیقه پیش',
-                'read' => false
-            ],
-            [
-                'id' => 2,
-                'title' => 'پشتیبان‌گیری تکمیل شد',
-                'description' => 'Snapshot سرور شما با موفقیت ایجاد شد',
-                'type' => 'technical',
-                'type_icon' => 'check',
-                'time' => '۱ ساعت پیش',
-                'read' => false
-            ],
-            [
-                'id' => 3,
-                'title' => 'پاسخ به تیکت شما',
-                'description' => 'پشتیبانی به تیکت #1001 پاسخ داد',
-                'type' => 'support',
-                'type_icon' => 'message',
-                'time' => '۲ ساعت پیش',
-                'read' => false
-            ],
-            [
-                'id' => 4,
-                'title' => 'هشدار امنیتی',
-                'description' => 'ورود از IP جدید شناسایی شد',
-                'type' => 'security',
-                'type_icon' => 'shield',
-                'time' => '۳ ساعت پیش',
-                'read' => true
-            ],
-            [
-                'id' => 5,
-                'title' => 'شارژ کیف پول',
-                'description' => 'موجودی کیف پول شما به‌روزرسانی شد',
-                'type' => 'billing',
-                'type_icon' => 'dollar',
-                'time' => '۱ روز پیش',
-                'read' => true
-            ]
-        ];
+        $customer = Auth::guard('customer')->user();
+        
+        if (!$customer) {
+            return response()->json([
+                'notifications' => [],
+                'unread_count' => 0
+            ]);
+        }
 
-        $unreadCount = count(array_filter($notifications, fn($n) => !$n['read']));
+        $notifications = Notification::where('customer_id', $customer->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function ($notification) {
+                return [
+                    'id' => $notification->id,
+                    'title' => $notification->title,
+                    'description' => $notification->description,
+                    'type' => $notification->type,
+                    'type_icon' => $notification->type_icon,
+                    'time' => $notification->time_ago,
+                    'read' => $notification->read,
+                    'action_url' => $notification->action_url,
+                ];
+            });
+
+        $unreadCount = Notification::where('customer_id', $customer->id)
+            ->where('read', false)
+            ->count();
 
         return response()->json([
-            'notifications' => array_slice($notifications, 0, 5),
+            'notifications' => $notifications,
             'unread_count' => $unreadCount
         ]);
     }
@@ -74,88 +55,49 @@ class NotificationController extends Controller
      */
     public function index(Request $request)
     {
+        $customer = Auth::guard('customer')->user();
         $filter = $request->get('filter', 'all');
 
-        // Dummy notifications
-        $allNotifications = [
-            [
-                'id' => 1,
-                'title' => 'صورتحساب جدید',
-                'description' => 'صورتحساب ماهانه شما آماده است. لطفاً برای مشاهده و پرداخت به بخش صورتحساب مراجعه کنید.',
-                'type' => 'billing',
-                'type_label' => 'صورتحساب',
-                'type_icon' => 'dollar',
-                'time' => '۵ دقیقه پیش',
-                'timestamp' => '۱۴۰۳/۱۰/۲۲ - ۱۴:۲۵',
-                'read' => false
-            ],
-            [
-                'id' => 2,
-                'title' => 'پشتیبان‌گیری تکمیل شد',
-                'description' => 'Snapshot سرور "وب سرور اصلی" شما با موفقیت ایجاد شد.',
-                'type' => 'technical',
-                'type_label' => 'فنی',
-                'type_icon' => 'check',
-                'time' => '۱ ساعت پیش',
-                'timestamp' => '۱۴۰۳/۱۰/۲۲ - ۱۳:۳۰',
-                'read' => false
-            ],
-            [
-                'id' => 3,
-                'title' => 'پاسخ به تیکت شما',
-                'description' => 'پشتیبانی به تیکت #1001 شما پاسخ داد. لطفاً برای مشاهده پاسخ به بخش تیکت‌ها مراجعه کنید.',
-                'type' => 'support',
-                'type_label' => 'پشتیبانی',
-                'type_icon' => 'message',
-                'time' => '۲ ساعت پیش',
-                'timestamp' => '۱۴۰۳/۱۰/۲۲ - ۱۲:۳۰',
-                'read' => false
-            ],
-            [
-                'id' => 4,
-                'title' => 'هشدار امنیتی',
-                'description' => 'ورود به حساب شما از IP جدید (185.123.45.67) شناسایی شد. در صورت عدم اطلاع، لطفاً رمز عبور خود را تغییر دهید.',
-                'type' => 'security',
-                'type_label' => 'امنیت',
-                'type_icon' => 'shield',
-                'time' => '۳ ساعت پیش',
-                'timestamp' => '۱۴۰۳/۱۰/۲۲ - ۱۱:۳۰',
-                'read' => true
-            ],
-            [
-                'id' => 5,
-                'title' => 'شارژ کیف پول',
-                'description' => 'موجودی کیف پول شما به مبلغ 1,000,000 ریال شارژ شد.',
-                'type' => 'billing',
-                'type_label' => 'صورتحساب',
-                'type_icon' => 'dollar',
-                'time' => '۱ روز پیش',
-                'timestamp' => '۱۴۰۳/۱۰/۲۱ - ۱۴:۰۰',
-                'read' => true
-            ],
-            [
-                'id' => 6,
-                'title' => 'به‌روزرسانی سیستم',
-                'description' => 'به‌روزرسانی‌های جدید برای سرور شما در دسترس است.',
-                'type' => 'technical',
-                'type_label' => 'فنی',
-                'type_icon' => 'info',
-                'time' => '۲ روز پیش',
-                'timestamp' => '۱۴۰۳/۱۰/۲۰ - ۱۰:۰۰',
-                'read' => true
-            ]
-        ];
+        $query = Notification::where('customer_id', $customer->id);
 
-        // Filter notifications
-        $notifications = match($filter) {
-            'unread' => array_filter($allNotifications, fn($n) => !$n['read']),
-            'billing' => array_filter($allNotifications, fn($n) => $n['type'] === 'billing'),
-            'technical' => array_filter($allNotifications, fn($n) => $n['type'] === 'technical'),
-            'security' => array_filter($allNotifications, fn($n) => $n['type'] === 'security'),
-            default => $allNotifications
-        };
+        // Apply filters
+        switch ($filter) {
+            case 'unread':
+                $query->where('read', false);
+                break;
+            case 'billing':
+                $query->where('type', Notification::TYPE_BILLING);
+                break;
+            case 'technical':
+                $query->where('type', Notification::TYPE_TECHNICAL);
+                break;
+            case 'security':
+                $query->where('type', Notification::TYPE_SECURITY);
+                break;
+            case 'wallet':
+                $query->where('type', Notification::TYPE_WALLET);
+                break;
+        }
 
-        $unreadCount = count(array_filter($allNotifications, fn($n) => !$n['read']));
+        $notifications = $query->orderBy('created_at', 'desc')->get()
+            ->map(function ($notification) {
+                return [
+                    'id' => $notification->id,
+                    'title' => $notification->title,
+                    'description' => $notification->description,
+                    'type' => $notification->type,
+                    'type_label' => $notification->type_label,
+                    'type_icon' => $notification->type_icon,
+                    'time' => $notification->time_ago,
+                    'timestamp' => $notification->created_at->format('Y/m/d - H:i'),
+                    'read' => $notification->read,
+                    'action_url' => $notification->action_url,
+                ];
+            });
+
+        $unreadCount = Notification::where('customer_id', $customer->id)
+            ->where('read', false)
+            ->count();
 
         return view('customer.notifications.index', compact('notifications', 'filter', 'unreadCount'));
     }
@@ -165,7 +107,14 @@ class NotificationController extends Controller
      */
     public function markAsRead($id)
     {
-        // TODO: Implement mark as read logic
+        $customer = Auth::guard('customer')->user();
+        
+        $notification = Notification::where('id', $id)
+            ->where('customer_id', $customer->id)
+            ->firstOrFail();
+
+        $notification->markAsRead();
+
         return response()->json(['success' => true]);
     }
 
@@ -174,10 +123,16 @@ class NotificationController extends Controller
      */
     public function markAllAsRead()
     {
-        // TODO: Implement mark all as read logic
+        $customer = Auth::guard('customer')->user();
+        
+        Notification::where('customer_id', $customer->id)
+            ->where('read', false)
+            ->update([
+                'read' => true,
+                'read_at' => now(),
+            ]);
+
         return redirect()->route('customer.notifications.index')
             ->with('success', 'همه اعلان‌ها به عنوان خوانده شده علامت‌گذاری شدند');
     }
 }
-
-

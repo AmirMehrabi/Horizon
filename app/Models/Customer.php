@@ -242,6 +242,14 @@ class Customer extends Authenticatable
     }
 
     /**
+     * Get the notifications for this customer.
+     */
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'customer_id');
+    }
+
+    /**
      * Get the machines associated with the customer.
      * This is a placeholder for the machine relationship.
      * @deprecated Use openStackInstances() instead
