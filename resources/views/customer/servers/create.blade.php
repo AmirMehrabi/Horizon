@@ -109,14 +109,14 @@
                                     <!-- Distro Logo -->
                                     <div class="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
                                         <img src="{{ asset('assets/os-icons/' . $distro['icon']) }}" alt="{{ $distro['name'] }}" class="w-full h-full object-contain">
-                                    </div>
+                    </div>
                                     <div class="text-sm font-medium text-gray-700">{{ $distro['name'] }}</div>
                                     <div class="mt-2">
                                         <select name="image_id_{{ $distro['id'] }}" id="image-select-{{ $distro['id'] }}" class="w-full text-xs border border-gray-300 rounded px-2 py-1 hidden peer-checked:block" disabled>
                                             <option value="">انتخاب نسخه</option>
                                         </select>
-                                    </div>
-                                </div>
+                </div>
+                </div>
                             </label>
                         @endforeach
                         
@@ -126,7 +126,7 @@
                             <div class="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all text-center">
                                 <div class="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
                                     <img src="{{ asset('assets/os-icons/icons8-linux-100.png') }}" alt="Other" class="w-full h-full object-contain">
-                                </div>
+                    </div>
                                 <div class="text-sm font-medium text-gray-700">سایر</div>
                                 <div class="mt-2">
                                     <select name="image_id" id="image-select-custom" class="w-full text-xs border border-gray-300 rounded px-2 py-1 hidden peer-checked:block" onchange="updateChecklist()">
@@ -137,9 +137,9 @@
                                             </option>
                                         @endforeach
                                     </select>
-                                </div>
-                            </div>
-                        </label>
+                </div>
+            </div>
+                    </label>
                 </div>
                     
                 @error('os')
@@ -190,15 +190,15 @@
                                     <div class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center shrink-0 peer-checked:border-blue-600 peer-checked:bg-blue-600 transition-colors">
                                         <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                        </svg>
-                                    </div>
+                                </svg>
+                            </div>
                                     <div class="flex-1">
                                         <span class="text-sm font-medium text-gray-900 block">{{ $flavor->name }}</span>
                                         <div class="sm:hidden mt-1 flex gap-4 text-xs text-gray-600">
                                             <span>{{ $flavor->vcpus }} vCPU</span>
                                             <span>{{ number_format($flavor->ram_in_gb, 1) }} GB RAM</span>
                                             <span>{{ $flavor->disk }} GB</span>
-                                        </div>
+                            </div>
                                     </div>
                                 </div>
                             </div>
@@ -416,29 +416,49 @@
                 
                 <!-- Checklist -->
                 <div class="space-y-3 mb-6">
-                    <div class="flex items-center" id="checklist-os">
-                        <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <div class="flex items-center transition-all duration-200" id="checklist-os">
+                        <!-- Unchecked Icon (Circle) -->
+                        <svg class="w-5 h-5 text-gray-400 mr-2 transition-all duration-200 checklist-icon-unchecked" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path>
                         </svg>
-                        <span class="text-sm text-gray-600">سیستم عامل</span>
+                        <!-- Checked Icon (Checkmark in Circle) -->
+                        <svg class="w-6 h-6 text-green-600 mr-2 transition-all duration-200 checklist-icon-checked hidden" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-sm text-gray-600 font-normal transition-all duration-200 checklist-text">سیستم عامل</span>
                     </div>
-                    <div class="flex items-center" id="checklist-flavor">
-                        <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <div class="flex items-center transition-all duration-200" id="checklist-flavor">
+                        <!-- Unchecked Icon (Circle) -->
+                        <svg class="w-5 h-5 text-gray-400 mr-2 transition-all duration-200 checklist-icon-unchecked" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path>
                         </svg>
-                        <span class="text-sm text-gray-600">پلن</span>
+                        <!-- Checked Icon (Checkmark in Circle) -->
+                        <svg class="w-6 h-6 text-green-600 mr-2 transition-all duration-200 checklist-icon-checked hidden" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-sm text-gray-600 font-normal transition-all duration-200 checklist-text">پلن</span>
                     </div>
-                    <div class="flex items-center" id="checklist-network">
-                        <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <div class="flex items-center transition-all duration-200" id="checklist-network">
+                        <!-- Unchecked Icon (Circle) -->
+                        <svg class="w-5 h-5 text-gray-400 mr-2 transition-all duration-200 checklist-icon-unchecked" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path>
                         </svg>
-                        <span class="text-sm text-gray-600">شبکه</span>
+                        <!-- Checked Icon (Checkmark in Circle) -->
+                        <svg class="w-6 h-6 text-green-600 mr-2 transition-all duration-200 checklist-icon-checked hidden" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-sm text-gray-600 font-normal transition-all duration-200 checklist-text">شبکه</span>
                     </div>
-                    <div class="flex items-center" id="checklist-access">
-                        <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <div class="flex items-center transition-all duration-200" id="checklist-access">
+                        <!-- Unchecked Icon (Circle) -->
+                        <svg class="w-5 h-5 text-gray-400 mr-2 transition-all duration-200 checklist-icon-unchecked" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path>
                         </svg>
-                        <span class="text-sm text-gray-600">دسترسی</span>
+                        <!-- Checked Icon (Checkmark in Circle) -->
+                        <svg class="w-6 h-6 text-green-600 mr-2 transition-all duration-200 checklist-icon-checked hidden" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-sm text-gray-600 font-normal transition-all duration-200 checklist-text">دسترسی</span>
                     </div>
                 </div>
 
@@ -591,15 +611,27 @@ function updateChecklist() {
         }
         
         if (imageId) {
-            osCheck.querySelector('svg').classList.remove('text-gray-400');
-            osCheck.querySelector('svg').classList.add('text-green-500');
+            // Show checked icon, hide unchecked
+            osCheck.querySelector('.checklist-icon-unchecked').classList.add('hidden');
+            osCheck.querySelector('.checklist-icon-checked').classList.remove('hidden');
+            // Update text styling
+            osCheck.querySelector('.checklist-text').classList.remove('text-gray-600', 'font-normal');
+            osCheck.querySelector('.checklist-text').classList.add('text-gray-900', 'font-semibold');
         } else {
-            osCheck.querySelector('svg').classList.remove('text-green-500');
-            osCheck.querySelector('svg').classList.add('text-gray-400');
+            // Show unchecked icon, hide checked
+            osCheck.querySelector('.checklist-icon-unchecked').classList.remove('hidden');
+            osCheck.querySelector('.checklist-icon-checked').classList.add('hidden');
+            // Update text styling
+            osCheck.querySelector('.checklist-text').classList.remove('text-gray-900', 'font-semibold');
+            osCheck.querySelector('.checklist-text').classList.add('text-gray-600', 'font-normal');
         }
     } else {
-        osCheck.querySelector('svg').classList.remove('text-green-500');
-        osCheck.querySelector('svg').classList.add('text-gray-400');
+        // Show unchecked icon, hide checked
+        osCheck.querySelector('.checklist-icon-unchecked').classList.remove('hidden');
+        osCheck.querySelector('.checklist-icon-checked').classList.add('hidden');
+        // Update text styling
+        osCheck.querySelector('.checklist-text').classList.remove('text-gray-900', 'font-semibold');
+        osCheck.querySelector('.checklist-text').classList.add('text-gray-600', 'font-normal');
     }
     
     // Check Flavor selection
@@ -608,53 +640,81 @@ function updateChecklist() {
         if (planType === 'prebuilt') {
             const flavorSelected = document.querySelector('input[name="flavor_id"]:checked');
         if (flavorSelected) {
-            flavorCheck.querySelector('svg').classList.remove('text-gray-400');
-            flavorCheck.querySelector('svg').classList.add('text-green-500');
+            // Show checked icon, hide unchecked
+            flavorCheck.querySelector('.checklist-icon-unchecked').classList.add('hidden');
+            flavorCheck.querySelector('.checklist-icon-checked').classList.remove('hidden');
+            // Update text styling
+            flavorCheck.querySelector('.checklist-text').classList.remove('text-gray-600', 'font-normal');
+            flavorCheck.querySelector('.checklist-text').classList.add('text-gray-900', 'font-semibold');
         } else {
-            flavorCheck.querySelector('svg').classList.remove('text-green-500');
-            flavorCheck.querySelector('svg').classList.add('text-gray-400');
+            // Show unchecked icon, hide checked
+            flavorCheck.querySelector('.checklist-icon-unchecked').classList.remove('hidden');
+            flavorCheck.querySelector('.checklist-icon-checked').classList.add('hidden');
+            // Update text styling
+            flavorCheck.querySelector('.checklist-text').classList.remove('text-gray-900', 'font-semibold');
+            flavorCheck.querySelector('.checklist-text').classList.add('text-gray-600', 'font-normal');
             }
         } else if (planType === 'custom') {
         const vcpu = parseInt(document.getElementById('custom_vcpu')?.value) || 0;
         const ram = parseInt(document.getElementById('custom_ram')?.value) || 0;
         const storage = parseInt(document.getElementById('custom_storage')?.value) || 0;
         if (vcpu > 0 && ram > 0 && storage >= 20) {
-            flavorCheck.querySelector('svg').classList.remove('text-gray-400');
-            flavorCheck.querySelector('svg').classList.add('text-green-500');
+            // Show checked icon, hide unchecked
+            flavorCheck.querySelector('.checklist-icon-unchecked').classList.add('hidden');
+            flavorCheck.querySelector('.checklist-icon-checked').classList.remove('hidden');
+            // Update text styling
+            flavorCheck.querySelector('.checklist-text').classList.remove('text-gray-600', 'font-normal');
+            flavorCheck.querySelector('.checklist-text').classList.add('text-gray-900', 'font-semibold');
         } else {
-            flavorCheck.querySelector('svg').classList.remove('text-green-500');
-            flavorCheck.querySelector('svg').classList.add('text-gray-400');
+            // Show unchecked icon, hide checked
+            flavorCheck.querySelector('.checklist-icon-unchecked').classList.remove('hidden');
+            flavorCheck.querySelector('.checklist-icon-checked').classList.add('hidden');
+            // Update text styling
+            flavorCheck.querySelector('.checklist-text').classList.remove('text-gray-900', 'font-semibold');
+            flavorCheck.querySelector('.checklist-text').classList.add('text-gray-600', 'font-normal');
         }
     } else {
-        flavorCheck.querySelector('svg').classList.remove('text-green-500');
-        flavorCheck.querySelector('svg').classList.add('text-gray-400');
+        // Show unchecked icon, hide checked
+        flavorCheck.querySelector('.checklist-icon-unchecked').classList.remove('hidden');
+        flavorCheck.querySelector('.checklist-icon-checked').classList.add('hidden');
+        // Update text styling
+        flavorCheck.querySelector('.checklist-text').classList.remove('text-gray-900', 'font-semibold');
+        flavorCheck.querySelector('.checklist-text').classList.add('text-gray-600', 'font-normal');
     }
     
     // Check Network (at least one network selected)
     const networkCheck = document.getElementById('checklist-network');
     const networkSelect = document.getElementById('network-select');
     if (networkSelect && networkSelect.selectedOptions.length > 0) {
-        networkCheck.querySelector('svg').classList.remove('text-gray-400');
-        networkCheck.querySelector('svg').classList.add('text-green-500');
+        // Show checked icon, hide unchecked
+        networkCheck.querySelector('.checklist-icon-unchecked').classList.add('hidden');
+        networkCheck.querySelector('.checklist-icon-checked').classList.remove('hidden');
+        // Update text styling
+        networkCheck.querySelector('.checklist-text').classList.remove('text-gray-600', 'font-normal');
+        networkCheck.querySelector('.checklist-text').classList.add('text-gray-900', 'font-semibold');
     } else {
-        networkCheck.querySelector('svg').classList.remove('text-green-500');
-        networkCheck.querySelector('svg').classList.add('text-gray-400');
+        // Show unchecked icon, hide checked
+        networkCheck.querySelector('.checklist-icon-unchecked').classList.remove('hidden');
+        networkCheck.querySelector('.checklist-icon-checked').classList.add('hidden');
+        // Update text styling
+        networkCheck.querySelector('.checklist-text').classList.remove('text-gray-900', 'font-semibold');
+        networkCheck.querySelector('.checklist-text').classList.add('text-gray-600', 'font-normal');
     }
     
     // Check Access (requires both access method and server name)
     const accessCheck = document.getElementById('checklist-access');
     const serverName = document.getElementById('server-name')?.value.trim();
-    const accessMethod = document.querySelector('input[name="access_method"]:checked')?.value;
+        const accessMethod = document.querySelector('input[name="access_method"]:checked')?.value;
     
     let accessMethodValid = false;
     
-    if (accessMethod === 'ssh_key') {
+        if (accessMethod === 'ssh_key') {
         const sshKeyId = document.getElementById('ssh-key-select')?.value;
         const sshPublicKey = document.getElementById('ssh-public-key-input')?.value.trim();
         if (sshKeyId || sshPublicKey) {
             accessMethodValid = true;
-        }
-    } else if (accessMethod === 'password') {
+            }
+        } else if (accessMethod === 'password') {
         const password = document.getElementById('root_password')?.value;
         const passwordConfirm = document.getElementById('root_password_confirmation')?.value;
         if (password && password.length >= 8 && password === passwordConfirm) {
@@ -664,19 +724,27 @@ function updateChecklist() {
     
     // Access is valid only if both access method and server name are provided
     if (accessMethodValid && serverName && serverName.length > 0) {
-        accessCheck.querySelector('svg').classList.remove('text-gray-400');
-        accessCheck.querySelector('svg').classList.add('text-green-500');
+        // Show checked icon, hide unchecked
+        accessCheck.querySelector('.checklist-icon-unchecked').classList.add('hidden');
+        accessCheck.querySelector('.checklist-icon-checked').classList.remove('hidden');
+        // Update text styling
+        accessCheck.querySelector('.checklist-text').classList.remove('text-gray-600', 'font-normal');
+        accessCheck.querySelector('.checklist-text').classList.add('text-gray-900', 'font-semibold');
     } else {
-        accessCheck.querySelector('svg').classList.remove('text-green-500');
-        accessCheck.querySelector('svg').classList.add('text-gray-400');
+        // Show unchecked icon, hide checked
+        accessCheck.querySelector('.checklist-icon-unchecked').classList.remove('hidden');
+        accessCheck.querySelector('.checklist-icon-checked').classList.add('hidden');
+        // Update text styling
+        accessCheck.querySelector('.checklist-text').classList.remove('text-gray-900', 'font-semibold');
+        accessCheck.querySelector('.checklist-text').classList.add('text-gray-600', 'font-normal');
     }
     
     // Enable/disable submit button
     const allChecked = 
-        osCheck.querySelector('svg').classList.contains('text-green-500') &&
-        flavorCheck.querySelector('svg').classList.contains('text-green-500') &&
-        networkCheck.querySelector('svg').classList.contains('text-green-500') &&
-        accessCheck.querySelector('svg').classList.contains('text-green-500');
+        !osCheck.querySelector('.checklist-icon-checked').classList.contains('hidden') &&
+        !flavorCheck.querySelector('.checklist-icon-checked').classList.contains('hidden') &&
+        !networkCheck.querySelector('.checklist-icon-checked').classList.contains('hidden') &&
+        !accessCheck.querySelector('.checklist-icon-checked').classList.contains('hidden');
     
     const submitButton = document.getElementById('submit-button');
     if (allChecked) {
