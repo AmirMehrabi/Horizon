@@ -359,12 +359,13 @@
                 const notificationList = document.getElementById('notification-list');
                 const notificationBadge = document.getElementById('notification-badge');
                 
-                // Update badge
-                if (data.unread_count > 0) {
+                // Update badge - only show if count is greater than 0
+                if (data.unread_count && data.unread_count > 0) {
                     notificationBadge.textContent = data.unread_count > 9 ? '9+' : data.unread_count;
                     notificationBadge.classList.remove('hidden');
                 } else {
                     notificationBadge.classList.add('hidden');
+                    notificationBadge.textContent = '0'; // Reset to 0 when hiding
                 }
                 
                 // Update list
