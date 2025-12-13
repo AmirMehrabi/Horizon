@@ -644,7 +644,7 @@ class OpenStackInstanceService
         try {
             $compute = $this->connection->getComputeService();
             $server = $compute->getServer(['id' => $instance->openstack_server_id]);
-            $server->reboot(['type' => $type]);
+            $server->reboot($type);
 
             $this->updateStatus($instance, 'building', 'rebooting');
             $this->logEvent($instance, 'reboot_requested', "Server reboot requested (type: {$type})", 'user');
