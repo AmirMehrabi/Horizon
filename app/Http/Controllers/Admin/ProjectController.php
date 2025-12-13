@@ -12,6 +12,7 @@ use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class ProjectController extends Controller
 {
@@ -121,7 +122,10 @@ class ProjectController extends Controller
 
             DB::commit();
 
-            // TODO: Dispatch job to sync with OpenStack if sync_immediately is true
+            // Dispatch job to sync with OpenStack if sync_immediately is true
+            if ($validated['sync_immediately'] ?? false) {
+                \App\Jobs\SyncProjectToOpenStack::dispatch($project, 'create');
+            }
 
             return redirect()
                 ->route('admin.projects.show', $project->id)
@@ -212,7 +216,12 @@ class ProjectController extends Controller
 
             DB::commit();
 
-            // TODO: Dispatch job to sync with OpenStack
+            // Dispatch job to sync with OpenStack
+            if ($project->openstack_project_id) {
+                \App\Jobs\SyncProjectToOpenStack::dispatch($project, 'update');
+            } else {
+                \App\Jobs\SyncProjectToOpenStack::dispatch($project, 'create');
+            }
 
             return redirect()
                 ->route('admin.projects.show', $project->id)
@@ -233,10 +242,13 @@ class ProjectController extends Controller
         $project = Project::findOrFail($id);
 
         try {
+            // Dispatch job to delete from OpenStack before soft deleting locally
+            if ($project->openstack_project_id) {
+                \App\Jobs\SyncProjectToOpenStack::dispatch($project, 'delete');
+            }
+
             // Soft delete (local-first)
             $project->delete();
-
-            // TODO: Dispatch job to delete from OpenStack
 
             return redirect()
                 ->route('admin.projects.index')
@@ -255,12 +267,8 @@ class ProjectController extends Controller
         $project = Project::findOrFail($id);
 
         try {
-            $project->update([
-                'sync_status' => Project::SYNC_STATUS_SYNCING,
-                'sync_error' => null,
-            ]);
-
-            // TODO: Dispatch sync job
+            // Dispatch sync job
+            \App\Jobs\SyncProjectToOpenStack::dispatch($project, 'sync');
 
             return back()->with('success', 'همگام‌سازی پروژه شروع شد.');
         } catch (\Exception $e) {
@@ -301,7 +309,19 @@ class ProjectController extends Controller
             $quota->update($validated);
         }
 
-        // TODO: Sync quota to OpenStack
+        // Sync quota to OpenStack if project is synced
+        if ($project->isSynced() && $project->openstack_project_id) {
+            try {
+                $projectService = app(\App\Services\OpenStack\OpenStackProjectService::class);
+                $projectService->syncQuota($project, $quota);
+            } catch (\Exception $e) {
+                Log::error('Failed to sync quota to OpenStack', [
+                    'project_id' => $project->id,
+                    'error' => $e->getMessage(),
+                ]);
+                return back()->with('warning', 'سهمیه به‌روزرسانی شد اما همگام‌سازی با OpenStack ناموفق بود: ' . $e->getMessage());
+            }
+        }
 
         return back()->with('success', 'سهمیه با موفقیت به‌روزرسانی شد.');
     }
