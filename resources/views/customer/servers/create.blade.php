@@ -171,21 +171,21 @@
             <!-- Prebuilt Plans (Flavors) -->
             <div id="prebuilt-plans" class="border border-gray-200 rounded-lg overflow-hidden">
                 <!-- Table Header -->
-                <div class="hidden md:grid md:grid-cols-5 gap-4 bg-gray-50 px-6 py-3 border-b border-gray-200">
-                    <div class="text-sm font-semibold text-gray-700">نام پلن</div>
-                    <div class="text-sm font-semibold text-gray-700">vCPU</div>
-                    <div class="text-sm font-semibold text-gray-700">RAM</div>
-                    <div class="text-sm font-semibold text-gray-700">Storage</div>
-                    <div class="text-sm font-semibold text-gray-700 text-left">قیمت ماهانه</div>
+                <div class="hidden sm:flex gap-4 bg-gray-50 px-6 py-3 border-b border-gray-200">
+                    <div class="flex-1 text-sm font-semibold text-gray-700">نام پلن</div>
+                    <div class="w-20 text-sm font-semibold text-gray-700">vCPU</div>
+                    <div class="w-24 text-sm font-semibold text-gray-700">RAM</div>
+                    <div class="w-24 text-sm font-semibold text-gray-700">Storage</div>
+                    <div class="w-32 text-sm font-semibold text-gray-700 text-left">قیمت ماهانه</div>
                 </div>
                 
                 <!-- Table Rows -->
                 @forelse($flavors as $flavor)
                     <label class="block cursor-pointer">
                         <input type="radio" name="flavor_id" value="{{ $flavor->id }}" class="peer hidden" data-flavor-id="{{ $flavor->id }}" data-hourly="{{ $flavor->pricing_hourly ?? 0 }}" data-monthly="{{ $flavor->pricing_monthly ?? 0 }}" {{ old('flavor_id') == $flavor->id ? 'checked' : '' }} onchange="updatePricing(); updateChecklist();">
-                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 px-6 py-4 border-b border-gray-200 hover:bg-gray-50 peer-checked:bg-blue-50 peer-checked:border-l-4 peer-checked:border-l-blue-600 transition-all">
+                        <div class="flex flex-col sm:flex-row gap-4 px-6 py-4 border-b border-gray-200 hover:bg-gray-50 peer-checked:bg-blue-50 peer-checked:border-l-4 peer-checked:border-l-blue-600 transition-all">
                             <!-- Plan Name -->
-                            <div class="flex items-center">
+                            <div class="flex-1 flex items-center">
                                 <div class="flex items-center gap-3 w-full">
                                     <div class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center shrink-0 peer-checked:border-blue-600 peer-checked:bg-blue-600 transition-colors">
                                         <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
@@ -194,7 +194,7 @@
                                     </div>
                                     <div class="flex-1">
                                         <span class="text-sm font-medium text-gray-900 block">{{ $flavor->name }}</span>
-                                        <div class="md:hidden mt-1 flex gap-4 text-xs text-gray-600">
+                                        <div class="sm:hidden mt-1 flex gap-4 text-xs text-gray-600">
                                             <span>{{ $flavor->vcpus }} vCPU</span>
                                             <span>{{ number_format($flavor->ram_in_gb, 1) }} GB RAM</span>
                                             <span>{{ $flavor->disk }} GB</span>
@@ -203,20 +203,20 @@
                                 </div>
                             </div>
                             <!-- vCPU -->
-                            <div class="hidden md:flex items-center text-sm text-gray-700">
+                            <div class="hidden sm:flex w-20 items-center text-sm text-gray-700">
                                 <span>{{ $flavor->vcpus }}</span>
                             </div>
                             <!-- RAM -->
-                            <div class="hidden md:flex items-center text-sm text-gray-700">
+                            <div class="hidden sm:flex w-24 items-center text-sm text-gray-700">
                                 <span>{{ number_format($flavor->ram_in_gb, 1) }} GB</span>
                             </div>
                             <!-- Storage -->
-                            <div class="hidden md:flex items-center text-sm text-gray-700">
+                            <div class="hidden sm:flex w-24 items-center text-sm text-gray-700">
                                 <span>{{ $flavor->disk }} GB</span>
                             </div>
                             <!-- Monthly Price -->
-                            <div class="flex items-center justify-between md:justify-end">
-                                <span class="md:hidden text-xs text-gray-600">قیمت:</span>
+                            <div class="flex items-center justify-between sm:justify-end w-32">
+                                <span class="sm:hidden text-xs text-gray-600">قیمت:</span>
                                 @if($flavor->pricing_monthly)
                                     <span class="text-lg font-bold text-gray-900">{{ number_format($flavor->pricing_monthly) }} تومان</span>
                                 @else
