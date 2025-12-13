@@ -35,7 +35,7 @@
     <p class="mt-1 text-sm text-gray-500">افزایش موجودی برای پرداخت سرویس‌ها</p>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Main Form -->
     <div class="lg:col-span-2">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">

@@ -58,7 +58,10 @@ Route::domain('hub.aviato.ir')
             
             // Network Management
             Route::get('/networks', [AdminNetworkManagementController::class, 'index'])->name('networks.index');
+            Route::post('/networks', [AdminNetworkManagementController::class, 'store'])->name('networks.store');
             Route::get('/networks/{id}', [AdminNetworkManagementController::class, 'show'])->name('networks.show');
+            Route::put('/networks/{id}', [AdminNetworkManagementController::class, 'update'])->name('networks.update');
+            Route::delete('/networks/{id}', [AdminNetworkManagementController::class, 'destroy'])->name('networks.destroy');
             Route::get('/networks/routers', [AdminNetworkManagementController::class, 'routers'])->name('networks.routers');
             Route::get('/networks/routers/{id}', [AdminNetworkManagementController::class, 'routerShow'])->name('networks.routers.show');
             Route::get('/networks/floating-ips', [AdminNetworkManagementController::class, 'floatingIps'])->name('networks.floating-ips');

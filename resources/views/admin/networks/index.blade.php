@@ -5,6 +5,7 @@
 @php
     $direction = config('ui.direction', 'ltr');
     $isRtl = $direction === 'rtl';
+    use Illuminate\Support\Str;
 @endphp
 
 @section('sidebar')
@@ -219,13 +220,31 @@
     </a>
 </div>
 
+@if(session('success'))
+<div class="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+    {{ session('success') }}
+</div>
+@endif
+
+@if(session('error'))
+<div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+    {{ session('error') }}
+</div>
+@endif
+
+@if(isset($error))
+<div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+    {{ $error }}
+</div>
+@endif
+
 <!-- Stats Cards -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm text-gray-500 font-medium mb-1">کل شبکه‌ها</p>
-                <p class="text-2xl font-bold text-gray-900">48</p>
+                <p class="text-2xl font-bold text-gray-900">{{ $statistics['total'] ?? 0 }}</p>
             </div>
             <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,7 +258,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm text-gray-500 font-medium mb-1">شبکه‌های عمومی</p>
-                <p class="text-2xl font-bold text-gray-900">12</p>
+                <p class="text-2xl font-bold text-gray-900">{{ $statistics['public'] ?? 0 }}</p>
             </div>
             <div class="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
                 <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,7 +272,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm text-gray-500 font-medium mb-1">شبکه‌های خصوصی</p>
-                <p class="text-2xl font-bold text-gray-900">36</p>
+                <p class="text-2xl font-bold text-gray-900">{{ $statistics['private'] ?? 0 }}</p>
             </div>
             <div class="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
                 <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -267,7 +286,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm text-gray-500 font-medium mb-1">IP های شناور</p>
-                <p class="text-2xl font-bold text-gray-900">247</p>
+                <p class="text-2xl font-bold text-gray-900">{{ $statistics['floating_ips'] ?? 0 }}</p>
             </div>
             <div class="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center">
                 <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -280,13 +299,13 @@
 </div>
 
 <!-- Filters and Search -->
-<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+<form method="GET" action="{{ route('admin.networks.index') }}" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <!-- Search -->
         <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-2">جستجو</label>
             <div class="relative">
-                <input type="text" placeholder="جستجو بر اساس نام، ID یا پروژه..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="جستجو بر اساس نام، ID یا پروژه..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
@@ -296,25 +315,29 @@
         <!-- Type Filter -->
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">نوع</label>
-            <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <select name="type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" onchange="this.form.submit()">
                 <option value="">همه</option>
-                <option value="public">عمومی</option>
-                <option value="private">خصوصی</option>
+                <option value="public" {{ ($filters['type'] ?? '') === 'public' ? 'selected' : '' }}>عمومی</option>
+                <option value="private" {{ ($filters['type'] ?? '') === 'private' ? 'selected' : '' }}>خصوصی</option>
             </select>
         </div>
         
         <!-- Project Filter -->
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">پروژه</label>
-            <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <select name="project_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" onchange="this.form.submit()">
                 <option value="">همه پروژه‌ها</option>
-                <option value="project-1">project-acme-corp</option>
-                <option value="project-2">project-techstart</option>
-                <option value="project-3">project-devsolutions</option>
+                <!-- TODO: Load projects dynamically -->
             </select>
         </div>
     </div>
-</div>
+    <div class="mt-4 flex justify-end">
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">اعمال فیلتر</button>
+        @if(!empty($filters['search']) || !empty($filters['type']) || !empty($filters['project_id']))
+        <a href="{{ route('admin.networks.index') }}" class="mr-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">پاک کردن</a>
+        @endif
+    </div>
+</form>
 
 <!-- Networks Table -->
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -325,102 +348,62 @@
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نام شبکه</th>
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نوع</th>
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">CIDR</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">پروژه</th>
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">پهنای باند</th>
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                <!-- Network 1 -->
+                @forelse($networks as $network)
                 <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
-                            <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-lg {{ $network->external ? 'bg-blue-100' : 'bg-purple-100' }} flex items-center justify-center">
+                                <svg class="h-6 w-6 {{ $network->external ? 'text-blue-600' : 'text-purple-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
                                 </svg>
                             </div>
                             <div class="mr-4">
-                                <div class="text-sm font-medium text-gray-900">public-network-01</div>
-                                <div class="text-sm text-gray-500">net-abc123def456</div>
+                                <div class="text-sm font-medium text-gray-900">{{ $network->name }}</div>
+                                <div class="text-sm text-gray-500">{{ Str::limit($network->openstack_id, 20) }}</div>
                             </div>
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
+                        @if($network->external)
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">عمومی</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">203.0.113.0/24</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">project-acme-corp</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">فعال</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">نامحدود</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <a href="{{ route('admin.networks.show', 'net-abc123def456') }}" class="text-blue-600 hover:text-blue-900 mr-4">مشاهده</a>
-                        <button onclick="editNetwork('net-abc123def456')" class="text-indigo-600 hover:text-indigo-900">ویرایش</button>
-                    </td>
-                </tr>
-                
-                <!-- Network 2 -->
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                                <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                </svg>
-                            </div>
-                            <div class="mr-4">
-                                <div class="text-sm font-medium text-gray-900">private-network-acme</div>
-                                <div class="text-sm text-gray-500">net-xyz789ghi012</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                        @else
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">خصوصی</span>
+                        @endif
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">10.0.1.0/24</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">project-acme-corp</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        @if($network->subnets->isNotEmpty())
+                            @foreach($network->subnets as $subnet)
+                                <div>{{ $subnet->cidr ?? 'N/A' }}</div>
+                            @endforeach
+                        @else
+                            <span class="text-gray-400">بدون Subnet</span>
+                        @endif
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap">
+                        @if($network->status === 'ACTIVE')
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">فعال</span>
+                        @elseif($network->status === 'DOWN')
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">غیرفعال</span>
+                        @else
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">{{ $network->status }}</span>
+                        @endif
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1 Gbps</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <a href="{{ route('admin.networks.show', 'net-xyz789ghi012') }}" class="text-blue-600 hover:text-blue-900 mr-4">مشاهده</a>
-                        <button onclick="editNetwork('net-xyz789ghi012')" class="text-indigo-600 hover:text-indigo-900">ویرایش</button>
+                        <a href="{{ route('admin.networks.show', $network->openstack_id) }}" class="text-blue-600 hover:text-blue-900 mr-4">مشاهده</a>
                     </td>
                 </tr>
-                
-                <!-- Network 3 -->
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                                <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                </svg>
-                            </div>
-                            <div class="mr-4">
-                                <div class="text-sm font-medium text-gray-900">private-network-tech</div>
-                                <div class="text-sm text-gray-500">net-mno345pqr678</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">خصوصی</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">10.0.2.0/24</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">project-techstart</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">فعال</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">500 Mbps</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <a href="{{ route('admin.networks.show', 'net-mno345pqr678') }}" class="text-blue-600 hover:text-blue-900 mr-4">مشاهده</a>
-                        <button onclick="editNetwork('net-mno345pqr678')" class="text-indigo-600 hover:text-indigo-900">ویرایش</button>
+                @empty
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                        شبکه‌ای یافت نشد
                     </td>
                 </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
@@ -437,62 +420,37 @@
                 </svg>
             </button>
         </div>
-        <form class="space-y-6">
+        <form method="POST" action="{{ route('admin.networks.store') }}" class="space-y-6">
+            @csrf
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">نام شبکه</label>
-                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="my-network" required>
+                <input type="text" name="name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="my-network" required>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">نوع شبکه</label>
-                    <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        <option value="">انتخاب نوع</option>
-                        <option value="public">عمومی</option>
-                        <option value="private">خصوصی</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">پروژه</label>
-                    <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        <option value="">انتخاب پروژه</option>
-                        <option value="project-1">project-acme-corp</option>
-                        <option value="project-2">project-techstart</option>
-                        <option value="project-3">project-devsolutions</option>
-                    </select>
-                </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">توضیحات (اختیاری)</label>
+                <textarea name="description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="توضیحات شبکه"></textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">نوع شبکه</label>
+                <select name="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                    <option value="">انتخاب نوع</option>
+                    <option value="public">عمومی</option>
+                    <option value="private">خصوصی</option>
+                </select>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">CIDR</label>
-                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="10.0.1.0/24" required>
-                <p class="mt-1 text-xs text-gray-500">مثال: 10.0.1.0/24 یا 192.168.1.0/24</p>
+                <input type="text" name="cidr" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="10.0.1.0/24">
+                <p class="mt-1 text-xs text-gray-500">مثال: 10.0.1.0/24 یا 192.168.1.0/24 (اختیاری)</p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Gateway IP (اختیاری)</label>
-                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="10.0.1.1">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">محدودیت پهنای باند (اختیاری)</label>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="1000" min="1">
-                        <p class="mt-1 text-xs text-gray-500">Mbps</p>
-                    </div>
-                    <div>
-                        <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="100" min="1">
-                        <p class="mt-1 text-xs text-gray-500">Burst Mbps</p>
-                    </div>
-                </div>
+                <input type="text" name="gateway_ip" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="10.0.1.1">
             </div>
             <div>
                 <label class="flex items-center">
-                    <input type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <input type="checkbox" name="enable_dhcp" value="1" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                     <span class="mr-2 block text-sm text-gray-700">فعال‌سازی DHCP</span>
-                </label>
-            </div>
-            <div>
-                <label class="flex items-center">
-                    <input type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                    <span class="mr-2 block text-sm text-gray-700">فعال‌سازی DNS</span>
                 </label>
             </div>
             <div class="flex justify-end gap-3 pt-4">
@@ -517,7 +475,6 @@ function closeCreateNetworkModal() {
 }
 
 function editNetwork(networkId) {
-    // Edit network logic
     window.location.href = "{{ route('admin.networks.show', 'PLACEHOLDER') }}".replace('PLACEHOLDER', networkId);
 }
 </script>
