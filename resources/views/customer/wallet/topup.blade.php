@@ -52,9 +52,10 @@
                             type="text" 
                             id="amount" 
                             name="amount" 
-                            placeholder="500,000 ریال" 
+                            placeholder="500000" 
                             class="w-full border border-gray-300 rounded-lg px-4 py-3 pr-12 text-lg focus:ring-blue-500 focus:border-blue-500"
-                            oninput="formatCurrency(this); updateSummary()"
+                            oninput="handleAmountInput(this); updateSummary()"
+                            onblur="formatCurrency(this)"
                             required
                         >
                         <span class="absolute {{ $isRtl ? 'left-4' : 'right-4' }} top-1/2 transform -translate-y-1/2 text-gray-500">ریال</span>
@@ -130,13 +131,20 @@
 </div>
 
 <script>
+function handleAmountInput(input) {
+    // Only allow digits, remove everything else
+    let value = input.value.replace(/[^\d]/g, '');
+    input.value = value;
+    updateSummary();
+}
+
 function formatCurrency(input) {
     // Remove all non-digit characters
     let value = input.value.replace(/[^\d]/g, '');
     
-    // Format with thousand separators
+    // Format with thousand separators using English locale (commas)
     if (value) {
-        value = parseInt(value).toLocaleString('fa-IR');
+        value = parseInt(value).toLocaleString('en-US');
     }
     
     input.value = value;
