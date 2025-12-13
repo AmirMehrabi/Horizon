@@ -10,6 +10,8 @@ use App\Models\OpenStackNetwork;
 use App\Models\OpenStackSecurityGroup;
 use App\Models\OpenStackKeyPair;
 use App\Models\OpenStackInstanceEvent;
+use App\Models\Wallet;
+use App\Models\WalletTransaction;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -48,11 +50,24 @@ class OpenStackInstanceService
             
             // Calculate costs
             $costs = $this->calculateCosts($flavor, $data['billing_cycle'] ?? 'hourly');
+            $billingCycle = $data['billing_cycle'] ?? 'hourly';
+            
+            // Generate instance name for use in descriptions
+            $instanceName = $data['name'] ?? $this->generateInstanceName($customer);
+            
+            // Validate wallet balance
+            $wallet = $customer->getOrCreateWallet();
+            $monthlyCost = (float) $costs['monthly'];
+            $minimumRequired = $monthlyCost / 3; // 1/3rd of monthly fee
+            
+            if ($wallet->balance < $minimumRequired) {
+                throw new \Exception("موجودی کیف پول کافی نیست. حداقل موجودی مورد نیاز: " . number_format($minimumRequired, 0) . " ریال (یک سوم هزینه ماهانه)");
+            }
             
             // Prepare instance data
             $instanceData = [
                 'customer_id' => $customer->id,
-                'name' => $data['name'] ?? $this->generateInstanceName($customer),
+                'name' => $instanceName,
                 'description' => $data['description'] ?? null,
                 'status' => 'pending',
                 'flavor_id' => $flavor->id,
@@ -73,6 +88,17 @@ class OpenStackInstanceService
 
             // Create instance in database
             $instance = OpenStackInstance::create($instanceData);
+            
+            // Deduct from wallet for monthly servers (after instance creation so we have the ID)
+            if ($billingCycle === 'monthly') {
+                $wallet->debit(
+                    $monthlyCost,
+                    "پرداخت سرور ماهانه: {$instanceName}",
+                    OpenStackInstance::class,
+                    $instance->id,
+                    ['billing_cycle' => 'monthly', 'flavor_id' => $flavor->id]
+                );
+            }
 
             // Attach networks
             $this->attachNetworks($instance, $data);

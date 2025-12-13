@@ -21,3 +21,10 @@ Schedule::command('openstack:sync-resources --type=instances')
     ->withoutOverlapping()
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/openstack-sync.log'));
+
+// Schedule hourly billing processing
+Schedule::command('billing:process-hourly')
+    ->hourly()
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/hourly-billing.log'));

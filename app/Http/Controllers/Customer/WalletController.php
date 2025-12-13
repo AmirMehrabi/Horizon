@@ -3,86 +3,41 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Wallet;
+use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class WalletController extends Controller
 {
     /**
      * Display wallet dashboard
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Dummy data for demonstration
-        $wallet = [
-            'balance' => 1245000, // in Rials
-            'currency' => 'ریال',
-            'formatted_balance' => '1,245,000 ریال',
-        ];
+        $customer = $request->user('customer');
+        $wallet = $customer->getOrCreateWallet();
+        
+        // Get recent transactions
+        $transactions = WalletTransaction::where('customer_id', $customer->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(50)
+            ->get()
+            ->map(function ($transaction) {
+                return [
+                    'id' => $transaction->id,
+                    'date' => $transaction->created_at->format('Y/m/d - H:i'),
+                    'description' => $transaction->description,
+                    'amount' => $transaction->type === 'credit' ? $transaction->amount : -$transaction->amount,
+                    'amount_formatted' => $transaction->formatted_amount,
+                    'status' => $transaction->status === 'completed' ? 'موفق' : ($transaction->status === 'pending' ? 'در انتظار' : 'ناموفق'),
+                    'status_color' => $transaction->status_color,
+                ];
+            });
 
-        $paymentMethods = [
-            [
-                'id' => 1,
-                'type' => 'card',
-                'masked' => '•••• •••• •••• 1234',
-                'status' => 'default',
-                'label' => 'کارت بانکی •••• 1234'
-            ],
-            [
-                'id' => 2,
-                'type' => 'mobile_money',
-                'masked' => '•••• 5678',
-                'status' => 'available',
-                'label' => 'موبایل •••• 5678'
-            ]
-        ];
-
-        $transactions = [
-            [
-                'id' => 1,
-                'date' => '۱۴۰۳/۱۰/۲۲ - ۱۴:۲۲',
-                'description' => 'شارژ کیف پول با کارت',
-                'amount' => 1000000,
-                'amount_formatted' => '+1,000,000 ریال',
-                'status' => 'موفق',
-                'status_color' => 'green'
-            ],
-            [
-                'id' => 2,
-                'date' => '۱۴۰۳/۱۰/۲۱ - ۱۰:۰۳',
-                'description' => 'پرداخت تمدید ماشین مجازی',
-                'amount' => -230000,
-                'amount_formatted' => '-230,000 ریال',
-                'status' => 'تکمیل شده',
-                'status_color' => 'blue'
-            ],
-            [
-                'id' => 3,
-                'date' => '۱۴۰۳/۱۰/۲۰ - ۱۶:۴۵',
-                'description' => 'شارژ کیف پول با کارت',
-                'amount' => 500000,
-                'amount_formatted' => '+500,000 ریال',
-                'status' => 'موفق',
-                'status_color' => 'green'
-            ],
-            [
-                'id' => 4,
-                'date' => '۱۴۰۳/۱۰/۱۹ - ۰۹:۱۵',
-                'description' => 'پرداخت خرید سرور جدید',
-                'amount' => -450000,
-                'amount_formatted' => '-450,000 ریال',
-                'status' => 'تکمیل شده',
-                'status_color' => 'blue'
-            ],
-            [
-                'id' => 5,
-                'date' => '۱۴۰۳/۱۰/۱۸ - ۱۴:۳۰',
-                'description' => 'شارژ کیف پول با کارت',
-                'amount' => 2000000,
-                'amount_formatted' => '+2,000,000 ریال',
-                'status' => 'موفق',
-                'status_color' => 'green'
-            ]
-        ];
+        // Payment methods (empty for now as per user request)
+        $paymentMethods = [];
 
         return view('customer.wallet.index', compact('wallet', 'paymentMethods', 'transactions'));
     }
@@ -90,30 +45,89 @@ class WalletController extends Controller
     /**
      * Display wallet topup page
      */
-    public function topup()
+    public function topup(Request $request)
     {
-        // Dummy data
-        $currentBalance = 1245000;
-        $paymentMethods = [
-            'کارت بانکی •••• 1234',
-            'کارت بانکی •••• 9981',
-            'درگاه پرداخت زرین‌پال',
-            'درگاه پرداخت نکست‌پی'
-        ];
+        $customer = $request->user('customer');
+        $wallet = $customer->getOrCreateWallet();
+        
+        $currentBalance = $wallet->balance;
+        
+        // Only Test Payment method for now
+        $paymentMethods = ['test_payment' => 'پرداخت تستی'];
 
         return view('customer.wallet.topup', compact('currentBalance', 'paymentMethods'));
     }
 
     /**
+     * Process wallet topup
+     */
+    public function processTopup(Request $request)
+    {
+        $request->validate([
+            'amount' => ['required', 'numeric', 'min:10000'],
+            'payment_method' => ['required', 'string', 'in:test_payment'],
+        ]);
+
+        try {
+            $customer = $request->user('customer');
+            $wallet = $customer->getOrCreateWallet();
+            
+            $amount = (float) $request->input('amount');
+            
+            // Process test payment (immediate credit)
+            if ($request->input('payment_method') === 'test_payment') {
+                DB::beginTransaction();
+                
+                try {
+                    $transaction = $wallet->credit(
+                        $amount,
+                        'شارژ کیف پول - پرداخت تستی',
+                        'test_payment'
+                    );
+                    
+                    DB::commit();
+                    
+                    Log::info('Wallet topup completed', [
+                        'customer_id' => $customer->id,
+                        'amount' => $amount,
+                        'transaction_id' => $transaction->id,
+                    ]);
+                    
+                    return redirect()->route('customer.wallet.index')
+                        ->with('success', 'کیف پول شما با موفقیت شارژ شد.');
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    throw $e;
+                }
+            }
+            
+            return redirect()->back()
+                ->withErrors(['error' => 'روش پرداخت نامعتبر است.']);
+                
+        } catch (\Exception $e) {
+            Log::error('Wallet topup failed', [
+                'customer_id' => $request->user('customer')->id ?? null,
+                'error' => $e->getMessage(),
+            ]);
+            
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'خطا در شارژ کیف پول: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
      * Get wallet balance for AJAX requests (for navbar indicator)
      */
-    public function getBalance()
+    public function getBalance(Request $request)
     {
-        // Dummy data
+        $customer = $request->user('customer');
+        $wallet = $customer->getOrCreateWallet();
+        
         return response()->json([
-            'balance' => 1245000,
-            'formatted_balance' => '1,245,000 ریال',
-            'currency' => 'ریال'
+            'balance' => $wallet->balance,
+            'formatted_balance' => $wallet->formatted_balance,
+            'currency' => $wallet->currency
         ]);
     }
 }

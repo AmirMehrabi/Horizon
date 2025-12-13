@@ -53,7 +53,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
                 </svg>
             </div>
-            <p class="text-3xl font-semibold text-gray-900 mb-2">{{ $wallet['formatted_balance'] }}</p>
+            <p class="text-3xl font-semibold text-gray-900 mb-2">{{ $wallet->formatted_balance }}</p>
             <p class="text-xs text-gray-500">پس از هر پرداخت یا شارژ به‌صورت خودکار به‌روزرسانی می‌شود</p>
         </div>
 
@@ -131,7 +131,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($transactions as $transaction)
+                        @forelse($transactions as $transaction)
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $transaction['date'] }}</td>
                             <td class="px-6 py-4 text-sm text-gray-900">{{ $transaction['description'] }}</td>
@@ -148,7 +148,13 @@
                                 </span>
                             </td>
                         </tr>
-                        @endforeach
+                        @empty
+                        <tr>
+                            <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500">
+                                هیچ تراکنشی یافت نشد
+                            </td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

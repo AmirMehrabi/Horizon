@@ -767,6 +767,12 @@ class OpenStackSyncService
                         
                         // Update status and IP addresses together
                         $updateData['status'] = $mappedStatus;
+                        
+                        // Set billing_started_at when instance becomes active for the first time
+                        if ($mappedStatus === 'active' && $oldStatus !== 'active' && is_null($instance->billing_started_at)) {
+                            $updateData['billing_started_at'] = now();
+                        }
+                        
                         $instance->update($updateData);
                         
                         // Log the status change event

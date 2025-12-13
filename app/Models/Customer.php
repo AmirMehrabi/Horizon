@@ -225,6 +225,22 @@ class Customer extends Authenticatable
     }
 
     /**
+     * Get the wallet associated with the customer.
+     */
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class, 'customer_id');
+    }
+
+    /**
+     * Get or create wallet for this customer.
+     */
+    public function getOrCreateWallet(): Wallet
+    {
+        return Wallet::getOrCreateForCustomer($this->id);
+    }
+
+    /**
      * Get the machines associated with the customer.
      * This is a placeholder for the machine relationship.
      * @deprecated Use openStackInstances() instead

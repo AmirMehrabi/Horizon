@@ -219,6 +219,7 @@ Route::domain('panel.aviato.ir')
             Route::prefix('wallet')->name('wallet.')->group(function () {
                 Route::get('/', [CustomerWalletController::class, 'index'])->name('index');
                 Route::get('/topup', [CustomerWalletController::class, 'topup'])->name('topup');
+                Route::post('/topup', [CustomerWalletController::class, 'processTopup'])->name('topup.process');
                 Route::get('/balance', [CustomerWalletController::class, 'getBalance'])->name('balance');
             });
             

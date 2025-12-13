@@ -39,7 +39,7 @@
     <!-- Main Form -->
     <div class="lg:col-span-2">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <form id="topupForm" method="POST" action="#">
+            <form id="topupForm" method="POST" action="{{ route('customer.wallet.topup.process') }}">
                 @csrf
                 
                 <!-- Amount Field -->
@@ -75,8 +75,8 @@
                         required
                     >
                         <option value="">انتخاب روش پرداخت</option>
-                        @foreach($paymentMethods as $method)
-                        <option value="{{ $method }}">{{ $method }}</option>
+                        @foreach($paymentMethods as $key => $method)
+                        <option value="{{ $key }}">{{ $method }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -171,25 +171,25 @@ function updateSummary() {
 
 // Form submission
 document.getElementById('topupForm')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
     const amountInput = document.getElementById('amount');
     const paymentMethod = document.getElementById('payment_method');
     
     const amountValue = amountInput.value.replace(/[^\d]/g, '');
     
     if (!amountValue || parseInt(amountValue) < 10000) {
+        e.preventDefault();
         alert('حداقل مبلغ شارژ ۱۰,۰۰۰ ریال است.');
         return;
     }
     
     if (!paymentMethod.value) {
+        e.preventDefault();
         alert('لطفاً روش پرداخت را انتخاب کنید.');
         return;
     }
     
-    // TODO: Implement actual payment processing
-    alert('در حال انتقال به درگاه پرداخت...');
+    // For test payment, submit the form directly
+    // For other payment methods, you would redirect to payment gateway here
 });
 </script>
 @endsection
