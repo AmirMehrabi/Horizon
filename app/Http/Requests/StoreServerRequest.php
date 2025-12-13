@@ -40,14 +40,12 @@ class StoreServerRequest extends FormRequest
             'plan_type' => ['required', 'string', 'in:prebuilt,custom'],
             'plan' => [
                 'required_without:flavor_id',
-                'required_if:plan_type,prebuilt',
                 'nullable',
                 'string',
                 'in:starter,standard,pro',
             ],
             'flavor_id' => [
                 'required_without:plan',
-                'required_if:plan_type,prebuilt',
                 'nullable',
                 'uuid',
                 'exists:openstack_flavors,id',
@@ -105,8 +103,9 @@ class StoreServerRequest extends FormRequest
             // Plan Selection
             'plan_type.required' => 'لطفاً نوع پلن را انتخاب کنید',
             'plan_type.in' => 'نوع پلن معتبر نیست',
-            'plan.required_if' => 'لطفاً یک پلن انتخاب کنید',
+            'plan.required_without' => 'لطفاً یک پلن انتخاب کنید',
             'plan.in' => 'پلن انتخاب شده معتبر نیست',
+            'flavor_id.required_without' => 'لطفاً یک پلن انتخاب کنید',
             'flavor_id.exists' => 'فلور انتخاب شده یافت نشد',
             'flavor_id.uuid' => 'شناسه فلور معتبر نیست',
             
@@ -178,6 +177,21 @@ class StoreServerRequest extends FormRequest
             $this->merge([
                 'network_ids' => array_filter(explode(',', $this->input('network_ids'))),
             ]);
+        }
+
+        // Normalize empty strings to null for flavor_id and plan
+        // This ensures required_without validation works correctly
+        if ($this->has('flavor_id')) {
+            $flavorId = $this->input('flavor_id');
+            if ($flavorId === '' || $flavorId === null) {
+                $this->merge(['flavor_id' => null]);
+            }
+        }
+        if ($this->has('plan')) {
+            $plan = $this->input('plan');
+            if ($plan === '' || $plan === null) {
+                $this->merge(['plan' => null]);
+            }
         }
     }
 }
