@@ -42,7 +42,7 @@
 </div>
 
 <!-- Two Column Layout -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Left Column -->
     <div class="lg:col-span-1 space-y-6">
         <!-- Balance Card -->
