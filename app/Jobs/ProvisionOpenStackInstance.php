@@ -208,12 +208,49 @@ class ProvisionOpenStackInstance implements ShouldQueue
         // Only add networks parameter if we have valid networks
         // If no networks, OpenStack will use default network
         if (!empty($networks)) {
-            // Re-index array to ensure clean numeric keys
-            $params['networks'] = array_values($networks);
-            Log::info('Final networks array for params', [
-                'networks' => $params['networks'],
-                'networks_json' => json_encode($params['networks']),
-            ]);
+            // Final validation: ensure all networks are objects with 'uuid' key
+            $finalNetworks = [];
+            foreach ($networks as $index => $network) {
+                // Double-check: if it's a string, convert it
+                if (is_string($network)) {
+                    Log::error('Network is still a string after processing! Converting.', [
+                        'network_string' => $network,
+                        'index' => $index,
+                        'instance_id' => $this->instance->id,
+                    ]);
+                    if (preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $network)) {
+                        $network = ['uuid' => (string)$network];
+                    } else {
+                        continue; // Skip invalid UUIDs
+                    }
+                }
+                
+                // Ensure it's an array with uuid key
+                if (is_array($network) && isset($network['uuid']) && !empty($network['uuid'])) {
+                    // Create a fresh array to avoid any key contamination
+                    $finalNetworks[] = ['uuid' => (string)$network['uuid']];
+                } else {
+                    Log::error('Network structure is invalid after processing', [
+                        'network' => $network,
+                        'network_type' => gettype($network),
+                        'index' => $index,
+                        'instance_id' => $this->instance->id,
+                    ]);
+                }
+            }
+            
+            if (!empty($finalNetworks)) {
+                $params['networks'] = $finalNetworks;
+                Log::info('Final networks array for params', [
+                    'networks' => $params['networks'],
+                    'networks_json' => json_encode($params['networks'], JSON_PRETTY_PRINT),
+                    'count' => count($finalNetworks),
+                ]);
+            } else {
+                Log::warning('No valid networks after final validation', [
+                    'instance_id' => $this->instance->id,
+                ]);
+            }
         } else {
             Log::info('No valid networks specified, OpenStack will use default network', [
                 'instance_id' => $this->instance->id,
@@ -370,18 +407,42 @@ class ProvisionOpenStackInstance implements ShouldQueue
                 // Validate array structure for networks and security groups
                 if ($key === 'networks') {
                     $validNetworks = [];
-                    foreach ($value as $network) {
+                    foreach ($value as $index => $network) {
+                        // Check if network is a string (wrong format) - convert to object
+                        if (is_string($network)) {
+                            Log::warning('Network passed as string instead of object, converting', [
+                                'network_string' => $network,
+                                'index' => $index,
+                                'instance_id' => $this->instance->id,
+                            ]);
+                            // Convert string UUID to proper object format
+                            if (preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $network)) {
+                                $network = ['uuid' => $network];
+                            } else {
+                                Log::error('Network string is not a valid UUID, skipping', [
+                                    'network_string' => $network,
+                                    'instance_id' => $this->instance->id,
+                                ]);
+                                continue;
+                            }
+                        }
+                        
+                        // Validate it's now an array/object with uuid key
                         if (is_array($network) && isset($network['uuid']) && !empty($network['uuid'])) {
+                            // Ensure uuid is a string
+                            $network['uuid'] = (string)$network['uuid'];
                             $validNetworks[] = $network;
                         } else {
                             Log::warning('Invalid network structure in params', [
                                 'network' => $network,
+                                'network_type' => gettype($network),
+                                'index' => $index,
                                 'instance_id' => $this->instance->id,
                             ]);
                         }
                     }
                     if (!empty($validNetworks)) {
-                        $cleanParams[$key] = $validNetworks;
+                        $cleanParams[$key] = array_values($validNetworks);
                     }
                     continue;
                 }
