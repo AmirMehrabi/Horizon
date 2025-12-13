@@ -591,7 +591,7 @@ class OpenStackInstanceService
             $server->start();
 
             $this->updateStatus($instance, 'building', 'starting');
-            $this->logEvent($instance, 'start_requested', 'Server start requested', 'customer');
+            $this->logEvent($instance, 'start_requested', 'Server start requested', 'user');
         } catch (\Exception $e) {
             Log::error('Failed to start server', [
                 'instance_id' => $instance->id,
@@ -617,7 +617,7 @@ class OpenStackInstanceService
             $server->stop();
 
             $this->updateStatus($instance, 'building', 'stopping');
-            $this->logEvent($instance, 'stop_requested', 'Server stop requested', 'customer');
+            $this->logEvent($instance, 'stop_requested', 'Server stop requested', 'user');
         } catch (\Exception $e) {
             Log::error('Failed to stop server', [
                 'instance_id' => $instance->id,
@@ -647,7 +647,7 @@ class OpenStackInstanceService
             $server->reboot(['type' => $type]);
 
             $this->updateStatus($instance, 'building', 'rebooting');
-            $this->logEvent($instance, 'reboot_requested', "Server reboot requested (type: {$type})", 'customer');
+            $this->logEvent($instance, 'reboot_requested', "Server reboot requested (type: {$type})", 'user');
         } catch (\Exception $e) {
             Log::error('Failed to reboot server', [
                 'instance_id' => $instance->id,
@@ -666,7 +666,7 @@ class OpenStackInstanceService
     {
         if (empty($instance->openstack_server_id)) {
             // If not provisioned in OpenStack, just delete locally
-            $this->logEvent($instance, 'deleted', 'Instance deleted (not provisioned in OpenStack)', 'customer');
+            $this->logEvent($instance, 'deleted', 'Instance deleted (not provisioned in OpenStack)', 'user');
             $instance->delete();
             return;
         }
@@ -677,7 +677,7 @@ class OpenStackInstanceService
             $server->delete();
 
             $this->updateStatus($instance, 'deleting', 'deleting');
-            $this->logEvent($instance, 'delete_requested', 'Server deletion requested', 'customer');
+            $this->logEvent($instance, 'delete_requested', 'Server deletion requested', 'user');
         } catch (\Exception $e) {
             Log::error('Failed to delete server', [
                 'instance_id' => $instance->id,
@@ -712,7 +712,7 @@ class OpenStackInstanceService
             $server->rescue($rescueParams);
 
             $this->updateStatus($instance, 'building', 'rescuing');
-            $this->logEvent($instance, 'rescue_requested', 'Server rescue mode requested', 'customer');
+            $this->logEvent($instance, 'rescue_requested', 'Server rescue mode requested', 'user');
         } catch (\Exception $e) {
             Log::error('Failed to enable rescue mode', [
                 'instance_id' => $instance->id,
@@ -738,7 +738,7 @@ class OpenStackInstanceService
             $server->unrescue();
 
             $this->updateStatus($instance, 'building', 'unrescuing');
-            $this->logEvent($instance, 'unrescue_requested', 'Server unrescue requested', 'customer');
+            $this->logEvent($instance, 'unrescue_requested', 'Server unrescue requested', 'user');
         } catch (\Exception $e) {
             Log::error('Failed to disable rescue mode', [
                 'instance_id' => $instance->id,
