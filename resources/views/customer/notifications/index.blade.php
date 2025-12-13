@@ -148,7 +148,7 @@
             
             if (!isRead && notificationId) {
                 // Mark as read via AJAX
-                fetch(`{{ route('customer.notifications.read', ['id' => '']) }}${notificationId}`, {
+                fetch(`/customer/notifications/${notificationId}/read`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
