@@ -5,6 +5,23 @@
 @php
     $direction = config('ui.direction', 'ltr');
     $isRtl = $direction === 'rtl';
+    
+    // Get available images for "Other" category (cirros)
+    $otherImages = $images->filter(function($image) {
+        return stripos($image->name, 'cirros') !== false;
+    });
+    
+    // Popular distros list
+    $popularDistros = [
+        ['id' => 'ubuntu', 'name' => 'Ubuntu', 'logo' => 'ubuntu'],
+        ['id' => 'debian', 'name' => 'Debian', 'logo' => 'debian'],
+        ['id' => 'centos', 'name' => 'CentOS', 'logo' => 'centos'],
+        ['id' => 'almalinux', 'name' => 'AlmaLinux', 'logo' => 'almalinux'],
+        ['id' => 'rocky', 'name' => 'Rocky Linux', 'logo' => 'rocky'],
+        ['id' => 'fedora', 'name' => 'Fedora', 'logo' => 'fedora'],
+        ['id' => 'opensuse', 'name' => 'openSUSE', 'logo' => 'opensuse'],
+        ['id' => 'arch', 'name' => 'Arch Linux', 'logo' => 'arch'],
+    ];
 @endphp
 
 @section('header_content')
@@ -29,11 +46,11 @@
 @endsection
 
 @section('content')
-<div class="max-w-5xl mx-auto">
+<div class="max-w-7xl mx-auto">
     <!-- Page Header -->
-    <div class="mb-8">
+    <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900">ایجاد سرور جدید</h1>
-        <p class="mt-1 text-sm text-gray-500">راهنمای گام به گام برای راه‌اندازی سرور مجازی</p>
+        <p class="mt-1 text-sm text-gray-500">پیکربندی و راه‌اندازی سرور مجازی خود</p>
     </div>
 
     <!-- Validation Errors -->
@@ -72,133 +89,75 @@
         </div>
     @endif
 
-    <!-- Progress Steps -->
-    <div class="mb-8">
-        <div class="flex items-center justify-between">
-            <!-- Step 1 -->
-            <div class="flex items-center flex-1">
-                <div class="flex flex-col items-center flex-1">
-                    <div id="step-1-indicator" class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold mb-2">
-                        ۱
+    <!-- Main Layout: Form + Sidebar -->
+    <div class="flex flex-col lg:flex-row gap-6">
+        <!-- Main Form Section (Scrollable) -->
+        <div class="flex-1 lg:max-w-3xl">
+            <form id="server-create-form" action="{{ route('customer.servers.store') }}" method="POST" class="space-y-6">
+                @csrf
+                
+                <!-- Operating System Selection -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">انتخاب سیستم عامل</h2>
+                    
+                    <!-- Popular Distributions Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                        @foreach($popularDistros as $distro)
+                            <label class="relative cursor-pointer group">
+                                <input type="radio" name="os" value="{{ $distro['id'] }}" class="peer hidden" data-distro="{{ $distro['id'] }}" onchange="handleDistroChange('{{ $distro['id'] }}')">
+                                <div class="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all text-center">
+                                    <!-- Distro Logo Placeholder -->
+                                    <div class="w-12 h-12 mx-auto mb-2 rounded-lg bg-gray-100 flex items-center justify-center">
+                                        <span class="text-xs font-semibold text-gray-600">{{ substr($distro['name'], 0, 2) }}</span>
                     </div>
-                    <span class="text-sm font-medium text-gray-900">انتخاب سیستم عامل</span>
+                                    <div class="text-sm font-medium text-gray-700">{{ $distro['name'] }}</div>
+                                    <div class="mt-2">
+                                        <select name="image_id_{{ $distro['id'] }}" id="image-select-{{ $distro['id'] }}" class="w-full text-xs border border-gray-300 rounded px-2 py-1 hidden peer-checked:block" disabled>
+                                            <option value="">انتخاب نسخه</option>
+                                        </select>
                 </div>
-                <div class="flex-1 h-1 bg-gray-200 mx-2 {{ $isRtl ? 'ml-2' : 'mr-2' }}">
-                    <div id="step-1-progress" class="h-1 bg-blue-600 transition-all duration-300" style="width: 0%"></div>
+                </div>
+                            </label>
+                        @endforeach
+                        
+                        <!-- Other Option -->
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="os" value="custom" class="peer hidden" data-distro="custom" onchange="handleDistroChange('custom')">
+                            <div class="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all text-center">
+                                <div class="w-12 h-12 mx-auto mb-2 rounded-lg bg-gray-100 flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                                    </svg>
+                    </div>
+                                <div class="text-sm font-medium text-gray-700">سایر</div>
+                                <div class="mt-2">
+                                    <select name="image_id" id="image-select-custom" class="w-full text-xs border border-gray-300 rounded px-2 py-1 hidden peer-checked:block" onchange="updateChecklist()">
+                                        <option value="">انتخاب تصویر</option>
+                                        @foreach($otherImages as $image)
+                                            <option value="{{ $image->id }}" {{ old('image_id') == $image->id ? 'selected' : '' }}>
+                                                {{ $image->name }} @if($image->description) - {{ $image->description }} @endif
+                                            </option>
+                                        @endforeach
+                                    </select>
                 </div>
             </div>
-
-            <!-- Step 2 -->
-            <div class="flex items-center flex-1">
-                <div class="flex flex-col items-center flex-1">
-                    <div id="step-2-indicator" class="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-semibold mb-2">
-                        ۲
-                    </div>
-                    <span class="text-sm font-medium text-gray-600">انتخاب پلن</span>
-                </div>
-                <div class="flex-1 h-1 bg-gray-200 mx-2 {{ $isRtl ? 'ml-2' : 'mr-2' }}">
-                    <div id="step-2-progress" class="h-1 bg-gray-200 transition-all duration-300" style="width: 0%"></div>
-                </div>
-            </div>
-
-            <!-- Step 3 -->
-            <div class="flex items-center flex-1">
-                <div class="flex flex-col items-center flex-1">
-                    <div id="step-3-indicator" class="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-semibold mb-2">
-                        ۳
-                    </div>
-                    <span class="text-sm font-medium text-gray-600">تنظیمات شبکه</span>
-                </div>
-                <div class="flex-1 h-1 bg-gray-200 mx-2 {{ $isRtl ? 'ml-2' : 'mr-2' }}">
-                    <div id="step-3-progress" class="h-1 bg-gray-200 transition-all duration-300" style="width: 0%"></div>
-                </div>
-            </div>
-
-            <!-- Step 4 -->
-            <div class="flex items-center">
-                <div class="flex flex-col items-center">
-                    <div id="step-4-indicator" class="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-semibold mb-2">
-                        ۴
-                    </div>
-                    <span class="text-sm font-medium text-gray-600">دسترسی و راه‌اندازی</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Wizard Form -->
-    <form id="vps-wizard-form" action="{{ route('customer.servers.store') }}" method="POST">
-        @csrf
-        
-        <!-- Step 1: Choose OS -->
-        <div id="step-1-content" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-6">انتخاب سیستم عامل</h2>
-            
-            <!-- OS Type Selection -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-3">نوع سیستم عامل</label>
-                <div class="flex gap-4 mb-4">
-                    <label class="flex items-center">
-                        <input type="radio" name="os" value="ubuntu" class="mr-2" {{ old('os') === 'ubuntu' ? 'checked' : '' }} onchange="loadImages('ubuntu')">
-                        <span class="text-sm text-gray-700">Ubuntu</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="os" value="debian" class="mr-2" {{ old('os') === 'debian' ? 'checked' : '' }} onchange="loadImages('debian')">
-                        <span class="text-sm text-gray-700">Debian</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="os" value="centos" class="mr-2" {{ old('os') === 'centos' ? 'checked' : '' }} onchange="loadImages('centos')">
-                        <span class="text-sm text-gray-700">CentOS</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="os" value="almalinux" class="mr-2" {{ old('os') === 'almalinux' ? 'checked' : '' }} onchange="loadImages('almalinux')">
-                        <span class="text-sm text-gray-700">AlmaLinux</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="os" value="windows" class="mr-2" {{ old('os') === 'windows' ? 'checked' : '' }} onchange="loadImages('windows')">
-                        <span class="text-sm text-gray-700">Windows</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="os" value="custom" class="mr-2" {{ old('os') === 'custom' ? 'checked' : '' }} onchange="loadImages('custom')">
-                        <span class="text-sm text-gray-700">سایر</span>
                     </label>
                 </div>
+                    
                 @error('os')
                     <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
                 @enderror
-            </div>
-
-            <!-- Image Selection -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">انتخاب تصویر</label>
-                <select name="image_id" id="image-select" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('image_id') border-red-400 bg-red-50 @enderror">
-                    <option value="">لطفاً ابتدا نوع سیستم عامل را انتخاب کنید</option>
-                    @foreach($images as $image)
-                        <option value="{{ $image->id }}" data-os-type="{{ strtolower($image->name) }}" {{ old('image_id') == $image->id ? 'selected' : '' }}>
-                            {{ $image->name }} @if($image->description) - {{ $image->description }} @endif
-                        </option>
-                    @endforeach
-                </select>
                 @error('image_id')
                     <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
                 @enderror
-                <p class="text-xs text-gray-500 mt-1">تصاویر موجود در منطقه شما</p>
             </div>
 
-            <div class="flex justify-end">
-                <button type="button" onclick="nextStep(2)" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
-                    بعدی →
-                </button>
-            </div>
-        </div>
-
-        <!-- Step 2: Select Plan -->
-        <div id="step-2-content" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hidden">
-            <h2 class="text-xl font-semibold text-gray-900 mb-6">انتخاب پلن</h2>
-            
-            <!-- Plan Type Selection -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-3">نوع پلن</label>
+                <!-- Plan Selection -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">انتخاب پلن</h2>
+                    
+                    <!-- Plan Type Toggle -->
+                    <div class="mb-4">
                 <div class="flex gap-4">
                     <label class="flex items-center">
                         <input type="radio" name="plan_type" value="prebuilt" class="mr-2" {{ old('plan_type', 'prebuilt') === 'prebuilt' ? 'checked' : '' }} onchange="togglePlanType()">
@@ -209,194 +168,130 @@
                         <span class="text-sm text-gray-700">سفارشی</span>
                     </label>
                 </div>
-                @error('plan_type')
-                    <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-                @enderror
             </div>
 
             <!-- Prebuilt Plans (Flavors) -->
-            <div id="prebuilt-plans" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <div id="prebuilt-plans" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @forelse($flavors as $flavor)
                     <label class="relative cursor-pointer">
-                        <input type="radio" name="flavor_id" value="{{ $flavor->id }}" class="peer hidden" data-flavor-id="{{ $flavor->id }}" {{ old('flavor_id') == $flavor->id ? 'checked' : '' }}>
-                        <div class="border-2 border-gray-200 rounded-lg p-6 hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg font-semibold text-gray-900">{{ $flavor->name }}</h3>
+                                <input type="radio" name="flavor_id" value="{{ $flavor->id }}" class="peer hidden" data-flavor-id="{{ $flavor->id }}" data-hourly="{{ $flavor->pricing_hourly ?? 0 }}" data-monthly="{{ $flavor->pricing_monthly ?? 0 }}" {{ old('flavor_id') == $flavor->id ? 'checked' : '' }} onchange="updatePricing(); updateChecklist();">
+                                <div class="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h3 class="text-base font-semibold text-gray-900">{{ $flavor->name }}</h3>
                                 <svg class="w-5 h-5 text-blue-600 hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                 </svg>
                             </div>
-                            @if($flavor->description)
-                                <p class="text-xs text-gray-500 mb-3">{{ $flavor->description }}</p>
-                            @endif
-                            <div class="space-y-2 text-sm text-gray-600 mb-4">
-                                <p>{{ $flavor->vcpus }} vCPU</p>
-                                <p>{{ number_format($flavor->ram_in_gb, 1) }}GB RAM</p>
-                                <p>{{ $flavor->disk }}GB Storage</p>
-                                @if($flavor->ephemeral_disk > 0)
-                                    <p>{{ $flavor->ephemeral_disk }}GB Ephemeral Disk</p>
-                                @endif
+                                    <div class="space-y-1 text-sm text-gray-600 mb-3">
+                                        <div class="flex justify-between">
+                                            <span>vCPU:</span>
+                                            <span class="font-medium">{{ $flavor->vcpus }}</span>
                             </div>
-                            <div class="flex items-center justify-between">
-                                @if($flavor->pricing_monthly)
-                                    <p class="text-lg font-bold text-gray-900">{{ number_format($flavor->pricing_monthly) }} تومان/ماه</p>
-                                @endif
-                                @if($flavor->pricing_hourly)
-                                    <p class="text-sm text-gray-500">{{ number_format($flavor->pricing_hourly) }} تومان/ساعت</p>
-                                @endif
+                                        <div class="flex justify-between">
+                                            <span>RAM:</span>
+                                            <span class="font-medium">{{ number_format($flavor->ram_in_gb, 1) }} GB</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Storage:</span>
+                                            <span class="font-medium">{{ $flavor->disk }} GB</span>
+                                        </div>
                             </div>
                         </div>
                     </label>
                 @empty
                     <div class="col-span-full text-center py-8 text-gray-500">
-                        <p>هیچ پلنی در دسترس نیست. لطفاً با پشتیبانی تماس بگیرید.</p>
+                                <p>هیچ پلنی در دسترس نیست</p>
                     </div>
                 @endforelse
             </div>
-            @error('flavor_id')
-                <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-            @enderror
-            @error('plan')
-                <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-            @enderror
 
             <!-- Custom Plan -->
-            <div id="custom-plan" class="hidden mb-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div id="custom-plan" class="hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">تعداد vCPU</label>
-                        <input type="number" name="custom_vcpu" id="custom_vcpu" min="1" max="32" value="{{ old('custom_vcpu', 1) }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('custom_vcpu') border-red-400 bg-red-50 @enderror" oninput="calculateCustomPrice()">
-                        @error('custom_vcpu')
-                            <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-                        @enderror
+                                <input type="number" name="custom_vcpu" id="custom_vcpu" min="1" max="32" value="{{ old('custom_vcpu', 1) }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" oninput="calculateCustomPrice(); updateChecklist();">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">RAM (GB)</label>
-                        <input type="number" name="custom_ram" id="custom_ram" min="1" max="128" value="{{ old('custom_ram', 2) }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('custom_ram') border-red-400 bg-red-50 @enderror" oninput="calculateCustomPrice()">
-                        @error('custom_ram')
-                            <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-                        @enderror
+                                <input type="number" name="custom_ram" id="custom_ram" min="1" max="128" value="{{ old('custom_ram', 2) }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" oninput="calculateCustomPrice(); updateChecklist();">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">فضای ذخیره‌سازی (GB)</label>
-                        <input type="number" name="custom_storage" id="custom_storage" min="20" max="1000" value="{{ old('custom_storage', 20) }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('custom_storage') border-red-400 bg-red-50 @enderror" oninput="calculateCustomPrice()">
-                        @error('custom_storage')
-                            <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-                        @enderror
+                                <input type="number" name="custom_storage" id="custom_storage" min="20" max="1000" value="{{ old('custom_storage', 20) }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" oninput="calculateCustomPrice(); updateChecklist();">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">پهنای باند (TB)</label>
-                        <input type="number" name="custom_bandwidth" id="custom_bandwidth" min="0.1" max="10" step="0.5" value="{{ old('custom_bandwidth', 1) }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('custom_bandwidth') border-red-400 bg-red-50 @enderror" oninput="calculateCustomPrice()">
-                        @error('custom_bandwidth')
-                            <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-                        @enderror
+                                <input type="number" name="custom_bandwidth" id="custom_bandwidth" min="0.1" max="10" step="0.5" value="{{ old('custom_bandwidth', 1) }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" oninput="calculateCustomPrice(); updateChecklist();">
                     </div>
                 </div>
-                <div class="mt-4 p-4 bg-blue-50 rounded-lg">
-                    <p class="text-sm text-gray-700">
-                        <span class="font-medium">قیمت تخمینی:</span>
-                        <span id="custom-price" class="text-lg font-bold text-blue-600">محاسبه می‌شود...</span>
-                    </p>
-                </div>
             </div>
 
-            <div class="flex justify-between">
-                <button type="button" onclick="prevStep(1)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-6 rounded-lg transition-colors">
-                    ← قبلی
-                </button>
-                <button type="button" onclick="nextStep(3)" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
-                    بعدی →
-                </button>
-            </div>
+                    @error('flavor_id')
+                        <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
+                    @enderror
         </div>
 
-        <!-- Step 3: Network -->
-        <div id="step-3-content" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hidden">
-            <h2 class="text-xl font-semibold text-gray-900 mb-6">تنظیمات شبکه</h2>
-            
-            <div class="space-y-6">
+                <!-- Network Settings -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">تنظیمات شبکه</h2>
+                    
+                    <div class="space-y-4">
                 <!-- Network Selection -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">انتخاب شبکه</label>
-                    <select name="network_ids[]" id="network-select" multiple class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('network_ids') border-red-400 bg-red-50 @enderror" size="4">
+                            <select name="network_ids[]" id="network-select" multiple class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" size="4" onchange="updateChecklist()">
                         @forelse($networks as $network)
                             <option value="{{ $network->id }}" {{ in_array($network->id, old('network_ids', [])) ? 'selected' : '' }}>
                                 {{ $network->name }} @if($network->external) (عمومی) @else (خصوصی) @endif
-                                @if($network->description) - {{ $network->description }} @endif
                             </option>
                         @empty
                             <option value="" disabled>هیچ شبکه‌ای در دسترس نیست</option>
                         @endforelse
                     </select>
-                    @error('network_ids')
-                        <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-                    @enderror
-                    @error('network_ids.*')
-                        <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-                    @enderror
                     <p class="text-xs text-gray-500 mt-1">برای انتخاب چند مورد، کلید Ctrl (یا Cmd در Mac) را نگه دارید</p>
                 </div>
 
                 <!-- Public IP -->
                 <div>
                     <label class="flex items-center">
-                        <input type="checkbox" name="assign_public_ip" value="1" {{ old('assign_public_ip', true) ? 'checked' : '' }} class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <input type="checkbox" name="assign_public_ip" value="1" {{ old('assign_public_ip', true) ? 'checked' : '' }} class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" onchange="updateChecklist()">
                         <span class="mr-2 text-sm font-medium text-gray-700">اختصاص IP عمومی</span>
                     </label>
-                    <p class="text-xs text-gray-500 mt-1 mr-6">سرور شما یک آدرس IP عمومی دریافت می‌کند</p>
                 </div>
 
                 <!-- Security Groups -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">گروه‌های امنیتی</label>
-                    <select name="security_groups[]" id="security-groups-select" multiple class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('security_groups') border-red-400 bg-red-50 @enderror" size="4">
+                            <select name="security_groups[]" id="security-groups-select" multiple class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" size="4" onchange="updateChecklist()">
                         @forelse($securityGroups as $sg)
                             <option value="{{ $sg->id }}" {{ in_array($sg->id, old('security_groups', [])) ? 'selected' : '' }}>
                                 {{ $sg->name }}
                                 @if($sg->description) - {{ $sg->description }} @endif
-                                @if(is_array($sg->rules) && count($sg->rules) > 0)
-                                    ({{ count($sg->rules) }} قانون)
-                                @endif
                             </option>
                         @empty
                             <option value="" disabled>هیچ گروه امنیتی در دسترس نیست</option>
                         @endforelse
                     </select>
-                    @error('security_groups')
-                        <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-                    @enderror
-                    @error('security_groups.*')
-                        <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-                    @enderror
-                    <p class="text-xs text-gray-500 mt-1">برای انتخاب چند مورد، کلید Ctrl (یا Cmd در Mac) را نگه دارید</p>
                 </div>
-            </div>
-
-            <div class="flex justify-between mt-6">
-                <button type="button" onclick="prevStep(2)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-6 rounded-lg transition-colors">
-                    ← قبلی
-                </button>
-                <button type="button" onclick="nextStep(4)" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
-                    بعدی →
-                </button>
             </div>
         </div>
 
-        <!-- Step 4: Access -->
-        <div id="step-4-content" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hidden">
-            <h2 class="text-xl font-semibold text-gray-900 mb-6">دسترسی و راه‌اندازی</h2>
-            
-            <div class="space-y-6">
+                <!-- Access Settings -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">دسترسی و راه‌اندازی</h2>
+                    
+                    <div class="space-y-4">
                 <!-- Access Method -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-3">روش دسترسی</label>
                     <div class="space-y-3">
                         <label class="flex items-center">
-                            <input type="radio" name="access_method" value="ssh_key" class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" checked onchange="toggleAccessMethod()">
+                                    <input type="radio" name="access_method" value="ssh_key" class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" checked onchange="toggleAccessMethod(); updateChecklist();">
                             <span class="mr-2 text-sm text-gray-700">کلید SSH</span>
                         </label>
                         <label class="flex items-center">
-                            <input type="radio" name="access_method" value="password" class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" onchange="toggleAccessMethod()">
+                                    <input type="radio" name="access_method" value="password" class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" onchange="toggleAccessMethod(); updateChecklist();">
                             <span class="mr-2 text-sm text-gray-700">رمز عبور root</span>
                         </label>
                     </div>
@@ -405,7 +300,7 @@
                 <!-- SSH Key -->
                 <div id="ssh-key-section">
                     <label class="block text-sm font-medium text-gray-700 mb-2">کلید SSH</label>
-                    <select name="ssh_key_id" id="ssh-key-select" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('ssh_key_id') border-red-400 bg-red-50 @enderror" onchange="toggleSshKeyInput()">
+                            <select name="ssh_key_id" id="ssh-key-select" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 mb-2" onchange="toggleSshKeyInput(); updateChecklist();">
                         <option value="">انتخاب کلید SSH موجود</option>
                         <option value="new">ایجاد کلید جدید</option>
                         @foreach($keyPairs as $keyPair)
@@ -414,14 +309,8 @@
                             </option>
                         @endforeach
                     </select>
-                    @error('ssh_key_id')
-                        <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-                    @enderror
-                    <p class="text-xs text-gray-500 mt-1">یا کلید SSH عمومی خود را وارد کنید</p>
-                    <textarea name="ssh_public_key" id="ssh-public-key-input" rows="4" class="mt-2 w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm @error('ssh_public_key') border-red-400 bg-red-50 @enderror" placeholder="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ...">{{ old('ssh_public_key') }}</textarea>
-                    @error('ssh_public_key')
-                        <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-                    @enderror
+                            <p class="text-xs text-gray-500 mb-2">یا کلید SSH عمومی خود را وارد کنید</p>
+                            <textarea name="ssh_public_key" id="ssh-public-key-input" rows="4" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm" placeholder="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ..." onchange="updateChecklist()">{{ old('ssh_public_key') }}</textarea>
                 </div>
 
                 <!-- Root Password -->
@@ -429,61 +318,40 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">رمز عبور root</label>
-                            <input type="password" name="root_password" id="root_password" value="{{ old('root_password') }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('root_password') border-red-400 bg-red-50 @enderror">
-                            @error('root_password')
-                                <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-                            @enderror
+                                    <input type="password" name="root_password" id="root_password" value="{{ old('root_password') }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" onchange="updateChecklist()">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">تأیید رمز عبور</label>
-                            <input type="password" name="root_password_confirmation" id="root_password_confirmation" value="{{ old('root_password_confirmation') }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('root_password_confirmation') border-red-400 bg-red-50 @enderror">
-                            @error('root_password_confirmation')
-                                <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-                            @enderror
+                                    <input type="password" name="root_password_confirmation" id="root_password_confirmation" value="{{ old('root_password_confirmation') }}" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" onchange="updateChecklist()">
                         </div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1">رمز عبور باید حداقل ۸ کاراکتر باشد</p>
                 </div>
 
                 <!-- Instance Name -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">نام سرور (اختیاری)</label>
-                    <input type="text" name="name" value="{{ old('name') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('name') border-red-400 bg-red-50 @enderror" placeholder="سرور من">
-                    @error('name')
-                        <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-                    @enderror
-                    <p class="text-xs text-gray-500 mt-1">اگر خالی بگذارید، نام به صورت خودکار ایجاد می‌شود</p>
+                            <input type="text" name="name" value="{{ old('name') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" placeholder="سرور من">
                 </div>
 
                 <!-- Description -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">توضیحات (اختیاری)</label>
-                    <textarea name="description" rows="2" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('description') border-red-400 bg-red-50 @enderror" placeholder="توضیحات سرور">{{ old('description') }}</textarea>
-                    @error('description')
-                        <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-                    @enderror
+                            <textarea name="description" rows="2" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" placeholder="توضیحات سرور">{{ old('description') }}</textarea>
                 </div>
 
-                <!-- User Data (Cloud-init) -->
+                        <!-- User Data -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">User Data (Cloud-init) (اختیاری)</label>
-                    <textarea name="user_data" rows="6" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm @error('user_data') border-red-400 bg-red-50 @enderror" placeholder="#!/bin/bash&#10;apt-get update&#10;apt-get install -y nginx">{{ old('user_data') }}</textarea>
-                    @error('user_data')
-                        <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-                    @enderror
-                    <p class="text-xs text-gray-500 mt-1">اسکریپت cloud-init برای راه‌اندازی خودکار</p>
+                            <textarea name="user_data" rows="6" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm" placeholder="#!/bin/bash&#10;apt-get update&#10;apt-get install -y nginx">{{ old('user_data') }}</textarea>
                 </div>
 
                 <!-- Billing Cycle -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">دوره صورتحساب</label>
-                    <select name="billing_cycle" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 @error('billing_cycle') border-red-400 bg-red-50 @enderror">
+                            <select name="billing_cycle" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" onchange="updatePricing()">
                         <option value="hourly" {{ old('billing_cycle', 'hourly') === 'hourly' ? 'selected' : '' }}>ساعتی</option>
                         <option value="monthly" {{ old('billing_cycle') === 'monthly' ? 'selected' : '' }}>ماهانه</option>
                     </select>
-                    @error('billing_cycle')
-                        <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
-                    @enderror
                 </div>
 
                 <!-- Auto-billing -->
@@ -492,165 +360,329 @@
                         <input type="checkbox" name="auto_billing" value="1" {{ old('auto_billing', true) ? 'checked' : '' }} class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                         <span class="mr-2 text-sm font-medium text-gray-700">صورتحساب خودکار هنگام راه‌اندازی</span>
                     </label>
-                    <p class="text-xs text-gray-600 mt-1 mr-6">هزینه سرور به صورت خودکار از کیف پول شما کسر می‌شود</p>
                 </div>
+                    </div>
+                </div>
+            </form>
             </div>
 
-            <div class="flex justify-between mt-6">
-                <button type="button" onclick="prevStep(3)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-6 rounded-lg transition-colors">
-                    ← قبلی
-                </button>
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
-                    راه‌اندازی سرور →
+        <!-- Sticky Sidebar -->
+        <div class="lg:w-80 lg:sticky lg:top-6 lg:self-start">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">خلاصه پیکربندی</h3>
+                
+                <!-- Checklist -->
+                <div class="space-y-3 mb-6">
+                    <div class="flex items-center" id="checklist-os">
+                        <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-sm text-gray-600">سیستم عامل</span>
+                    </div>
+                    <div class="flex items-center" id="checklist-flavor">
+                        <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-sm text-gray-600">پلن</span>
+                    </div>
+                    <div class="flex items-center" id="checklist-network">
+                        <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-sm text-gray-600">شبکه</span>
+                    </div>
+                    <div class="flex items-center" id="checklist-access">
+                        <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-sm text-gray-600">دسترسی</span>
+                    </div>
+                </div>
+
+                <!-- Pricing -->
+                <div class="border-t border-gray-200 pt-4 mb-6">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">قیمت ساعتی:</span>
+                            <span class="text-lg font-bold text-gray-900" id="pricing-hourly">-</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">قیمت ماهانه:</span>
+                            <span class="text-lg font-bold text-gray-900" id="pricing-monthly">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" form="server-create-form" id="submit-button" disabled class="w-full bg-gray-300 text-gray-500 font-medium py-3 px-4 rounded-lg transition-colors cursor-not-allowed">
+                    راه‌اندازی سرور
                 </button>
             </div>
         </div>
-    </form>
+    </div>
 </div>
 
 <script>
-let currentStep = 1;
 const apiBaseUrl = '{{ route("customer.servers.api.images") }}';
 const region = '{{ config("openstack.region") }}';
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Set initial plan type (this will enable/disable fields appropriately)
     togglePlanType();
-    
-    // Set initial access method (this will enable/disable fields appropriately)
     toggleAccessMethod();
+    updateChecklist();
+    updatePricing();
     
-    // Filter images based on initial OS selection
-    const initialOs = document.querySelector('input[name="os"]:checked');
-    if (initialOs) {
-        loadImages(initialOs.value);
-    }
-    
-    // Calculate initial custom price if custom plan is selected
-    const initialPlanType = document.querySelector('input[name="plan_type"]:checked')?.value;
-    if (initialPlanType === 'custom') {
-        calculateCustomPrice();
-    }
-    
-    // Ensure all initially hidden fields are properly disabled
-    // This prevents browser validation on hidden fields
-    const passwordSection = document.getElementById('password-section');
-    if (passwordSection && passwordSection.classList.contains('hidden')) {
-        const rootPassword = document.getElementById('root_password');
-        const rootPasswordConfirm = document.getElementById('root_password_confirmation');
-        if (rootPassword) {
-            rootPassword.disabled = true;
-            rootPassword.removeAttribute('required');
-        }
-        if (rootPasswordConfirm) {
-            rootPasswordConfirm.disabled = true;
-            rootPasswordConfirm.removeAttribute('required');
-        }
+    // Add change listener to custom image select
+    const customImageSelect = document.getElementById('image-select-custom');
+    if (customImageSelect) {
+        customImageSelect.addEventListener('change', updateChecklist);
     }
 });
 
-function nextStep(step) {
-    // Validate current step
-    if (currentStep === 1) {
-        const osSelected = document.querySelector('input[name="os"]:checked');
-        if (!osSelected) {
-            alert('لطفاً یک سیستم عامل انتخاب کنید');
-            return;
+function handleDistroChange(distroId) {
+    // Hide all version dropdowns and remove name attribute
+    document.querySelectorAll('[id^="image-select-"]').forEach(select => {
+        select.classList.add('hidden');
+        select.disabled = true;
+        if (select.name === 'image_id') {
+            select.removeAttribute('name');
         }
-        const imageSelect = document.getElementById('image-select');
-        if (!imageSelect || !imageSelect.value) {
-            alert('لطفاً یک تصویر انتخاب کنید');
-            return;
-        }
-    } else if (currentStep === 2) {
-        const planType = document.querySelector('input[name="plan_type"]:checked')?.value;
-        if (planType === 'prebuilt') {
-            const flavorSelected = document.querySelector('input[name="flavor_id"]:checked');
-            if (!flavorSelected) {
-                alert('لطفاً یک پلن انتخاب کنید');
-                return;
+    });
+    
+    // Show and enable the selected distro's dropdown
+    const select = document.getElementById(`image-select-${distroId}`);
+    if (select) {
+        select.classList.remove('hidden');
+        select.disabled = false;
+        
+        // For "Other" (custom), set name directly
+        if (distroId === 'custom') {
+            select.name = 'image_id';
+            // Remove any existing hidden input
+            const hiddenInput = document.querySelector('input[name="image_id"][type="hidden"]');
+            if (hiddenInput) {
+                hiddenInput.remove();
             }
-        } else if (planType === 'custom') {
-            const vcpu = parseInt(document.querySelector('input[name="custom_vcpu"]').value) || 0;
-            const ram = parseInt(document.querySelector('input[name="custom_ram"]').value) || 0;
-            const storage = parseInt(document.querySelector('input[name="custom_storage"]').value) || 0;
-            if (vcpu < 1 || ram < 1 || storage < 20) {
-                alert('لطفاً مقادیر معتبر برای پلن سفارشی وارد کنید');
-                return;
-            }
-        }
-    } else if (currentStep === 4) {
-        const accessMethod = document.querySelector('input[name="access_method"]:checked')?.value;
-        if (accessMethod === 'ssh_key') {
-            const sshKeySelect = document.getElementById('ssh-key-select');
-            const sshPublicKeyInput = document.getElementById('ssh-public-key-input');
-            const sshKeyId = sshKeySelect ? sshKeySelect.value : '';
-            const sshPublicKey = sshPublicKeyInput ? sshPublicKeyInput.value.trim() : '';
-            if (!sshKeyId && !sshPublicKey) {
-                alert('لطفاً یک کلید SSH انتخاب کنید یا کلید عمومی خود را وارد کنید');
-                return;
-            }
-        } else if (accessMethod === 'password') {
-            const rootPassword = document.getElementById('root_password');
-            const rootPasswordConfirm = document.getElementById('root_password_confirmation');
-            const password = rootPassword ? rootPassword.value : '';
-            const passwordConfirm = rootPasswordConfirm ? rootPasswordConfirm.value : '';
-            if (!password || password.length < 8) {
-                alert('رمز عبور باید حداقل ۸ کاراکتر باشد');
-                return;
-            }
-            if (password !== passwordConfirm) {
-                alert('رمز عبور و تأیید رمز عبور مطابقت ندارند');
-                return;
-            }
+        } else {
+            // For other distros, load images and sync to hidden field
+            loadImagesForDistro(distroId, select);
         }
     }
-
-    // Hide current step
-    document.getElementById(`step-${currentStep}-content`).classList.add('hidden');
     
-    // Show next step
-    document.getElementById(`step-${step}-content`).classList.remove('hidden');
-    
-    // Update progress indicators
-    updateProgress(currentStep, step);
-    
-    currentStep = step;
+    updateChecklist();
 }
 
-function prevStep(step) {
-    // Hide current step
-    document.getElementById(`step-${currentStep}-content`).classList.add('hidden');
+function loadImagesForDistro(distroId, selectElement) {
+    selectElement.innerHTML = '<option value="">در حال بارگذاری...</option>';
+    selectElement.disabled = true;
     
-    // Show previous step
-    document.getElementById(`step-${step}-content`).classList.remove('hidden');
-    
-    // Update progress indicators
-    updateProgress(currentStep, step);
-    
-    currentStep = step;
-}
-
-function updateProgress(fromStep, toStep) {
-    // Reset all indicators
-    for (let i = 1; i <= 4; i++) {
-        const indicator = document.getElementById(`step-${i}-indicator`);
-        const progress = document.getElementById(`step-${i}-progress`);
-        
-        if (i < toStep) {
-            indicator.classList.remove('bg-gray-300', 'text-gray-600');
-            indicator.classList.add('bg-blue-600', 'text-white');
-            if (progress) progress.style.width = '100%';
-        } else if (i === toStep) {
-            indicator.classList.remove('bg-gray-300', 'text-gray-600');
-            indicator.classList.add('bg-blue-600', 'text-white');
-            if (progress) progress.style.width = '0%';
-        } else {
-            indicator.classList.remove('bg-blue-600', 'text-white');
-            indicator.classList.add('bg-gray-300', 'text-gray-600');
-            if (progress) progress.style.width = '0%';
+    fetch(`${apiBaseUrl}?os=${distroId}&region=${region}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
         }
+    })
+    .then(response => response.json())
+    .then(data => {
+        selectElement.innerHTML = '<option value="">انتخاب نسخه</option>';
+        
+        if (data.success && data.data && data.data.length > 0) {
+            data.data.forEach(image => {
+                const option = document.createElement('option');
+                option.value = image.id;
+                option.textContent = `${image.name}${image.description ? ' - ' + image.description : ''}`;
+                selectElement.appendChild(option);
+            });
+        } else {
+            selectElement.innerHTML = '<option value="">هیچ نسخه‌ای یافت نشد</option>';
+        }
+        
+        selectElement.disabled = false;
+        
+        // Sync to hidden image_id field on change
+        selectElement.addEventListener('change', function syncImageId() {
+            let hiddenInput = document.querySelector('input[name="image_id"][type="hidden"]');
+            if (!hiddenInput) {
+                hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'image_id';
+                document.getElementById('server-create-form').appendChild(hiddenInput);
+            }
+            hiddenInput.value = this.value;
+            updateChecklist();
+        });
+        
+        // Trigger change if there's a selected value
+        if (selectElement.value) {
+            selectElement.dispatchEvent(new Event('change'));
+        }
+    })
+    .catch(error => {
+        console.error('Error loading images:', error);
+        selectElement.innerHTML = '<option value="">خطا در بارگذاری</option>';
+        selectElement.disabled = false;
+    });
+}
+
+function updateChecklist() {
+    // Check OS selection
+        const osSelected = document.querySelector('input[name="os"]:checked');
+    const osCheck = document.getElementById('checklist-os');
+    let imageId = '';
+    
+    if (osSelected) {
+        if (osSelected.value === 'custom') {
+            // For "Other", check the custom select directly
+            const customSelect = document.getElementById('image-select-custom');
+            imageId = customSelect ? customSelect.value : '';
+        } else {
+            // For other distros, check the hidden input or the select
+            const hiddenInput = document.querySelector('input[name="image_id"][type="hidden"]');
+            if (hiddenInput) {
+                imageId = hiddenInput.value;
+            } else {
+                const distroSelect = document.getElementById(`image-select-${osSelected.value}`);
+                imageId = distroSelect ? distroSelect.value : '';
+            }
+        }
+        
+        if (imageId) {
+            osCheck.querySelector('svg').classList.remove('text-gray-400');
+            osCheck.querySelector('svg').classList.add('text-green-500');
+        } else {
+            osCheck.querySelector('svg').classList.remove('text-green-500');
+            osCheck.querySelector('svg').classList.add('text-gray-400');
+        }
+    } else {
+        osCheck.querySelector('svg').classList.remove('text-green-500');
+        osCheck.querySelector('svg').classList.add('text-gray-400');
+    }
+    
+    // Check Flavor selection
+        const planType = document.querySelector('input[name="plan_type"]:checked')?.value;
+    const flavorCheck = document.getElementById('checklist-flavor');
+        if (planType === 'prebuilt') {
+            const flavorSelected = document.querySelector('input[name="flavor_id"]:checked');
+        if (flavorSelected) {
+            flavorCheck.querySelector('svg').classList.remove('text-gray-400');
+            flavorCheck.querySelector('svg').classList.add('text-green-500');
+        } else {
+            flavorCheck.querySelector('svg').classList.remove('text-green-500');
+            flavorCheck.querySelector('svg').classList.add('text-gray-400');
+            }
+        } else if (planType === 'custom') {
+        const vcpu = parseInt(document.getElementById('custom_vcpu')?.value) || 0;
+        const ram = parseInt(document.getElementById('custom_ram')?.value) || 0;
+        const storage = parseInt(document.getElementById('custom_storage')?.value) || 0;
+        if (vcpu > 0 && ram > 0 && storage >= 20) {
+            flavorCheck.querySelector('svg').classList.remove('text-gray-400');
+            flavorCheck.querySelector('svg').classList.add('text-green-500');
+        } else {
+            flavorCheck.querySelector('svg').classList.remove('text-green-500');
+            flavorCheck.querySelector('svg').classList.add('text-gray-400');
+        }
+    } else {
+        flavorCheck.querySelector('svg').classList.remove('text-green-500');
+        flavorCheck.querySelector('svg').classList.add('text-gray-400');
+    }
+    
+    // Check Network (at least one network selected)
+    const networkCheck = document.getElementById('checklist-network');
+    const networkSelect = document.getElementById('network-select');
+    if (networkSelect && networkSelect.selectedOptions.length > 0) {
+        networkCheck.querySelector('svg').classList.remove('text-gray-400');
+        networkCheck.querySelector('svg').classList.add('text-green-500');
+    } else {
+        networkCheck.querySelector('svg').classList.remove('text-green-500');
+        networkCheck.querySelector('svg').classList.add('text-gray-400');
+    }
+    
+    // Check Access
+    const accessCheck = document.getElementById('checklist-access');
+        const accessMethod = document.querySelector('input[name="access_method"]:checked')?.value;
+        if (accessMethod === 'ssh_key') {
+        const sshKeyId = document.getElementById('ssh-key-select')?.value;
+        const sshPublicKey = document.getElementById('ssh-public-key-input')?.value.trim();
+        if (sshKeyId || sshPublicKey) {
+            accessCheck.querySelector('svg').classList.remove('text-gray-400');
+            accessCheck.querySelector('svg').classList.add('text-green-500');
+        } else {
+            accessCheck.querySelector('svg').classList.remove('text-green-500');
+            accessCheck.querySelector('svg').classList.add('text-gray-400');
+            }
+        } else if (accessMethod === 'password') {
+        const password = document.getElementById('root_password')?.value;
+        const passwordConfirm = document.getElementById('root_password_confirmation')?.value;
+        if (password && password.length >= 8 && password === passwordConfirm) {
+            accessCheck.querySelector('svg').classList.remove('text-gray-400');
+            accessCheck.querySelector('svg').classList.add('text-green-500');
+        } else {
+            accessCheck.querySelector('svg').classList.remove('text-green-500');
+            accessCheck.querySelector('svg').classList.add('text-gray-400');
+        }
+    } else {
+        accessCheck.querySelector('svg').classList.remove('text-green-500');
+        accessCheck.querySelector('svg').classList.add('text-gray-400');
+    }
+    
+    // Enable/disable submit button
+    const allChecked = 
+        osCheck.querySelector('svg').classList.contains('text-green-500') &&
+        flavorCheck.querySelector('svg').classList.contains('text-green-500') &&
+        networkCheck.querySelector('svg').classList.contains('text-green-500') &&
+        accessCheck.querySelector('svg').classList.contains('text-green-500');
+    
+    const submitButton = document.getElementById('submit-button');
+    if (allChecked) {
+        submitButton.disabled = false;
+        submitButton.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+        submitButton.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+    } else {
+        submitButton.disabled = true;
+        submitButton.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+        submitButton.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+    }
+}
+
+function updatePricing() {
+    const planType = document.querySelector('input[name="plan_type"]:checked')?.value;
+    let hourly = 0;
+    let monthly = 0;
+    
+    if (planType === 'prebuilt') {
+        const flavorSelected = document.querySelector('input[name="flavor_id"]:checked');
+        if (flavorSelected) {
+            hourly = parseFloat(flavorSelected.dataset.hourly) || 0;
+            monthly = parseFloat(flavorSelected.dataset.monthly) || 0;
+        }
+    } else if (planType === 'custom') {
+        // Calculate custom pricing
+        const vcpu = parseInt(document.getElementById('custom_vcpu')?.value) || 1;
+        const ram = parseInt(document.getElementById('custom_ram')?.value) || 2;
+        const storage = parseInt(document.getElementById('custom_storage')?.value) || 20;
+        const bandwidth = parseFloat(document.getElementById('custom_bandwidth')?.value) || 1;
+        
+        // Base pricing calculation
+        monthly = (vcpu * 50000) + (ram * 30000) + (storage * 2000) + (bandwidth * 50000);
+        hourly = monthly / 730; // Approximate hourly
+    }
+    
+    // Update display
+    const billingCycle = document.querySelector('select[name="billing_cycle"]')?.value;
+    const hourlyEl = document.getElementById('pricing-hourly');
+    const monthlyEl = document.getElementById('pricing-monthly');
+    
+    if (hourly > 0) {
+        hourlyEl.textContent = hourly.toLocaleString('fa-IR') + ' تومان';
+    } else {
+        hourlyEl.textContent = '-';
+    }
+    
+    if (monthly > 0) {
+        monthlyEl.textContent = monthly.toLocaleString('fa-IR') + ' تومان';
+        } else {
+        monthlyEl.textContent = '-';
     }
 }
 
@@ -659,7 +691,6 @@ function togglePlanType() {
     const prebuiltPlans = document.getElementById('prebuilt-plans');
     const customPlan = document.getElementById('custom-plan');
     
-    // Get custom plan input fields
     const customVcpu = document.getElementById('custom_vcpu');
     const customRam = document.getElementById('custom_ram');
     const customStorage = document.getElementById('custom_storage');
@@ -669,30 +700,28 @@ function togglePlanType() {
         prebuiltPlans.classList.remove('hidden');
         customPlan.classList.add('hidden');
         
-        // Disable custom plan fields to prevent validation when hidden
         if (customVcpu) customVcpu.disabled = true;
         if (customRam) customRam.disabled = true;
         if (customStorage) customStorage.disabled = true;
         if (customBandwidth) customBandwidth.disabled = true;
-        
-        // Clear any selected flavor_id when switching to prebuilt (if needed)
-        // The form will use flavor_id directly
     } else {
         prebuiltPlans.classList.add('hidden');
         customPlan.classList.remove('hidden');
         
-        // Enable custom plan fields
         if (customVcpu) customVcpu.disabled = false;
         if (customRam) customRam.disabled = false;
         if (customStorage) customStorage.disabled = false;
         if (customBandwidth) customBandwidth.disabled = false;
         
-        // Clear flavor_id selection when switching to custom
-        const flavorInputs = document.querySelectorAll('input[name="flavor_id"]');
-        flavorInputs.forEach(input => input.checked = false);
-        
         calculateCustomPrice();
     }
+    
+    updatePricing();
+    updateChecklist();
+}
+
+function calculateCustomPrice() {
+    updatePricing();
 }
 
 function toggleAccessMethod() {
@@ -700,11 +729,8 @@ function toggleAccessMethod() {
     const sshSection = document.getElementById('ssh-key-section');
     const passwordSection = document.getElementById('password-section');
     
-    // Get all SSH key related fields
     const sshKeySelect = document.getElementById('ssh-key-select');
     const sshPublicKeyInput = document.getElementById('ssh-public-key-input');
-    
-    // Get all password related fields
     const rootPassword = document.getElementById('root_password');
     const rootPasswordConfirm = document.getElementById('root_password_confirmation');
     
@@ -712,32 +738,23 @@ function toggleAccessMethod() {
         sshSection.classList.remove('hidden');
         passwordSection.classList.add('hidden');
         
-        // Enable SSH key fields
         if (sshKeySelect) sshKeySelect.disabled = false;
-        if (sshPublicKeyInput) {
-            sshPublicKeyInput.disabled = false;
-            sshPublicKeyInput.removeAttribute('required');
-        }
+        if (sshPublicKeyInput) sshPublicKeyInput.disabled = false;
         
-        // Disable password fields
         if (rootPassword) {
             rootPassword.disabled = true;
             rootPassword.value = '';
-            rootPassword.removeAttribute('required');
         }
         if (rootPasswordConfirm) {
             rootPasswordConfirm.disabled = true;
             rootPasswordConfirm.value = '';
-            rootPasswordConfirm.removeAttribute('required');
         }
         
-        // Update SSH key input requirement based on selection
         toggleSshKeyInput();
     } else {
         sshSection.classList.add('hidden');
         passwordSection.classList.remove('hidden');
         
-        // Disable SSH key fields
         if (sshKeySelect) {
             sshKeySelect.disabled = true;
             sshKeySelect.value = '';
@@ -745,19 +762,13 @@ function toggleAccessMethod() {
         if (sshPublicKeyInput) {
             sshPublicKeyInput.disabled = true;
             sshPublicKeyInput.value = '';
-            sshPublicKeyInput.removeAttribute('required');
         }
         
-        // Enable password fields
-        if (rootPassword) {
-            rootPassword.disabled = false;
-            rootPassword.setAttribute('required', 'required');
-        }
-        if (rootPasswordConfirm) {
-            rootPasswordConfirm.disabled = false;
-            rootPasswordConfirm.setAttribute('required', 'required');
-        }
+        if (rootPassword) rootPassword.disabled = false;
+        if (rootPasswordConfirm) rootPasswordConfirm.disabled = false;
     }
+    
+    updateChecklist();
 }
 
 function toggleSshKeyInput() {
@@ -765,80 +776,54 @@ function toggleSshKeyInput() {
     const sshPublicKeyInput = document.getElementById('ssh-public-key-input');
     const accessMethod = document.querySelector('input[name="access_method"]:checked')?.value;
     
-    // Only modify if SSH key method is selected and field is not disabled
     if (accessMethod === 'ssh_key' && sshPublicKeyInput && !sshPublicKeyInput.disabled) {
         if (sshKeySelect.value === 'new' || sshKeySelect.value === '') {
             sshPublicKeyInput.setAttribute('required', 'required');
         } else {
             sshPublicKeyInput.removeAttribute('required');
-            sshPublicKeyInput.value = '';
         }
-    }
-}
-
-function loadImages(osType) {
-    const imageSelect = document.getElementById('image-select');
-    const currentValue = imageSelect.value;
-    
-    // Show loading state
-    imageSelect.innerHTML = '<option value="">در حال بارگذاری...</option>';
-    imageSelect.disabled = true;
-    
-    // Fetch images from API
-    fetch(`{{ route('customer.servers.api.images') }}?os=${osType}&region=${region}`, {
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        imageSelect.innerHTML = '<option value="">انتخاب تصویر</option>';
-        
-        if (data.success && data.data && data.data.length > 0) {
-            data.data.forEach(image => {
-                const option = document.createElement('option');
-                option.value = image.id;
-                option.textContent = `${image.name}${image.description ? ' - ' + image.description : ''}`;
-                if (image.id === currentValue) {
-                    option.selected = true;
-                }
-                imageSelect.appendChild(option);
-            });
-        } else {
-            imageSelect.innerHTML = '<option value="">هیچ تصویری یافت نشد</option>';
-        }
-        
-        imageSelect.disabled = false;
-    })
-    .catch(error => {
-        console.error('Error loading images:', error);
-        imageSelect.innerHTML = '<option value="">خطا در بارگذاری تصاویر</option>';
-        imageSelect.disabled = false;
-    });
-}
-
-function calculateCustomPrice() {
-    const vcpu = parseInt(document.querySelector('input[name="custom_vcpu"]')?.value) || 1;
-    const ram = parseInt(document.querySelector('input[name="custom_ram"]')?.value) || 2;
-    const storage = parseInt(document.querySelector('input[name="custom_storage"]')?.value) || 20;
-    const bandwidth = parseFloat(document.querySelector('input[name="custom_bandwidth"]')?.value) || 1;
-    
-    // Pricing calculation (adjust based on your pricing model)
-    // Base pricing: vCPU * 50000 + RAM * 30000 + Storage * 2000 + Bandwidth * 50000
-    const price = (vcpu * 50000) + (ram * 30000) + (storage * 2000) + (bandwidth * 50000);
-    const priceElement = document.getElementById('custom-price');
-    if (priceElement) {
-        priceElement.textContent = price.toLocaleString('fa-IR') + ' تومان/ماه';
     }
 }
 
 // Form submission handler
-document.getElementById('vps-wizard-form').addEventListener('submit', function(e) {
-    // Ensure all disabled fields are properly handled before submission
-    const planType = document.querySelector('input[name="plan_type"]:checked')?.value;
+document.getElementById('server-create-form').addEventListener('submit', function(e) {
+    // Ensure image_id is set correctly
+    const osSelected = document.querySelector('input[name="os"]:checked');
+    if (osSelected) {
+        if (osSelected.value === 'custom') {
+            // For "Other", the select already has name="image_id"
+            const customSelect = document.getElementById('image-select-custom');
+            if (!customSelect || !customSelect.value) {
+                e.preventDefault();
+                alert('لطفاً یک تصویر انتخاب کنید');
+                return false;
+            }
+        } else {
+            // For other distros, ensure hidden input exists and has value
+            const distroSelect = document.getElementById(`image-select-${osSelected.value}`);
+            if (!distroSelect || !distroSelect.value) {
+                e.preventDefault();
+                alert('لطفاً یک نسخه انتخاب کنید');
+                return false;
+            }
+            
+            let hiddenInput = document.querySelector('input[name="image_id"][type="hidden"]');
+            if (!hiddenInput) {
+                hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'image_id';
+                this.appendChild(hiddenInput);
+            }
+            hiddenInput.value = distroSelect.value;
+        }
+    } else {
+        e.preventDefault();
+        alert('لطفاً یک سیستم عامل انتخاب کنید');
+        return false;
+    }
     
     // Disable custom plan fields if prebuilt is selected
+    const planType = document.querySelector('input[name="plan_type"]:checked')?.value;
     if (planType === 'prebuilt') {
         const customVcpu = document.getElementById('custom_vcpu');
         const customRam = document.getElementById('custom_ram');
@@ -853,7 +838,6 @@ document.getElementById('vps-wizard-form').addEventListener('submit', function(e
     // Handle access method fields
     const accessMethod = document.querySelector('input[name="access_method"]:checked')?.value;
     if (accessMethod === 'ssh_key') {
-        // Disable password fields
         const rootPassword = document.getElementById('root_password');
         const rootPasswordConfirm = document.getElementById('root_password_confirmation');
         if (rootPassword) {
@@ -864,19 +848,7 @@ document.getElementById('vps-wizard-form').addEventListener('submit', function(e
             rootPasswordConfirm.disabled = true;
             rootPasswordConfirm.removeAttribute('required');
         }
-        
-        // Validate SSH key
-        const sshKeySelect = document.getElementById('ssh-key-select');
-        const sshPublicKeyInput = document.getElementById('ssh-public-key-input');
-        const sshKeyId = sshKeySelect ? sshKeySelect.value : '';
-        const sshPublicKey = sshPublicKeyInput ? sshPublicKeyInput.value.trim() : '';
-        if (!sshKeyId && !sshPublicKey) {
-            e.preventDefault();
-            alert('لطفاً یک کلید SSH انتخاب کنید یا کلید عمومی خود را وارد کنید');
-            return false;
-        }
     } else if (accessMethod === 'password') {
-        // Disable SSH key fields
         const sshKeySelect = document.getElementById('ssh-key-select');
         const sshPublicKeyInput = document.getElementById('ssh-public-key-input');
         if (sshKeySelect) {
@@ -888,26 +860,10 @@ document.getElementById('vps-wizard-form').addEventListener('submit', function(e
             sshPublicKeyInput.value = '';
             sshPublicKeyInput.removeAttribute('required');
         }
-        
-        // Validate password
-        const rootPassword = document.getElementById('root_password');
-        const rootPasswordConfirm = document.getElementById('root_password_confirmation');
-        const password = rootPassword ? rootPassword.value : '';
-        const passwordConfirm = rootPasswordConfirm ? rootPasswordConfirm.value : '';
-        if (!password || password.length < 8) {
-            e.preventDefault();
-            alert('رمز عبور باید حداقل ۸ کاراکتر باشد');
-            return false;
-        }
-        if (password !== passwordConfirm) {
-            e.preventDefault();
-            alert('رمز عبور و تأیید رمز عبور مطابقت ندارند');
-            return false;
-        }
     }
     
     // Show loading state
-    const submitButton = this.querySelector('button[type="submit"]');
+    const submitButton = document.getElementById('submit-button');
     if (submitButton) {
         submitButton.disabled = true;
         submitButton.textContent = 'در حال ایجاد سرور...';
@@ -915,6 +871,3 @@ document.getElementById('vps-wizard-form').addEventListener('submit', function(e
 });
 </script>
 @endsection
-
-
-
