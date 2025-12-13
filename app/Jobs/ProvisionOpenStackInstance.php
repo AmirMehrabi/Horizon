@@ -58,6 +58,18 @@ class ProvisionOpenStackInstance implements ShouldQueue
             // Prepare server creation parameters
             $serverParams = $this->prepareServerParams();
 
+            // Log parameters for debugging (excluding sensitive data)
+            Log::info('Preparing to create server in OpenStack', [
+                'instance_id' => $this->instance->id,
+                'name' => $serverParams['name'] ?? null,
+                'flavorId' => $serverParams['flavorId'] ?? null,
+                'imageId' => $serverParams['imageId'] ?? null,
+                'networks_count' => isset($serverParams['networks']) ? count($serverParams['networks']) : 0,
+                'security_groups_count' => isset($serverParams['securityGroups']) ? count($serverParams['securityGroups']) : 0,
+                'has_keyName' => isset($serverParams['keyName']),
+                'has_userData' => isset($serverParams['userData']),
+            ]);
+
             // Create server in OpenStack
             $server = $compute->createServer($serverParams);
 
@@ -104,27 +116,63 @@ class ProvisionOpenStackInstance implements ShouldQueue
     {
         $this->instance->load(['flavor', 'image', 'keyPair', 'networks', 'securityGroups']);
 
+        // Validate required OpenStack IDs
+        if (empty($this->instance->flavor->openstack_id)) {
+            throw new \Exception('Flavor missing OpenStack ID. Please sync flavors first.');
+        }
+        if (empty($this->instance->image->openstack_id)) {
+            throw new \Exception('Image missing OpenStack ID. Please sync images first.');
+        }
+
         $params = [
             'name' => $this->instance->name,
             'flavorId' => $this->instance->flavor->openstack_id,
             'imageId' => $this->instance->image->openstack_id,
         ];
 
-        // Add networks
+        // Add networks - filter out networks without openstack_id
+        // OpenStack SDK expects networks as array of objects with 'uuid' key
         if ($this->instance->networks->isNotEmpty()) {
             $networks = [];
             foreach ($this->instance->networks as $network) {
-                $networks[] = ['uuid' => $network->openstack_id];
+                // Validate openstack_id is not empty and is a valid UUID format
+                $openstackId = trim($network->openstack_id ?? '');
+                if (!empty($openstackId) && strlen($openstackId) > 0) {
+                    $networks[] = ['uuid' => $openstackId];
+                } else {
+                    Log::warning('Network missing or invalid openstack_id, skipping', [
+                        'network_id' => $network->id,
+                        'network_name' => $network->name,
+                        'openstack_id' => $network->openstack_id,
+                        'instance_id' => $this->instance->id,
+                    ]);
+                }
             }
-            $params['networks'] = $networks;
+            if (!empty($networks)) {
+                $params['networks'] = $networks;
+            } else {
+                Log::warning('No valid networks found for instance', [
+                    'instance_id' => $this->instance->id,
+                    'networks_count' => $this->instance->networks->count(),
+                ]);
+            }
         }
 
-        // Add security groups
+        // Add security groups - filter out security groups without openstack_id
+        // OpenStack SDK expects security groups as array of name strings
         if ($this->instance->securityGroups->isNotEmpty()) {
-            $securityGroups = $this->instance->securityGroups
-                ->pluck('openstack_id')
-                ->filter()
-                ->toArray();
+            $securityGroups = [];
+            foreach ($this->instance->securityGroups as $sg) {
+                if (!empty($sg->name)) {
+                    // OpenStack SDK expects security groups as array of name strings
+                    $securityGroups[] = $sg->name;
+                } else {
+                    Log::warning('Security group missing name, skipping', [
+                        'security_group_id' => $sg->id,
+                        'instance_id' => $this->instance->id,
+                    ]);
+                }
+            }
             if (!empty($securityGroups)) {
                 $params['securityGroups'] = $securityGroups;
             }

@@ -76,6 +76,9 @@ class ServerController extends Controller
             $instance = $this->instanceService->create($customer, $request->validated());
             
             // Dispatch job to provision in OpenStack
+            // Note: If QUEUE_CONNECTION=sync in .env, this will run immediately
+            // Otherwise, you need to run a queue worker: php artisan queue:work --queue=openstack-provisioning
+            // Or run: php artisan queue:listen --queue=openstack-provisioning
             ProvisionOpenStackInstance::dispatch($instance);
             
             Log::info('Instance creation initiated', [

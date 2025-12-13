@@ -1,0 +1,4 @@
+# Laravel Scheduler - Run every minute
+# Add this to your crontab with: crontab -e
+* * * * * cd /var/www/html/horizon && php artisan schedule:run >> /dev/null 2>&1
+
