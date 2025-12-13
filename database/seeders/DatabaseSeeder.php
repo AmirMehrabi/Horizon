@@ -21,10 +21,5 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
-
-        // Seed OpenStack tables
-        $this->call([
-            OpenStackSeeder::class,
-        ]);
     }
 }
