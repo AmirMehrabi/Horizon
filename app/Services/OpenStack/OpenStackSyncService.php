@@ -8,6 +8,8 @@ use App\Models\OpenStackNetwork;
 use App\Models\OpenStackSubnet;
 use App\Models\OpenStackSecurityGroup;
 use App\Models\OpenStackSyncJob;
+use App\Models\OpenStackInstance;
+use App\Services\OpenStack\OpenStackInstanceService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
@@ -42,6 +44,7 @@ class OpenStackSyncService
                     'images' => $this->syncImages(),
                     'networks' => $this->syncNetworks(),
                     'security_groups' => $this->syncSecurityGroups(),
+                    'instances' => $this->syncInstances(),
                     default => ['success' => false, 'error' => "Unknown resource type: {$type}"],
                 };
             } catch (\Exception $e) {
@@ -671,6 +674,135 @@ class OpenStackSyncService
             OpenStackSecurityGroup::create($data);
             $stats['created']++;
         }
+    }
+
+    /**
+     * Sync instance statuses from OpenStack to local database.
+     *
+     * @return array
+     */
+    public function syncInstances(): array
+    {
+        $syncJob = $this->createSyncJob('instances');
+
+        try {
+            $syncJob->update(['status' => 'running', 'started_at' => now()]);
+
+            $compute = $this->connection->getComputeService();
+            $instanceService = app(OpenStackInstanceService::class);
+
+            // Get all instances that have been provisioned in OpenStack
+            $instances = OpenStackInstance::whereNotNull('openstack_server_id')
+                ->whereIn('status', ['pending', 'building'])
+                ->get();
+
+            $stats = [
+                'checked' => 0,
+                'updated' => 0,
+                'errors' => [],
+            ];
+
+            foreach ($instances as $instance) {
+                try {
+                    $stats['checked']++;
+                    
+                    // Get server from OpenStack
+                    $server = $compute->getServer(['id' => $instance->openstack_server_id]);
+                    
+                    // Map OpenStack status to our status
+                    $openstackStatus = strtolower($server->status ?? '');
+                    $mappedStatus = $this->mapOpenStackStatus($openstackStatus);
+                    
+                    // Update if status changed
+                    if ($instance->status !== $mappedStatus) {
+                        $instanceService->updateStatus($instance, $mappedStatus, $openstackStatus);
+                        $stats['updated']++;
+                        
+                        Log::info('Instance status updated from sync', [
+                            'instance_id' => $instance->id,
+                            'old_status' => $instance->status,
+                            'new_status' => $mappedStatus,
+                            'openstack_status' => $openstackStatus,
+                        ]);
+                    } else {
+                        // Just update the last_openstack_status and synced_at
+                        $instance->update([
+                            'last_openstack_status' => $openstackStatus,
+                            'synced_at' => now(),
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    $stats['errors'][] = [
+                        'instance_id' => $instance->id,
+                        'openstack_server_id' => $instance->openstack_server_id,
+                        'error' => $e->getMessage(),
+                    ];
+                    Log::warning('Failed to sync instance status', [
+                        'instance_id' => $instance->id,
+                        'openstack_server_id' => $instance->openstack_server_id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+
+            $syncJob->update([
+                'status' => 'completed',
+                'completed_at' => now(),
+                'records_synced' => $stats['checked'],
+                'records_updated' => $stats['updated'],
+                'errors_count' => count($stats['errors']),
+                'errors' => $stats['errors'],
+            ]);
+
+            return [
+                'success' => true,
+                'stats' => $stats,
+                'job_id' => $syncJob->id,
+            ];
+        } catch (\Exception $e) {
+            $syncJob->update([
+                'status' => 'failed',
+                'completed_at' => now(),
+                'error_message' => $e->getMessage(),
+                'errors' => [['error' => $e->getMessage()]],
+            ]);
+
+            Log::error('Instance status sync failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+                'job_id' => $syncJob->id,
+            ];
+        }
+    }
+
+    /**
+     * Map OpenStack server status to our internal status.
+     *
+     * @param string $openstackStatus
+     * @return string
+     */
+    protected function mapOpenStackStatus(string $openstackStatus): string
+    {
+        return match (strtolower($openstackStatus)) {
+            'active' => 'active',
+            'build', 'building' => 'building',
+            'deleted', 'soft_deleted' => 'deleted',
+            'error', 'error_deleting' => 'error',
+            'stopped', 'shutoff' => 'stopped',
+            'suspended' => 'stopped',
+            'paused' => 'stopped',
+            'rescue' => 'building',
+            'resize', 'verify_resize', 'confirm_resize' => 'building',
+            'revert_resize' => 'building',
+            'reboot', 'hard_reboot' => 'building',
+            'migrating' => 'building',
+            default => 'building', // Default to building for unknown statuses
+        };
     }
 
     /**

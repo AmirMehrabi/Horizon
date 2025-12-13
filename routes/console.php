@@ -14,3 +14,10 @@ Schedule::command('openstack:sync-resources')
     ->withoutOverlapping()
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/openstack-sync.log'));
+
+// Schedule OpenStack instance status sync every minute (for building instances)
+Schedule::command('openstack:sync-resources --type=instances')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/openstack-sync.log'));

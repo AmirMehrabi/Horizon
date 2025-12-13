@@ -13,7 +13,7 @@ class SyncOpenStackResources extends Command
      * @var string
      */
     protected $signature = 'openstack:sync-resources
-                            {--type=* : Specific resource types to sync (flavors, images, networks, security_groups)}
+                            {--type=* : Specific resource types to sync (flavors, images, networks, security_groups, instances)}
                             {--force : Force sync even if sync is disabled in config}';
 
     /**
