@@ -52,7 +52,13 @@ Route::domain('hub.aviato.ir')
             Route::get('/users', [AdminUserManagementController::class, 'index'])->name('users.index');
             Route::get('/projects', [AdminProjectManagementController::class, 'index'])->name('projects.index');
             Route::get('/compute', [AdminComputeController::class, 'index'])->name('compute.index');
+            Route::get('/compute/create', [AdminComputeController::class, 'create'])->name('compute.create');
+            Route::post('/compute', [AdminComputeController::class, 'store'])->name('compute.store');
             Route::get('/compute/{id}', [AdminComputeController::class, 'show'])->name('compute.show');
+            Route::post('/compute/{id}/start', [AdminComputeController::class, 'start'])->name('compute.start');
+            Route::post('/compute/{id}/stop', [AdminComputeController::class, 'stop'])->name('compute.stop');
+            Route::post('/compute/{id}/reboot', [AdminComputeController::class, 'reboot'])->name('compute.reboot');
+            Route::delete('/compute/{id}', [AdminComputeController::class, 'destroy'])->name('compute.destroy');
             Route::get('/images', [AdminImageManagementController::class, 'index'])->name('images.index');
             Route::get('/images/{id}', [AdminImageManagementController::class, 'show'])->name('images.show');
             

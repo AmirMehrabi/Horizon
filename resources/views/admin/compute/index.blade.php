@@ -143,12 +143,12 @@
         <h1 class="text-3xl font-bold text-gray-900">مدیریت محاسبات</h1>
         <p class="mt-1 text-sm text-gray-500">مدیریت کامل Instance های Nova</p>
     </div>
-    <button onclick="openCreateModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium text-sm transition-colors duration-200 flex items-center gap-2 shadow-sm">
+    <a href="{{ route('admin.compute.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium text-sm transition-colors duration-200 flex items-center gap-2 shadow-sm">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>
         ایجاد Instance جدید
-    </button>
+    </a>
 </div>
 
 <!-- Stats Cards -->
@@ -157,7 +157,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm text-gray-500 font-medium mb-1">کل Instance ها</p>
-                <p class="text-2xl font-bold text-gray-900">1,247</p>
+                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total']) }}</p>
             </div>
             <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,7 +171,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm text-gray-500 font-medium mb-1">در حال اجرا</p>
-                <p class="text-2xl font-bold text-gray-900">1,198</p>
+                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['active']) }}</p>
             </div>
             <div class="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
                 <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -185,7 +185,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm text-gray-500 font-medium mb-1">متوقف شده</p>
-                <p class="text-2xl font-bold text-gray-900">32</p>
+                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['stopped']) }}</p>
             </div>
             <div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
                 <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -199,7 +199,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm text-gray-500 font-medium mb-1">خطا / در انتظار</p>
-                <p class="text-2xl font-bold text-gray-900">17</p>
+                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['error'] + $stats['building']) }}</p>
             </div>
             <div class="w-12 h-12 rounded-lg bg-red-100 flex items-center justify-center">
                 <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,13 +211,13 @@
 </div>
 
 <!-- Filters and Search -->
-<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+<form method="GET" action="{{ route('admin.compute.index') }}" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <!-- Search -->
         <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-2">جستجو</label>
             <div class="relative">
-                <input type="text" placeholder="جستجو بر اساس نام، IP یا ID..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="جستجو بر اساس نام، IP یا ID..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
@@ -227,26 +227,40 @@
         <!-- Status Filter -->
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">وضعیت</label>
-            <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <select name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" onchange="this.form.submit()">
                 <option value="">همه وضعیت‌ها</option>
-                <option value="active">در حال اجرا</option>
-                <option value="stopped">متوقف شده</option>
-                <option value="error">خطا</option>
-                <option value="pending">در انتظار</option>
+                <option value="active" {{ ($filters['status'] ?? '') === 'active' ? 'selected' : '' }}>در حال اجرا</option>
+                <option value="stopped" {{ ($filters['status'] ?? '') === 'stopped' ? 'selected' : '' }}>متوقف شده</option>
+                <option value="building" {{ ($filters['status'] ?? '') === 'building' ? 'selected' : '' }}>در حال ساخت</option>
+                <option value="pending" {{ ($filters['status'] ?? '') === 'pending' ? 'selected' : '' }}>در انتظار</option>
+                <option value="error" {{ ($filters['status'] ?? '') === 'error' ? 'selected' : '' }}>خطا</option>
             </select>
         </div>
         
-        <!-- Project Filter -->
+        <!-- Customer Filter -->
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">پروژه</label>
-            <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <option value="">همه پروژه‌ها</option>
-                <option value="1">project-acme-corp</option>
-                <option value="2">project-techstart</option>
+            <label class="block text-sm font-medium text-gray-700 mb-2">مشتری</label>
+            <select name="customer_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" onchange="this.form.submit()">
+                <option value="">همه مشتری‌ها</option>
+                @foreach($customers as $customer)
+                    <option value="{{ $customer->id }}" {{ ($filters['customer_id'] ?? '') == $customer->id ? 'selected' : '' }}>
+                        {{ $customer->company_name ?: $customer->first_name . ' ' . $customer->last_name }}
+                    </option>
+                @endforeach
             </select>
         </div>
     </div>
-</div>
+    <div class="mt-4 flex justify-end">
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+            اعمال فیلتر
+        </button>
+        @if(array_filter($filters))
+            <a href="{{ route('admin.compute.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium {{ $isRtl ? 'mr-2' : 'ml-2' }}">
+                پاک کردن فیلترها
+            </a>
+        @endif
+    </div>
+</form>
 
 <!-- Instances Table -->
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -264,345 +278,181 @@
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                <!-- Instance Row 1 -->
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                @forelse($instances as $instance)
+                    @php
+                        $statusColors = [
+                            'active' => ['bg' => 'bg-green-100', 'text' => 'text-green-800', 'dot' => 'bg-green-500', 'label' => 'در حال اجرا'],
+                            'stopped' => ['bg' => 'bg-gray-100', 'text' => 'text-gray-800', 'dot' => 'bg-gray-500', 'label' => 'متوقف شده'],
+                            'building' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-800', 'dot' => 'bg-blue-500', 'label' => 'در حال ساخت'],
+                            'pending' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-800', 'dot' => 'bg-yellow-500', 'label' => 'در انتظار'],
+                            'error' => ['bg' => 'bg-red-100', 'text' => 'text-red-800', 'dot' => 'bg-red-500', 'label' => 'خطا'],
+                            'deleting' => ['bg' => 'bg-orange-100', 'text' => 'text-orange-800', 'dot' => 'bg-orange-500', 'label' => 'در حال حذف'],
+                        ];
+                        $status = $statusColors[$instance->status] ?? $statusColors['pending'];
+                        $publicIps = $instance->ip_addresses['public'] ?? [];
+                        $privateIps = $instance->ip_addresses['private'] ?? [];
+                    @endphp
+                    <tr class="hover:bg-gray-50 transition-colors {{ $instance->status === 'error' ? 'bg-red-50' : '' }}">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-lg {{ $status['bg'] }} flex items-center justify-center">
+                                    <svg class="w-6 h-6 {{ $status['text'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
+                                    </svg>
+                                </div>
+                                <div class="{{ $isRtl ? 'mr-4' : 'ml-4' }}">
+                                    <a href="{{ route('admin.compute.show', $instance->id) }}" class="text-sm font-medium text-blue-600 hover:text-blue-800">{{ $instance->name }}</a>
+                                    <div class="text-sm text-gray-500">ID: {{ substr($instance->id, 0, 8) }}...</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ $instance->customer->company_name ?: $instance->customer->first_name . ' ' . $instance->customer->last_name }}</div>
+                            <div class="text-sm text-gray-500">{{ $instance->customer->email ?? '-' }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ $instance->flavor->name ?? '-' }}</div>
+                            <div class="text-xs text-gray-500">
+                                @if($instance->flavor)
+                                    {{ $instance->flavor->vcpus }} vCPU, {{ number_format($instance->flavor->ram / 1024) }} GB RAM
+                                @else
+                                    -
+                                @endif
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if(!empty($publicIps))
+                                <div class="text-sm text-gray-900">{{ $publicIps[0] ?? '-' }}</div>
+                                @if(!empty($privateIps))
+                                    <div class="text-xs text-gray-500">{{ $privateIps[0] }} (Private)</div>
+                                @endif
+                            @elseif(!empty($privateIps))
+                                <div class="text-sm text-gray-900">{{ $privateIps[0] }}</div>
+                                <div class="text-xs text-gray-500">Private</div>
+                            @else
+                                <div class="text-sm text-gray-500">-</div>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ $instance->region ?? '-' }}</div>
+                            <div class="text-xs text-gray-500">{{ $instance->availability_zone ?? '-' }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $status['bg'] }} {{ $status['text'] }}">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $status['dot'] }} {{ $isRtl ? 'ml-1.5' : 'mr-1.5' }}"></span>
+                                {{ $status['label'] }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex items-center gap-2">
+                                @if($instance->status === 'stopped')
+                                    <form method="POST" action="{{ route('admin.compute.start', $instance->id) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" class="text-green-600 hover:text-green-900" title="شروع" onclick="return confirm('آیا مطمئن هستید که می‌خواهید این Instance را شروع کنید؟')">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                @elseif($instance->status === 'active')
+                                    <form method="POST" action="{{ route('admin.compute.stop', $instance->id) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" class="text-orange-600 hover:text-orange-900" title="خاموش کردن" onclick="return confirm('آیا مطمئن هستید که می‌خواهید این Instance را خاموش کنید؟')">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.compute.reboot', $instance->id) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" class="text-blue-600 hover:text-blue-900" title="راه‌اندازی مجدد" onclick="return confirm('آیا مطمئن هستید که می‌خواهید این Instance را راه‌اندازی مجدد کنید؟')">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                @endif
+                                @if(in_array($instance->status, ['error', 'deleting']))
+                                    <form method="POST" action="{{ route('admin.compute.destroy', $instance->id) }}" class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-900" title="حذف" onclick="return confirm('آیا مطمئن هستید که می‌خواهید این Instance را حذف کنید؟ این عمل غیرقابل بازگشت است.')">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                @endif
+                                <a href="{{ route('admin.compute.show', $instance->id) }}" class="text-indigo-600 hover:text-indigo-900" title="جزئیات">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center">
+                            <div class="text-gray-500">
+                                <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
                                 </svg>
+                                <p class="text-lg font-medium">هیچ Instance یافت نشد</p>
+                                <p class="text-sm mt-1">لطفاً فیلترهای جستجو را تغییر دهید یا Instance جدیدی ایجاد کنید.</p>
                             </div>
-                            <div class="{{ $isRtl ? 'mr-4' : 'ml-4' }}">
-                                <a href="{{ route('admin.compute.show', 'instance-001') }}" class="text-sm font-medium text-blue-600 hover:text-blue-800">web-server-01</a>
-                                <div class="text-sm text-gray-500">ID: abc123def456</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">project-acme-corp</div>
-                        <div class="text-sm text-gray-500">Acme Corporation</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">s-2vcpu-4gb</div>
-                        <div class="text-xs text-gray-500">2 vCPU, 4 GB RAM</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">192.168.1.100</div>
-                        <div class="text-xs text-gray-500">45.67.89.123 (Public)</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">hv-nyc-01</div>
-                        <div class="text-xs text-gray-500">NYC1</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                            <span class="w-1.5 h-1.5 rounded-full bg-green-500 {{ $isRtl ? 'ml-1.5' : 'mr-1.5' }}"></span>
-                            در حال اجرا
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div class="flex items-center gap-2">
-                            <button onclick="forceShutdown('instance-001')" class="text-orange-600 hover:text-orange-900" title="خاموش کردن اجباری">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
-                                </svg>
-                            </button>
-                            <button onclick="rebootInstance('instance-001')" class="text-blue-600 hover:text-blue-900" title="راه‌اندازی مجدد">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                </svg>
-                            </button>
-                            <a href="{{ route('admin.compute.show', 'instance-001') }}" class="text-indigo-600 hover:text-indigo-900" title="جزئیات">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                </svg>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                
-                <!-- Instance Row 2 - Stopped -->
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
-                                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
-                                </svg>
-                            </div>
-                            <div class="{{ $isRtl ? 'mr-4' : 'ml-4' }}">
-                                <a href="{{ route('admin.compute.show', 'instance-002') }}" class="text-sm font-medium text-blue-600 hover:text-blue-800">db-server-01</a>
-                                <div class="text-sm text-gray-500">ID: xyz789ghi012</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">project-techstart</div>
-                        <div class="text-sm text-gray-500">TechStart Inc</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">s-4vcpu-8gb</div>
-                        <div class="text-xs text-gray-500">4 vCPU, 8 GB RAM</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">192.168.1.200</div>
-                        <div class="text-xs text-gray-500">45.67.89.124 (Public)</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">hv-nyc-02</div>
-                        <div class="text-xs text-gray-500">NYC1</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                            <span class="w-1.5 h-1.5 rounded-full bg-gray-500 {{ $isRtl ? 'ml-1.5' : 'mr-1.5' }}"></span>
-                            متوقف شده
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div class="flex items-center gap-2">
-                            <button onclick="startInstance('instance-002')" class="text-green-600 hover:text-green-900" title="شروع">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </button>
-                            <a href="{{ route('admin.compute.show', 'instance-002') }}" class="text-indigo-600 hover:text-indigo-900" title="جزئیات">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                </svg>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                
-                <!-- Instance Row 3 - Error -->
-                <tr class="hover:bg-gray-50 transition-colors bg-red-50">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
-                                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <div class="{{ $isRtl ? 'mr-4' : 'ml-4' }}">
-                                <a href="{{ route('admin.compute.show', 'instance-003') }}" class="text-sm font-medium text-blue-600 hover:text-blue-800">failed-instance</a>
-                                <div class="text-sm text-gray-500">ID: err456fail789</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">project-acme-corp</div>
-                        <div class="text-sm text-gray-500">Acme Corporation</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">s-1vcpu-2gb</div>
-                        <div class="text-xs text-gray-500">1 vCPU, 2 GB RAM</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-500">-</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-500">-</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                            <span class="w-1.5 h-1.5 rounded-full bg-red-500 {{ $isRtl ? 'ml-1.5' : 'mr-1.5' }}"></span>
-                            خطا
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div class="flex items-center gap-2">
-                            <button onclick="deleteInstance('instance-003')" class="text-red-600 hover:text-red-900" title="حذف">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                </svg>
-                            </button>
-                            <a href="{{ route('admin.compute.show', 'instance-003') }}" class="text-indigo-600 hover:text-indigo-900" title="جزئیات">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                </svg>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
+                        </td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
     
     <!-- Pagination -->
-    <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-        <div class="flex-1 flex justify-between sm:hidden">
-            <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                قبلی
-            </a>
-            <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                بعدی
-            </a>
-        </div>
-        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div>
-                <p class="text-sm text-gray-700">
-                    نمایش
-                    <span class="font-medium">1</span>
-                    تا
-                    <span class="font-medium">25</span>
-                    از
-                    <span class="font-medium">1,247</span>
-                    نتیجه
-                </p>
-            </div>
-            <div>
-                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                    <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                        <span class="sr-only">قبلی</span>
-                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-                        </svg>
+    @if($instances->hasPages())
+        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+            <div class="flex-1 flex justify-between sm:hidden">
+                @if($instances->onFirstPage())
+                    <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-300 bg-white cursor-not-allowed">
+                        قبلی
+                    </span>
+                @else
+                    <a href="{{ $instances->previousPageUrl() }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        قبلی
                     </a>
-                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600">1</a>
-                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">2</a>
-                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">3</a>
-                    <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                        <span class="sr-only">بعدی</span>
-                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                        </svg>
+                @endif
+                @if($instances->hasMorePages())
+                    <a href="{{ $instances->nextPageUrl() }}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        بعدی
                     </a>
-                </nav>
+                @else
+                    <span class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-300 bg-white cursor-not-allowed">
+                        بعدی
+                    </span>
+                @endif
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- Create Instance Modal -->
-<div id="createModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-3/4 shadow-lg rounded-lg bg-white max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-xl font-bold text-gray-900">ایجاد Instance جدید</h3>
-            <button onclick="closeCreateModal()" class="text-gray-400 hover:text-gray-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
-        </div>
-        <form class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">نام Instance</label>
-                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="web-server-01" required>
+                    <p class="text-sm text-gray-700">
+                        نمایش
+                        <span class="font-medium">{{ $instances->firstItem() }}</span>
+                        تا
+                        <span class="font-medium">{{ $instances->lastItem() }}</span>
+                        از
+                        <span class="font-medium">{{ $instances->total() }}</span>
+                        نتیجه
+                    </p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">پروژه</label>
-                    <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                        <option value="">انتخاب پروژه</option>
-                        <option value="1">project-acme-corp</option>
-                        <option value="2">project-techstart</option>
-                    </select>
+                    {{ $instances->links() }}
                 </div>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Image</label>
-                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                    <option value="">انتخاب Image</option>
-                    <option value="ubuntu-22.04">Ubuntu 22.04 LTS</option>
-                    <option value="ubuntu-20.04">Ubuntu 20.04 LTS</option>
-                    <option value="centos-8">CentOS 8</option>
-                    <option value="debian-11">Debian 11</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Flavor (سایز)</label>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500">
-                        <input type="radio" name="flavor" value="s-1vcpu-2gb" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
-                        <div class="mr-3">
-                            <p class="font-medium text-gray-900">s-1vcpu-2gb</p>
-                            <p class="text-sm text-gray-500">1 vCPU, 2 GB RAM</p>
-                        </div>
-                    </label>
-                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500">
-                        <input type="radio" name="flavor" value="s-2vcpu-4gb" class="h-4 w-4 text-blue-600 focus:ring-blue-500" checked>
-                        <div class="mr-3">
-                            <p class="font-medium text-gray-900">s-2vcpu-4gb</p>
-                            <p class="text-sm text-gray-500">2 vCPU, 4 GB RAM</p>
-                        </div>
-                    </label>
-                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500">
-                        <input type="radio" name="flavor" value="s-4vcpu-8gb" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
-                        <div class="mr-3">
-                            <p class="font-medium text-gray-900">s-4vcpu-8gb</p>
-                            <p class="text-sm text-gray-500">4 vCPU, 8 GB RAM</p>
-                        </div>
-                    </label>
-                </div>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Network</label>
-                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                    <option value="">انتخاب Network</option>
-                    <option value="private-net">Private Network</option>
-                    <option value="public-net">Public Network</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Key Pair (SSH)</label>
-                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">بدون Key Pair</option>
-                    <option value="my-key">my-key</option>
-                    <option value="admin-key">admin-key</option>
-                </select>
-            </div>
-            <div class="flex justify-end gap-3 pt-4">
-                <button type="button" onclick="closeCreateModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-                    انصراف
-                </button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    ایجاد Instance
-                </button>
-            </div>
-        </form>
-    </div>
+        </div>
+    @endif
 </div>
 
-<script>
-function openCreateModal() {
-    document.getElementById('createModal').classList.remove('hidden');
-}
-
-function closeCreateModal() {
-    document.getElementById('createModal').classList.add('hidden');
-}
-
-function forceShutdown(instanceId) {
-    if (confirm('آیا مطمئن هستید که می‌خواهید این Instance را به صورت اجباری خاموش کنید؟')) {
-        // Force shutdown logic here
-        alert('Instance در حال خاموش شدن...');
-    }
-}
-
-function rebootInstance(instanceId) {
-    if (confirm('آیا مطمئن هستید که می‌خواهید این Instance را راه‌اندازی مجدد کنید؟')) {
-        // Reboot logic here
-        alert('Instance در حال راه‌اندازی مجدد...');
-    }
-}
-
-function startInstance(instanceId) {
-    // Start logic here
-    alert('Instance در حال شروع...');
-}
-
-function deleteInstance(instanceId) {
-    if (confirm('آیا مطمئن هستید که می‌خواهید این Instance را حذف کنید؟ این عمل غیرقابل بازگشت است.')) {
-        // Delete logic here
-        alert('Instance حذف شد');
-    }
-}
-</script>
 @endsection
 
 
