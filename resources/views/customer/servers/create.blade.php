@@ -410,7 +410,7 @@
             </div>
 
         <!-- Sticky Sidebar -->
-        <div class="lg:w-80 lg:sticky lg:top-6 lg:self-start">
+        <div class="lg:w-80 lg:sticky lg:top-[76px] lg:self-start">
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">خلاصه پیکربندی</h3>
                 
