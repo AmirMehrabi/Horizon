@@ -191,12 +191,12 @@
         <h1 class="text-3xl font-bold text-gray-900">داشبورد</h1>
         <p class="mt-1 text-sm text-gray-500">نمای کلی سطح بالا برای اپراتورهای ابری</p>
     </div>
-    <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium text-sm transition-colors duration-200 flex items-center gap-2 shadow-sm">
+    <a href="{{ route('admin.compute.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium text-sm transition-colors duration-200 flex items-center gap-2 shadow-sm">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>
-        ایجاد
-    </button>
+        ایجاد Instance
+    </a>
 </div>
 
 <!-- Dashboard Content -->
@@ -216,7 +216,7 @@
                         </div>
                         <div>
                             <p class="text-sm text-gray-500 font-medium">ماشین‌های مجازی فعال</p>
-                            <p class="text-2xl font-bold text-gray-900">1,247</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['instances']['total']) }}</p>
                         </div>
                     </div>
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -227,11 +227,11 @@
                 <div class="pt-4 border-t border-gray-100">
                     <div class="flex items-center justify-between text-sm">
                         <span class="text-gray-500">در حال اجرا</span>
-                        <span class="font-semibold text-gray-900">1,198</span>
+                        <span class="font-semibold text-gray-900">{{ number_format($stats['instances']['active']) }}</span>
                     </div>
                     <div class="flex items-center justify-between text-sm mt-1">
                         <span class="text-gray-500">متوقف شده</span>
-                        <span class="font-semibold text-gray-900">49</span>
+                        <span class="font-semibold text-gray-900">{{ number_format($stats['instances']['stopped']) }}</span>
                     </div>
                 </div>
             </div>
@@ -247,7 +247,7 @@
                         </div>
                         <div>
                             <p class="text-sm text-gray-500 font-medium">شبکه‌های فعال</p>
-                            <p class="text-2xl font-bold text-gray-900">342</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['networks']['total']) }}</p>
                         </div>
                     </div>
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -258,11 +258,11 @@
                 <div class="pt-4 border-t border-gray-100">
                     <div class="flex items-center justify-between text-sm">
                         <span class="text-gray-500">خصوصی</span>
-                        <span class="font-semibold text-gray-900">298</span>
+                        <span class="font-semibold text-gray-900">{{ number_format($stats['networks']['private']) }}</span>
                     </div>
                     <div class="flex items-center justify-between text-sm mt-1">
                         <span class="text-gray-500">عمومی</span>
-                        <span class="font-semibold text-gray-900">44</span>
+                        <span class="font-semibold text-gray-900">{{ number_format($stats['networks']['public']) }}</span>
                     </div>
                 </div>
             </div>
@@ -278,7 +278,8 @@
                         </div>
                         <div>
                             <p class="text-sm text-gray-500 font-medium">حجم‌های فعال</p>
-                            <p class="text-2xl font-bold text-gray-900">856</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['resources']['disk']['used']) }}</p>
+                            <p class="text-xs text-gray-500 mt-1">GB</p>
                         </div>
                     </div>
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -288,12 +289,12 @@
                 </div>
                 <div class="pt-4 border-t border-gray-100">
                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-gray-500">متصل شده</span>
-                        <span class="font-semibold text-gray-900">812</span>
+                        <span class="text-gray-500">استفاده شده</span>
+                        <span class="font-semibold text-gray-900">{{ number_format($stats['resources']['disk']['used']) }} GB</span>
                     </div>
                     <div class="flex items-center justify-between text-sm mt-1">
-                        <span class="text-gray-500">غیر متصل</span>
-                        <span class="font-semibold text-gray-900">44</span>
+                        <span class="text-gray-500">کل ظرفیت</span>
+                        <span class="font-semibold text-gray-900">{{ number_format($stats['resources']['disk']['total']) }} GB</span>
                     </div>
                 </div>
             </div>
@@ -309,7 +310,7 @@
                 <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">مشاهده همه</a>
             </div>
             <div class="space-y-4">
-                <!-- Online Hypervisors -->
+                <!-- Online Regions -->
                 <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
@@ -318,66 +319,55 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-900">آنلاین</p>
-                            <p class="text-xs text-gray-500">هایپروایزرهای عملیاتی</p>
+                            <p class="text-sm font-semibold text-gray-900">مناطق فعال</p>
+                            <p class="text-xs text-gray-500">مناطق عملیاتی</p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-2xl font-bold text-green-600">24</p>
-                        <p class="text-xs text-gray-500">۹۶٪ زمان فعالیت</p>
+                        <p class="text-2xl font-bold text-green-600">{{ $stats['regions']->count() }}</p>
+                        <p class="text-xs text-gray-500">{{ $stats['regions']->count() > 0 ? '۱۰۰٪' : '۰٪' }} زمان فعالیت</p>
                     </div>
                 </div>
 
-                <!-- Offline Hypervisors -->
-                <div class="flex items-center justify-between p-4 bg-red-50 rounded-lg border border-red-200">
+                <!-- Instances by Status -->
+                <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-900">آفلاین</p>
-                            <p class="text-xs text-gray-500">نیاز به توجه دارد</p>
+                            <p class="text-sm font-semibold text-gray-900">Instance های فعال</p>
+                            <p class="text-xs text-gray-500">در حال اجرا</p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-2xl font-bold text-red-600">1</p>
-                        <p class="text-xs text-gray-500">۴٪ زمان توقف</p>
+                        <p class="text-2xl font-bold text-blue-600">{{ number_format($stats['instances']['active']) }}</p>
+                        <p class="text-xs text-gray-500">از {{ number_format($stats['instances']['total']) }} کل</p>
                     </div>
                 </div>
 
-                <!-- Hypervisor List -->
+                <!-- Regions List -->
                 <div class="pt-4 border-t border-gray-100">
                     <div class="space-y-3">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                                <span class="text-sm text-gray-900 font-medium">hv-nyc-01</span>
+                        @forelse($stats['regions'] as $region => $zones)
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                                    <span class="text-sm text-gray-900 font-medium">{{ $region }}</span>
+                                </div>
+                                <span class="text-xs text-gray-500">
+                                    @if($zones->count() > 0)
+                                        {{ $zones->implode(', ') }}
+                                    @else
+                                        -
+                                    @endif
+                                </span>
                             </div>
-                            <span class="text-xs text-gray-500">NYC1</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                                <span class="text-sm text-gray-900 font-medium">hv-nyc-02</span>
-                            </div>
-                            <span class="text-xs text-gray-500">NYC1</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-red-500"></span>
-                                <span class="text-sm text-gray-900 font-medium">hv-sfo-03</span>
-                            </div>
-                            <span class="text-xs text-gray-500">SFO3</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                                <span class="text-sm text-gray-900 font-medium">hv-ams-01</span>
-                            </div>
-                            <span class="text-xs text-gray-500">AMS3</span>
-                        </div>
+                        @empty
+                            <p class="text-sm text-gray-500">هیچ منطقه‌ای یافت نشد</p>
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -399,12 +389,12 @@
                             </svg>
                             <span class="text-sm font-semibold text-gray-900">vCPU</span>
                         </div>
-                        <span class="text-sm font-semibold text-gray-900">8,456 / 10,000</span>
+                        <span class="text-sm font-semibold text-gray-900">{{ number_format($stats['resources']['vcpus']['used']) }} / {{ number_format($stats['resources']['vcpus']['total']) }}</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2.5">
-                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: 84.56%"></div>
+                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ min($stats['resources']['vcpus']['percentage'], 100) }}%"></div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1">۸۴.۶٪ استفاده شده</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ number_format($stats['resources']['vcpus']['percentage'], 1) }}٪ استفاده شده</p>
                 </div>
 
                 <!-- RAM Capacity -->
@@ -416,12 +406,12 @@
                             </svg>
                             <span class="text-sm font-semibold text-gray-900">RAM</span>
                         </div>
-                        <span class="text-sm font-semibold text-gray-900">32.4 TB / 40 TB</span>
+                        <span class="text-sm font-semibold text-gray-900">{{ number_format($stats['resources']['ram']['used_tb'], 1) }} TB / {{ number_format($stats['resources']['ram']['total_tb'], 1) }} TB</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2.5">
-                        <div class="bg-purple-600 h-2.5 rounded-full" style="width: 81%"></div>
+                        <div class="bg-purple-600 h-2.5 rounded-full" style="width: {{ min($stats['resources']['ram']['percentage'], 100) }}%"></div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1">۸۱٪ استفاده شده</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ number_format($stats['resources']['ram']['percentage'], 1) }}٪ استفاده شده</p>
                 </div>
 
                 <!-- Storage Capacity -->
@@ -433,12 +423,12 @@
                             </svg>
                             <span class="text-sm font-semibold text-gray-900">ذخیره‌سازی</span>
                         </div>
-                        <span class="text-sm font-semibold text-gray-900">245 PB / 300 PB</span>
+                        <span class="text-sm font-semibold text-gray-900">{{ number_format($stats['resources']['disk']['used'] / 1024, 1) }} TB / {{ number_format($stats['resources']['disk']['total'] / 1024, 1) }} TB</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2.5">
-                        <div class="bg-orange-600 h-2.5 rounded-full" style="width: 81.67%"></div>
+                        <div class="bg-orange-600 h-2.5 rounded-full" style="width: {{ min($stats['resources']['disk']['percentage'], 100) }}%"></div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1">۸۱.۷٪ استفاده شده</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ number_format($stats['resources']['disk']['percentage'], 1) }}٪ استفاده شده</p>
                 </div>
             </div>
         </div>
@@ -461,25 +451,34 @@
                 <div class="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-sm text-gray-600 font-medium">درآمد کل</span>
-                        <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full font-medium">+12.5%</span>
+                        @if($stats['revenue']['growth'] > 0)
+                            <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full font-medium">+{{ number_format($stats['revenue']['growth'], 1) }}%</span>
+                        @elseif($stats['revenue']['growth'] < 0)
+                            <span class="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full font-medium">{{ number_format($stats['revenue']['growth'], 1) }}%</span>
+                        @else
+                            <span class="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded-full font-medium">0%</span>
+                        @endif
                     </div>
-                    <p class="text-3xl font-bold text-gray-900">$2,847,392</p>
-                    <p class="text-xs text-gray-500 mt-1">در مقابل $۲,۵۳۰,۱۸۴ دوره قبلی</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ number_format($stats['revenue']['total'], 0) }} ریال</p>
+                    <p class="text-xs text-gray-500 mt-1">در مقابل {{ number_format($stats['revenue']['previous'], 0) }} ریال دوره قبلی</p>
                 </div>
 
                 <!-- Revenue Breakdown -->
                 <div class="grid grid-cols-3 gap-4">
                     <div class="text-center p-3 bg-gray-50 rounded-lg">
-                        <p class="text-xs text-gray-500 mb-1">ماهانه تکراری</p>
-                        <p class="text-lg font-bold text-gray-900">$1,924,580</p>
+                        <p class="text-xs text-gray-500 mb-1">ماهانه</p>
+                        <p class="text-lg font-bold text-gray-900">{{ number_format($stats['revenue']['monthly'], 0) }}</p>
+                        <p class="text-xs text-gray-500">ریال</p>
                     </div>
                     <div class="text-center p-3 bg-gray-50 rounded-lg">
-                        <p class="text-xs text-gray-500 mb-1">یکباره</p>
-                        <p class="text-lg font-bold text-gray-900">$623,450</p>
+                        <p class="text-xs text-gray-500 mb-1">ساعتی</p>
+                        <p class="text-lg font-bold text-gray-900">{{ number_format($stats['revenue']['hourly'], 0) }}</p>
+                        <p class="text-xs text-gray-500">ریال</p>
                     </div>
                     <div class="text-center p-3 bg-gray-50 rounded-lg">
-                        <p class="text-xs text-gray-500 mb-1">افزونه‌ها</p>
-                        <p class="text-lg font-bold text-gray-900">$299,362</p>
+                        <p class="text-xs text-gray-500 mb-1">سایر</p>
+                        <p class="text-lg font-bold text-gray-900">{{ number_format($stats['revenue']['other'], 0) }}</p>
+                        <p class="text-xs text-gray-500">ریال</p>
                     </div>
                 </div>
 
@@ -502,7 +501,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600 font-medium">امروز</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-1">47</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($stats['customers']['today_signups']) }}</p>
                         </div>
                         <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
                             <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -525,7 +524,7 @@
                             <p class="text-xs text-gray-500">دوشنبه - یکشنبه</p>
                         </div>
                     </div>
-                    <p class="text-lg font-bold text-gray-900">312</p>
+                    <p class="text-lg font-bold text-gray-900">{{ number_format($stats['customers']['week_signups']) }}</p>
                 </div>
 
                 <!-- This Month -->
@@ -541,34 +540,30 @@
                             <p class="text-xs text-gray-500">ماه جاری</p>
                         </div>
                     </div>
-                    <p class="text-lg font-bold text-gray-900">1,247</p>
+                    <p class="text-lg font-bold text-gray-900">{{ number_format($stats['customers']['month_signups']) }}</p>
                 </div>
 
                 <!-- Recent Signups List -->
                 <div class="pt-4 border-t border-gray-100">
                     <p class="text-sm font-semibold text-gray-900 mb-3">ثبت‌نام‌های اخیر</p>
                     <div class="space-y-2">
-                        <div class="flex items-center justify-between text-sm">
-                            <div class="flex items-center gap-2">
-                                <div class="w-6 h-6 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-medium">JD</div>
-                                <span class="text-gray-900">John Doe</span>
+                        @forelse($stats['customers']['recent'] as $customer)
+                            @php
+                                $initials = strtoupper(substr($customer->first_name ?? '', 0, 1) . substr($customer->last_name ?? '', 0, 1));
+                                $colors = ['blue', 'green', 'purple', 'orange', 'red'];
+                                $color = $colors[array_rand($colors)];
+                                $name = $customer->company_name ?: ($customer->first_name . ' ' . $customer->last_name);
+                            @endphp
+                            <div class="flex items-center justify-between text-sm">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-full bg-{{ $color }}-600 text-white text-xs flex items-center justify-center font-medium">{{ $initials ?: '?' }}</div>
+                                    <span class="text-gray-900">{{ $name }}</span>
+                                </div>
+                                <span class="text-xs text-gray-500">{{ $customer->created_at->diffForHumans() }}</span>
                             </div>
-                            <span class="text-xs text-gray-500">۲ ساعت پیش</span>
-                        </div>
-                        <div class="flex items-center justify-between text-sm">
-                            <div class="flex items-center gap-2">
-                                <div class="w-6 h-6 rounded-full bg-green-600 text-white text-xs flex items-center justify-center font-medium">SM</div>
-                                <span class="text-gray-900">Sarah Miller</span>
-                            </div>
-                            <span class="text-xs text-gray-500">۵ ساعت پیش</span>
-                        </div>
-                        <div class="flex items-center justify-between text-sm">
-                            <div class="flex items-center gap-2">
-                                <div class="w-6 h-6 rounded-full bg-purple-600 text-white text-xs flex items-center justify-center font-medium">RJ</div>
-                                <span class="text-gray-900">Robert Johnson</span>
-                            </div>
-                            <span class="text-xs text-gray-500">۱ روز پیش</span>
-                        </div>
+                        @empty
+                            <p class="text-sm text-gray-500">هیچ ثبت‌نامی وجود ندارد</p>
+                        @endforelse
                     </div>
                 </div>
             </div>
