@@ -154,12 +154,24 @@
                     <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                     </svg>
-                    <span class="text-sm font-medium text-gray-500 mr-1 md:mr-2">web-server-01</span>
+                    <span class="text-sm font-medium text-gray-500 mr-1 md:mr-2">{{ $instance->name }}</span>
                 </div>
             </li>
         </ol>
     </nav>
 </div>
+
+@if(session('success'))
+<div class="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+    {{ session('success') }}
+</div>
+@endif
+
+@if(session('error'))
+<div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+    {{ session('error') }}
+</div>
+@endif
 
 <!-- Page Header -->
 <div class="flex items-center justify-between mb-8">
@@ -170,14 +182,25 @@
             </svg>
         </div>
         <div>
-            <h1 class="text-3xl font-bold text-gray-900">web-server-01</h1>
-            <p class="mt-1 text-sm text-gray-500">Instance ID: abc123def456</p>
+            <h1 class="text-3xl font-bold text-gray-900">{{ $instance->name }}</h1>
+            <p class="mt-1 text-sm text-gray-500">Instance ID: {{ substr($instance->id, 0, 8) }}...</p>
         </div>
     </div>
     <div class="flex items-center gap-3">
-        <span class="px-3 py-1.5 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-            <span class="w-2 h-2 rounded-full bg-green-500 {{ $isRtl ? 'ml-2' : 'mr-2' }}"></span>
-            در حال اجرا
+        @php
+            $statusColors = [
+                'active' => ['bg' => 'bg-green-100', 'text' => 'text-green-800', 'dot' => 'bg-green-500', 'label' => 'در حال اجرا'],
+                'stopped' => ['bg' => 'bg-gray-100', 'text' => 'text-gray-800', 'dot' => 'bg-gray-500', 'label' => 'متوقف شده'],
+                'building' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-800', 'dot' => 'bg-blue-500', 'label' => 'در حال ساخت'],
+                'pending' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-800', 'dot' => 'bg-yellow-500', 'label' => 'در انتظار'],
+                'error' => ['bg' => 'bg-red-100', 'text' => 'text-red-800', 'dot' => 'bg-red-500', 'label' => 'خطا'],
+                'deleting' => ['bg' => 'bg-orange-100', 'text' => 'text-orange-800', 'dot' => 'bg-orange-500', 'label' => 'در حال حذف'],
+            ];
+            $status = $statusColors[$instance->status] ?? $statusColors['pending'];
+        @endphp
+        <span class="px-3 py-1.5 inline-flex text-sm leading-5 font-semibold rounded-full {{ $status['bg'] }} {{ $status['text'] }}">
+            <span class="w-2 h-2 rounded-full {{ $status['dot'] }} {{ $isRtl ? 'ml-2' : 'mr-2' }}"></span>
+            {{ $status['label'] }}
         </span>
         <div class="relative">
             <button onclick="toggleActionsMenu()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2">
@@ -187,14 +210,27 @@
                 </svg>
             </button>
             <div id="actionsMenu" class="hidden absolute {{ $isRtl ? 'left-0' : 'right-0' }} mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-                <button onclick="openResizeModal()" class="block w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">تغییر سایز</button>
-                <button onclick="openMigrateModal()" class="block w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">انتقال به هایپروایزر دیگر</button>
-                <button onclick="openPasswordResetModal()" class="block w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">بازنشانی رمز عبور</button>
+                @if($instance->status === 'stopped')
+                    <form method="POST" action="{{ route('admin.compute.start', $instance->id) }}" class="block">
+                        @csrf
+                        <button type="submit" class="block w-full text-right px-4 py-2 text-sm text-green-700 hover:bg-green-50">شروع</button>
+                    </form>
+                @elseif($instance->status === 'active')
+                    <form method="POST" action="{{ route('admin.compute.stop', $instance->id) }}" class="block">
+                        @csrf
+                        <button type="submit" class="block w-full text-right px-4 py-2 text-sm text-orange-700 hover:bg-orange-50" onclick="return confirm('آیا مطمئن هستید؟')">خاموش کردن</button>
+                    </form>
+                    <form method="POST" action="{{ route('admin.compute.reboot', $instance->id) }}" class="block">
+                        @csrf
+                        <button type="submit" class="block w-full text-right px-4 py-2 text-sm text-blue-700 hover:bg-blue-50" onclick="return confirm('آیا مطمئن هستید؟')">راه‌اندازی مجدد</button>
+                    </form>
+                @endif
                 <div class="border-t border-gray-200 my-1"></div>
-                <button onclick="forceShutdown()" class="block w-full text-right px-4 py-2 text-sm text-orange-700 hover:bg-orange-50">خاموش کردن اجباری</button>
-                <button onclick="rebootInstance()" class="block w-full text-right px-4 py-2 text-sm text-blue-700 hover:bg-blue-50">راه‌اندازی مجدد</button>
-                <div class="border-t border-gray-200 my-1"></div>
-                <button onclick="deleteInstance()" class="block w-full text-right px-4 py-2 text-sm text-red-700 hover:bg-red-50">حذف Instance</button>
+                <form method="POST" action="{{ route('admin.compute.destroy', $instance->id) }}" class="block">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="block w-full text-right px-4 py-2 text-sm text-red-700 hover:bg-red-50" onclick="return confirm('آیا مطمئن هستید که می‌خواهید این Instance را حذف کنید؟ این عمل غیرقابل بازگشت است.')">حذف Instance</button>
+                </form>
             </div>
         </div>
     </div>
@@ -209,28 +245,39 @@
             <h2 class="text-lg font-semibold text-gray-900 mb-4">نمای کلی</h2>
             <div class="grid grid-cols-2 gap-6">
                 <div>
-                    <p class="text-sm text-gray-500 mb-1">پروژه</p>
-                    <p class="text-sm font-medium text-gray-900">project-acme-corp</p>
+                    <p class="text-sm text-gray-500 mb-1">مشتری</p>
+                    <p class="text-sm font-medium text-gray-900">{{ $instance->customer->company_name ?: $instance->customer->first_name . ' ' . $instance->customer->last_name }}</p>
                 </div>
                 <div>
-                    <p class="text-sm text-gray-500 mb-1">مشتری</p>
-                    <p class="text-sm font-medium text-gray-900">Acme Corporation</p>
+                    <p class="text-sm text-gray-500 mb-1">ایمیل</p>
+                    <p class="text-sm font-medium text-gray-900">{{ $instance->customer->email ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-500 mb-1">Image</p>
-                    <p class="text-sm font-medium text-gray-900">Ubuntu 22.04 LTS</p>
+                    <p class="text-sm font-medium text-gray-900">{{ $instance->image->name ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-500 mb-1">Flavor</p>
-                    <p class="text-sm font-medium text-gray-900">s-2vcpu-4gb</p>
+                    <p class="text-sm font-medium text-gray-900">{{ $instance->flavor->name ?? '-' }}</p>
+                    @if($instance->flavor)
+                        <p class="text-xs text-gray-500 mt-1">{{ $instance->flavor->vcpus }} vCPU, {{ number_format($instance->flavor->ram / 1024) }} GB RAM, {{ $instance->flavor->disk }} GB Disk</p>
+                    @endif
                 </div>
                 <div>
-                    <p class="text-sm text-gray-500 mb-1">هایپروایزر</p>
-                    <p class="text-sm font-medium text-gray-900">hv-nyc-01 (NYC1)</p>
+                    <p class="text-sm text-gray-500 mb-1">Region</p>
+                    <p class="text-sm font-medium text-gray-900">{{ $instance->region ?? '-' }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500 mb-1">Availability Zone</p>
+                    <p class="text-sm font-medium text-gray-900">{{ $instance->availability_zone ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-500 mb-1">تاریخ ایجاد</p>
-                    <p class="text-sm font-medium text-gray-900">۱۴۰۳/۰۳/۱۵</p>
+                    <p class="text-sm font-medium text-gray-900">{{ $instance->created_at->format('Y/m/d H:i') }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500 mb-1">OpenStack Server ID</p>
+                    <p class="text-sm font-medium text-gray-900 font-mono">{{ $instance->openstack_server_id ?? 'هنوز ایجاد نشده' }}</p>
                 </div>
             </div>
         </div>
@@ -241,30 +288,51 @@
                 <h2 class="text-lg font-semibold text-gray-900">شبکه‌سازی</h2>
             </div>
             <div class="space-y-4">
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                        <p class="text-sm font-medium text-gray-900">IP عمومی</p>
-                        <p class="text-sm text-gray-500 mt-1">45.67.89.123</p>
+                @php
+                    $publicIps = $instance->ip_addresses['public'] ?? [];
+                    $privateIps = $instance->ip_addresses['private'] ?? [];
+                @endphp
+                @if(!empty($publicIps))
+                    @foreach($publicIps as $ip)
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">IP عمومی</p>
+                                <p class="text-sm text-gray-500 mt-1 font-mono">{{ $ip }}</p>
+                            </div>
+                            <button onclick="copyToClipboard('{{ $ip }}')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">کپی</button>
+                        </div>
+                    @endforeach
+                @endif
+                @if(!empty($privateIps))
+                    @foreach($privateIps as $ip)
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">IP خصوصی</p>
+                                <p class="text-sm text-gray-500 mt-1 font-mono">{{ $ip }}</p>
+                            </div>
+                            <button onclick="copyToClipboard('{{ $ip }}')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">کپی</button>
+                        </div>
+                    @endforeach
+                @endif
+                @if(empty($publicIps) && empty($privateIps))
+                    <div class="text-center py-8 text-gray-500">
+                        <p>هنوز IP آدرسی اختصاص داده نشده است</p>
                     </div>
-                    <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">کپی</button>
-                </div>
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                        <p class="text-sm font-medium text-gray-900">IP خصوصی</p>
-                        <p class="text-sm text-gray-500 mt-1">192.168.1.100</p>
-                    </div>
-                    <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">کپی</button>
-                </div>
+                @endif
                 <div class="pt-4 border-t border-gray-200">
                     <p class="text-sm text-gray-500 mb-2">Network ها</p>
                     <div class="space-y-2">
-                        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
-                            <div>
-                                <p class="text-sm font-medium text-gray-900">private-net</p>
-                                <p class="text-xs text-gray-500">192.168.1.0/24</p>
+                        @forelse($instance->networks as $network)
+                            <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ $network->name }}</p>
+                                    <p class="text-xs text-gray-500">{{ $network->openstack_id }}</p>
+                                </div>
+                                <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">متصل</span>
                             </div>
-                            <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">متصل</span>
-                        </div>
+                        @empty
+                            <p class="text-sm text-gray-500">هیچ Network ی متصل نیست</p>
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -328,14 +396,11 @@
             </div>
             <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm text-green-400 max-h-96 overflow-y-auto">
                 <div class="space-y-1">
-                    <div>[2024-03-15 10:23:45] Instance started successfully</div>
-                    <div>[2024-03-15 10:23:46] Network interface configured: eth0</div>
-                    <div>[2024-03-15 10:23:47] Volume attached: volume-boot-01</div>
-                    <div>[2024-03-15 10:23:48] SSH service started</div>
-                    <div>[2024-03-15 10:23:50] System initialization complete</div>
-                    <div>[2024-03-15 10:24:00] Health check passed</div>
-                    <div>[2024-03-15 10:30:15] User login: root</div>
-                    <div>[2024-03-15 11:45:22] Package update completed</div>
+                    @forelse($instance->events as $event)
+                        <div>[{{ $event->created_at->format('Y-m-d H:i:s') }}] {{ $event->message }}</div>
+                    @empty
+                        <div class="text-gray-500">هیچ رویدادی ثبت نشده است</div>
+                    @endforelse
                 </div>
             </div>
             <div class="mt-4 flex items-center gap-4">
@@ -406,24 +471,37 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                     </svg>
                 </button>
-                <button onclick="rebootInstance()" class="w-full text-right px-4 py-2.5 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 rounded-lg font-medium text-sm transition-colors flex items-center justify-between">
-                    <span>راه‌اندازی مجدد</span>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                </button>
-                <button onclick="openPasswordResetModal()" class="w-full text-right px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg font-medium text-sm transition-colors flex items-center justify-between">
-                    <span>بازنشانی رمز عبور</span>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-                    </svg>
-                </button>
-                <button onclick="forceShutdown()" class="w-full text-right px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg font-medium text-sm transition-colors flex items-center justify-between">
-                    <span>خاموش کردن اجباری</span>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
-                    </svg>
-                </button>
+                @if($instance->status === 'active')
+                    <form method="POST" action="{{ route('admin.compute.reboot', $instance->id) }}" class="block">
+                        @csrf
+                        <button type="submit" onclick="return confirm('آیا مطمئن هستید؟')" class="w-full text-right px-4 py-2.5 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 rounded-lg font-medium text-sm transition-colors flex items-center justify-between">
+                            <span>راه‌اندازی مجدد</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ route('admin.compute.stop', $instance->id) }}" class="block">
+                        @csrf
+                        <button type="submit" onclick="return confirm('آیا مطمئن هستید؟')" class="w-full text-right px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg font-medium text-sm transition-colors flex items-center justify-between">
+                            <span>خاموش کردن</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                            </svg>
+                        </button>
+                    </form>
+                @elseif($instance->status === 'stopped')
+                    <form method="POST" action="{{ route('admin.compute.start', $instance->id) }}" class="block">
+                        @csrf
+                        <button type="submit" onclick="return confirm('آیا مطمئن هستید؟')" class="w-full text-right px-4 py-2.5 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg font-medium text-sm transition-colors flex items-center justify-between">
+                            <span>شروع</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </button>
+                    </form>
+                @endif
             </div>
         </div>
 
@@ -433,20 +511,32 @@
             <div class="space-y-3 text-sm">
                 <div class="flex justify-between">
                     <span class="text-gray-500">Availability Zone</span>
-                    <span class="font-medium text-gray-900">nova</span>
+                    <span class="font-medium text-gray-900">{{ $instance->availability_zone ?? 'nova' }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-500">Key Pair</span>
-                    <span class="font-medium text-gray-900">my-key</span>
+                    <span class="font-medium text-gray-900">{{ $instance->keyPair->name ?? '-' }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-500">Security Groups</span>
-                    <span class="font-medium text-gray-900">default, web</span>
+                    <span class="font-medium text-gray-900">
+                        @if($instance->securityGroups->count() > 0)
+                            {{ $instance->securityGroups->pluck('name')->join(', ') }}
+                        @else
+                            -
+                        @endif
+                    </span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-500">Uptime</span>
-                    <span class="font-medium text-gray-900">15 روز</span>
+                    <span class="text-gray-500">Billing Cycle</span>
+                    <span class="font-medium text-gray-900">{{ $instance->billing_cycle === 'hourly' ? 'ساعتی' : 'ماهانه' }}</span>
                 </div>
+                @if($instance->billing_started_at)
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Billing Started</span>
+                        <span class="font-medium text-gray-900">{{ $instance->billing_started_at->format('Y/m/d H:i') }}</span>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -700,25 +790,12 @@ function detachVolume(volumeId) {
     }
 }
 
-function forceShutdown() {
-    if (confirm('آیا مطمئن هستید که می‌خواهید این Instance را به صورت اجباری خاموش کنید؟')) {
-        // Force shutdown logic here
-        alert('Instance در حال خاموش شدن...');
-    }
-}
-
-function rebootInstance() {
-    if (confirm('آیا مطمئن هستید که می‌خواهید این Instance را راه‌اندازی مجدد کنید؟')) {
-        // Reboot logic here
-        alert('Instance در حال راه‌اندازی مجدد...');
-    }
-}
-
-function deleteInstance() {
-    if (confirm('آیا مطمئن هستید که می‌خواهید این Instance را حذف کنید؟ این عمل غیرقابل بازگشت است.')) {
-        // Delete logic here
-        window.location.href = "{{ route('admin.compute.index') }}";
-    }
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        alert('کپی شد: ' + text);
+    }, function(err) {
+        console.error('Failed to copy: ', err);
+    });
 }
 
 function refreshLogs() {
