@@ -38,8 +38,20 @@ class StoreServerRequest extends FormRequest
             
             // Step 2: Plan Selection
             'plan_type' => ['required', 'string', 'in:prebuilt,custom'],
-            'plan' => ['required_if:plan_type,prebuilt', 'string', 'in:starter,standard,pro'],
-            'flavor_id' => ['nullable', 'uuid', 'exists:openstack_flavors,id'],
+            'plan' => [
+                'required_without:flavor_id',
+                'required_if:plan_type,prebuilt',
+                'nullable',
+                'string',
+                'in:starter,standard,pro',
+            ],
+            'flavor_id' => [
+                'required_without:plan',
+                'required_if:plan_type,prebuilt',
+                'nullable',
+                'uuid',
+                'exists:openstack_flavors,id',
+            ],
             
             // Custom plan fields
             'custom_vcpu' => ['required_if:plan_type,custom', 'integer', 'min:1', 'max:32'],
