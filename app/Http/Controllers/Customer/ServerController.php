@@ -26,7 +26,7 @@ class ServerController extends Controller
     /**
      * Display the VPS purchase wizard
      */
-    public function create()
+    public function create(Request $request)
     {
         $region = config('openstack.region');
         
@@ -54,8 +54,14 @@ class ServerController extends Controller
         $securityGroups = OpenStackSecurityGroup::where('region', $region)
             ->orderBy('name')
             ->get();
+        
+        $customer = $request->user('customer');
+        $keyPairs = \App\Models\OpenStackKeyPair::where('customer_id', $customer->id)
+            ->where('region', $region)
+            ->orderBy('name')
+            ->get();
 
-        return view('customer.servers.create', compact('flavors', 'images', 'networks', 'securityGroups'));
+        return view('customer.servers.create', compact('flavors', 'images', 'networks', 'securityGroups', 'keyPairs'));
     }
 
     /**
@@ -237,14 +243,16 @@ class ServerController extends Controller
                     'shared' => $network->shared,
                     'external' => $network->external,
                     'is_active' => $network->isActive(),
-                    'subnets' => $network->subnets->map(function ($subnet) {
-                        return [
-                            'id' => $subnet->id,
-                            'name' => $subnet->name,
-                            'cidr' => $subnet->cidr,
-                            'ip_version' => $subnet->ip_version,
-                        ];
-                    }),
+                    'subnets' => $network->relationLoaded('subnets') && $network->subnets instanceof \Illuminate\Database\Eloquent\Collection
+                        ? $network->subnets->map(function ($subnet) {
+                            return [
+                                'id' => $subnet->id,
+                                'name' => $subnet->name,
+                                'cidr' => $subnet->cidr,
+                                'ip_version' => $subnet->ip_version,
+                            ];
+                        })->toArray()
+                        : (is_array($network->subnets) ? $network->subnets : []),
                 ];
             });
 
