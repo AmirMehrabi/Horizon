@@ -124,6 +124,15 @@ class OpenStackInstance extends Model
     }
 
     /**
+     * Get all backup snapshots for this instance.
+     */
+    public function backupSnapshots(): HasMany
+    {
+        return $this->hasMany(BackupSnapshot::class, 'instance_id')
+                    ->orderBy('created_at', 'desc');
+    }
+
+    /**
      * Check if instance is active.
      */
     public function isActive(): bool

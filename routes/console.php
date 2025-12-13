@@ -28,3 +28,10 @@ Schedule::command('billing:process-hourly')
     ->withoutOverlapping()
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/hourly-billing.log'));
+
+// Schedule backup processing every 5 minutes
+Schedule::command('backups:process-scheduled')
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/backups.log'));

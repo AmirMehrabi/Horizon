@@ -250,6 +250,22 @@ class Customer extends Authenticatable
     }
 
     /**
+     * Get the backup settings for this customer.
+     */
+    public function backupSettings()
+    {
+        return $this->hasOne(BackupSettings::class, 'customer_id');
+    }
+
+    /**
+     * Get the backup snapshots for this customer.
+     */
+    public function backupSnapshots()
+    {
+        return $this->hasMany(BackupSnapshot::class, 'customer_id');
+    }
+
+    /**
      * Get the machines associated with the customer.
      * This is a placeholder for the machine relationship.
      * @deprecated Use openStackInstances() instead
