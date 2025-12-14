@@ -79,7 +79,7 @@ class ProcessHourlyBilling extends Command
                             'خطا در پرداخت هزینه ساعتی',
                             "پرداخت هزینه ساعتی سرور \"{$instance->name}\" به دلیل موجودی ناکافی انجام نشد. موجودی مورد نیاز: " . number_format($hourlyCost, 0) . " ریال. موجودی فعلی: " . number_format($wallet->balance, 0) . " ریال.",
                             'dollar',
-                            '/customer/wallet/topup',
+                            '/wallet/topup',
                             [
                                 'instance_id' => $instance->id,
                                 'instance_name' => $instance->name,

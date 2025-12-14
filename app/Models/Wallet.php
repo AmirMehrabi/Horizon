@@ -140,7 +140,7 @@ class Wallet extends Model
                     'موجودی کیف پول تمام شده است',
                     'موجودی کیف پول شما تمام شده است. لطفاً برای ادامه استفاده از سرویس‌ها، کیف پول خود را شارژ کنید.',
                     'dollar',
-                    '/customer/wallet/topup',
+                    '/wallet/topup',
                     ['balance' => $balance]
                 );
             }
@@ -159,7 +159,7 @@ class Wallet extends Model
                     'هشدار موجودی کم',
                     "موجودی کیف پول شما در حال اتمام است (" . number_format($balance, 0) . " ریال). برای ادامه استفاده از سرویس‌ها، کیف پول خود را شارژ کنید.",
                     'dollar',
-                    '/customer/wallet/topup',
+                    '/wallet/topup',
                     ['balance' => $balance]
                 );
             }
