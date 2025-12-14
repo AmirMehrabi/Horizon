@@ -441,40 +441,31 @@
             }
             
             // Safely insert HTML (for highlighted text from backend)
-            // The backend provides HTML with <mark> tags, we sanitize it
+            // The backend provides HTML with <mark> tags, we sanitize it and add styling
             function safeHtml(html) {
                 if (!html) return '';
                 
-                // Create a temporary container
-                const temp = document.createElement('div');
-                temp.innerHTML = html;
+                // Use a simple approach: parse with DOMParser, but be careful about duplication
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+                const container = doc.body.firstElementChild;
                 
-                // Remove dangerous elements
-                const dangerous = temp.querySelectorAll('script, iframe, object, embed, form, input, style');
-                dangerous.forEach(el => el.remove());
-                
-                // Process the content: preserve mark tags, escape everything else
-                function processNode(node) {
-                    let result = '';
-                    
-                    for (let child = node.firstChild; child; child = child.nextSibling) {
-                        if (child.nodeType === Node.TEXT_NODE) {
-                            result += escapeHtml(child.textContent);
-                        } else if (child.nodeType === Node.ELEMENT_NODE) {
-                            if (child.tagName === 'MARK') {
-                                // Preserve mark tag and its content
-                                result += `<mark class="bg-yellow-200 font-medium">${escapeHtml(child.textContent)}</mark>`;
-                            } else {
-                                // For other elements, just process their text content
-                                result += processNode(child);
-                            }
-                        }
-                    }
-                    
-                    return result;
+                if (!container) {
+                    // Fallback: escape everything
+                    return escapeHtml(html);
                 }
                 
-                return processNode(temp);
+                // Remove dangerous elements
+                container.querySelectorAll('script, iframe, object, embed, form, input, style').forEach(el => el.remove());
+                
+                // Add classes to mark tags using a simple replace
+                // This avoids any text content duplication
+                let result = container.innerHTML;
+                
+                // Replace <mark> with <mark class="...">
+                result = result.replace(/<mark(\s|>)/gi, '<mark class="bg-yellow-200 font-medium"$1');
+                
+                return result;
             }
             
             // Perform search
