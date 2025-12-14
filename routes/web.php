@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\StorageManagementController as AdminStorageManage
 use App\Http\Controllers\Admin\LogsMonitoringController as AdminLogsMonitoringController;
 use App\Http\Controllers\Admin\NotificationsController as AdminNotificationsController;
 use App\Http\Controllers\Admin\BillingController as AdminBillingController;
+use App\Http\Controllers\Admin\SearchController as AdminSearchController;
 use App\Http\Controllers\Customer\AuthController as CustomerAuthController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\ServerController as CustomerServerController;
@@ -49,6 +50,10 @@ Route::domain('hub.aviato.ir')
         Route::middleware('auth:web')->group(function () {
             Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
             Route::get('/dashboard', [AdminDashboardController::class, 'index']);
+            
+            // Search
+            Route::get('/search', [AdminSearchController::class, 'search'])->name('search');
+            
             Route::get('/users', [AdminUserManagementController::class, 'index'])->name('users.index');
             // Project Management Routes
             Route::get('/projects', [\App\Http\Controllers\Admin\ProjectController::class, 'index'])->name('projects.index');

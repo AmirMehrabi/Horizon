@@ -42,5 +42,12 @@ return [
     'configure_networking_desc' => 'Set up VPCs, firewalls, and load balancers for your infrastructure.',
     'enable_monitoring' => 'Enable monitoring',
     'enable_monitoring_desc' => 'Track performance and set up alerts for your resources.',
+    'recent_searches' => 'Recent Searches',
+    'no_recent_searches' => 'No recent searches',
+    'clear_recent_searches' => 'Clear recent searches',
+    'no_results' => 'No results found',
+    'customers' => 'Customers',
+    'instances' => 'Instances',
+    'searching' => 'Searching...',
 ];
 

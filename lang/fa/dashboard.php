@@ -42,5 +42,12 @@ return [
     'configure_networking_desc' => 'VPC، فایروال‌ها و لود بالانسرها را برای زیرساخت خود راه‌اندازی کنید.',
     'enable_monitoring' => 'نظارت را فعال کنید',
     'enable_monitoring_desc' => 'عملکرد را ردیابی کنید و هشدارها را برای منابع خود تنظیم کنید.',
+    'recent_searches' => 'جستجوهای اخیر',
+    'no_recent_searches' => 'جستجوی اخیری وجود ندارد',
+    'clear_recent_searches' => 'پاک کردن جستجوهای اخیر',
+    'no_results' => 'نتیجه‌ای یافت نشد',
+    'customers' => 'مشتریان',
+    'instances' => 'نمونه‌ها',
+    'searching' => 'در حال جستجو...',
 ];
 

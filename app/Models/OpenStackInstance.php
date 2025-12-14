@@ -219,4 +219,28 @@ class OpenStackInstance extends Model
     {
         return $query->where('status', '!=', 'deleted');
     }
+
+    /**
+     * Scope a query to search instances by name, description, or customer.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $search
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSearch($query, $search)
+    {
+        return $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('description', 'like', "%{$search}%")
+              ->orWhere('openstack_server_id', 'like', "%{$search}%")
+              ->orWhere('region', 'like', "%{$search}%")
+              ->orWhereHas('customer', function ($customerQuery) use ($search) {
+                  $customerQuery->where('first_name', 'like', "%{$search}%")
+                                ->orWhere('last_name', 'like', "%{$search}%")
+                                ->orWhere('company_name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%")
+                                ->orWhere('phone_number', 'like', "%{$search}%");
+              });
+        });
+    }
 }
