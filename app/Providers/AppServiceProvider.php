@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Services\OpenStack\OpenStackConnectionService;
 use App\Services\OpenStack\OpenStackInstanceService;
 use App\Services\OpenStack\OpenStackSyncService;
+use App\Services\Sms\SmsService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -31,6 +32,11 @@ class AppServiceProvider extends ServiceProvider
             return new OpenStackSyncService(
                 $app->make(OpenStackConnectionService::class)
             );
+        });
+
+        // Register SMS Service as singleton
+        $this->app->singleton(SmsService::class, function ($app) {
+            return new SmsService();
         });
     }
 

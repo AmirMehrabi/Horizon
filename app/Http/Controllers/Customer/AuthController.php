@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use App\Models\Customer;
 use App\Models\CustomerVerificationCode;
+use App\Services\Sms\SmsService;
 use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
@@ -17,8 +18,9 @@ class AuthController extends Controller
     /**
      * Create a new controller instance.
      */
-    public function __construct()
-    {
+    public function __construct(
+        private SmsService $smsService
+    ) {
         // Laravel 12 uses different middleware registration
     }
 
@@ -96,6 +98,27 @@ class AuthController extends Controller
             $request->ip(),
             $request->userAgent()
         );
+
+        // Send SMS with registration credentials in Farsi
+        try {
+            $smsResult = $this->smsService->sendRegistrationCredentials(
+                $phoneNumber,
+                $phoneNumber,
+                $verificationCode->code
+            );
+
+            if (!$smsResult['success']) {
+                \Log::warning('Failed to send registration SMS', [
+                    'phone' => $phoneNumber,
+                    'error' => $smsResult['message'] ?? 'Unknown error',
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Exception while sending registration SMS', [
+                'phone' => $phoneNumber,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         // Store phone number in session for verification
         $request->session()->put('verification_phone', $phoneNumber);
@@ -221,6 +244,26 @@ class AuthController extends Controller
             $request->userAgent()
         );
 
+        // Send SMS with login credentials in Farsi
+        try {
+            $smsResult = $this->smsService->sendLoginCredentials(
+                $phoneNumber,
+                $verificationCode->code
+            );
+
+            if (!$smsResult['success']) {
+                \Log::warning('Failed to send login SMS', [
+                    'phone' => $phoneNumber,
+                    'error' => $smsResult['message'] ?? 'Unknown error',
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Exception while sending login SMS', [
+                'phone' => $phoneNumber,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         // Store phone number in session
         $request->session()->put('login_phone', $phoneNumber);
 
@@ -326,6 +369,36 @@ class AuthController extends Controller
             $request->ip(),
             $request->userAgent()
         );
+
+        // Send SMS with verification code
+        try {
+            if ($type === CustomerVerificationCode::TYPE_REGISTRATION) {
+                $smsResult = $this->smsService->sendRegistrationCredentials(
+                    $phoneNumber,
+                    $phoneNumber,
+                    $verificationCode->code
+                );
+            } else {
+                $smsResult = $this->smsService->sendLoginCredentials(
+                    $phoneNumber,
+                    $verificationCode->code
+                );
+            }
+
+            if (!$smsResult['success']) {
+                \Log::warning('Failed to resend verification SMS', [
+                    'phone' => $phoneNumber,
+                    'type' => $type,
+                    'error' => $smsResult['message'] ?? 'Unknown error',
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Exception while resending verification SMS', [
+                'phone' => $phoneNumber,
+                'type' => $type,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return response()->json([
             'success' => true,
