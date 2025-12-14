@@ -27,9 +27,9 @@ class CustomerApiKey extends Model
         'updated_at' => 'datetime',
     ];
 
-    protected $hidden = [
-        'key',
-    ];
+    // Note: We don't hide 'key' here because we need to display it to users
+    // In a production environment, consider encrypting keys at rest
+    // and only showing them once when created
 
     /**
      * Get the customer that owns this API key.

@@ -82,6 +82,22 @@ class ProfileController extends Controller
             })
             ->toArray();
 
+        // Log profile view (only if not already logged recently to avoid spam)
+        $recentLog = $customer->activityLogs()
+            ->where('action', 'مشاهده پروفایل')
+            ->where('created_at', '>=', now()->subMinutes(5))
+            ->first();
+        
+        if (!$recentLog) {
+            CustomerActivityLog::log(
+                $customer->id,
+                'مشاهده پروفایل',
+                'success',
+                request()->ip(),
+                request()->userAgent()
+            );
+        }
+
         return view('customer.profile.index', compact('user', 'twoFactorEnabled', 'twoFactorSecret', 'recoveryCodes', 'apiKeys', 'activityLogs'));
     }
 
@@ -196,7 +212,7 @@ class ProfileController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'current_password' => ['required', 'string'],
+            'current_password' => $customer->password ? ['required', 'string'] : ['nullable'],
             'new_password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
@@ -223,11 +239,9 @@ class ProfileController extends Controller
                     ->withErrors(['current_password' => 'رمز عبور فعلی اشتباه است'])
                     ->withInput();
             }
-        } else {
-            // If no password is set, we still require current_password for security
-            // But we'll accept any value as long as it's provided
-            // In a real scenario, you might want to require email verification or SMS verification
         }
+        // If no password is set, we allow setting a new password without current password verification
+        // This is acceptable since customers use SMS authentication as primary method
 
         // Update password (using mutator which will hash it)
         $customer->password = $request->new_password;
