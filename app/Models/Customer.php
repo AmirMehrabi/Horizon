@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 
 class Customer extends Authenticatable
@@ -23,6 +24,7 @@ class Customer extends Authenticatable
         'last_name',
         'phone_number',
         'email',
+        'password',
         'company_name',
         'address',
         'city',
@@ -42,6 +44,7 @@ class Customer extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
+        'password',
         'remember_token',
     ];
 
@@ -58,6 +61,21 @@ class Customer extends Authenticatable
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
     ];
+
+    /**
+     * Automatically hash password when setting it.
+     */
+    public function setPasswordAttribute($value)
+    {
+        if ($value && !empty($value)) {
+            // Only hash if it's not already hashed (doesn't start with $2y$)
+            if (!str_starts_with($value, '$2y$')) {
+                $this->attributes['password'] = Hash::make($value);
+            } else {
+                $this->attributes['password'] = $value;
+            }
+        }
+    }
 
     /**
      * The primary key type.
@@ -263,6 +281,23 @@ class Customer extends Authenticatable
     public function backupSnapshots()
     {
         return $this->hasMany(BackupSnapshot::class, 'customer_id');
+    }
+
+    /**
+     * Get the API keys for this customer.
+     */
+    public function apiKeys()
+    {
+        return $this->hasMany(CustomerApiKey::class, 'customer_id');
+    }
+
+    /**
+     * Get the activity logs for this customer.
+     */
+    public function activityLogs()
+    {
+        return $this->hasMany(CustomerActivityLog::class, 'customer_id')
+                    ->orderBy('created_at', 'desc');
     }
 
     /**

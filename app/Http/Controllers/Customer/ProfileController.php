@@ -3,7 +3,14 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
+use App\Models\CustomerApiKey;
+use App\Models\CustomerActivityLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class ProfileController extends Controller
 {
@@ -12,93 +19,68 @@ class ProfileController extends Controller
      */
     public function index()
     {
-        // Dummy data for current user
+        $customer = Auth::guard('customer')->user();
+        
+        if (!$customer) {
+            return redirect()->route('customer.login');
+        }
+
+        // Format user data for view
         $user = [
-            'id' => 1,
-            'first_name' => 'علی',
-            'last_name' => 'احمدی',
-            'email' => 'ali.ahmadi@example.com',
-            'phone' => '09123456789',
-            'national_id' => '1234567890',
-            'company' => 'شرکت نمونه',
-            'address' => 'تهران، خیابان ولیعصر',
-            'city' => 'تهران',
-            'postal_code' => '1234567890',
-            'country' => 'ایران',
+            'id' => $customer->id,
+            'first_name' => $customer->first_name,
+            'last_name' => $customer->last_name,
+            'email' => $customer->email,
+            'phone' => $customer->phone_number,
+            'national_id' => $customer->preferences['national_id'] ?? null,
+            'company' => $customer->company_name,
+            'address' => $customer->address,
+            'city' => $customer->city,
+            'postal_code' => $customer->postal_code,
+            'country' => $customer->country,
             'avatar' => null,
-            'created_at' => '۱۴۰۳/۰۱/۱۵',
+            'created_at' => $customer->created_at ? $customer->created_at->format('Y/m/d') : null,
         ];
 
+        // 2FA is disabled as per user request
         $twoFactorEnabled = false;
         $twoFactorSecret = null;
         $recoveryCodes = [];
 
-        $apiKeys = [
-            [
-                'id' => 1,
-                'name' => 'کلید API اصلی',
-                'key' => 'api_live_51H3k2j3k4j5k6j7k8j9k0j1k2j3k4j5k6j7k8j9k0j1k2j3k4j5k6j',
-                'last_used' => '۱۴۰۳/۱۰/۲۰ - ۱۴:۳۰',
-                'created_at' => '۱۴۰۳/۰۹/۱۰',
-                'permissions' => ['read', 'write']
-            ],
-            [
-                'id' => 2,
-                'name' => 'کلید API تست',
-                'key' => 'api_test_98H7k2j3k4j5k6j7k8j9k0j1k2j3k4j5k6j7k8j9k0j1k2j3k4j5k6j',
-                'last_used' => 'هرگز',
-                'created_at' => '۱۴۰۳/۱۰/۱۵',
-                'permissions' => ['read']
-            ]
-        ];
+        // Get real API keys
+        $apiKeys = $customer->apiKeys()
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($key) {
+                return [
+                    'id' => $key->id,
+                    'name' => $key->name,
+                    'key' => $key->key,
+                    'last_used' => $key->last_used_at 
+                        ? $key->last_used_at->format('Y/m/d - H:i') 
+                        : 'هرگز',
+                    'created_at' => $key->created_at->format('Y/m/d'),
+                    'permissions' => $key->permissions ?? ['read'],
+                ];
+            })
+            ->toArray();
 
-        $activityLogs = [
-            [
-                'id' => 1,
-                'action' => 'ورود به سیستم',
-                'ip' => '185.123.45.67',
-                'location' => 'تهران، ایران',
-                'device' => 'Chrome on Windows',
-                'timestamp' => '۱۴۰۳/۱۰/۲۲ - ۱۴:۲۲',
-                'status' => 'موفق'
-            ],
-            [
-                'id' => 2,
-                'action' => 'تغییر رمز عبور',
-                'ip' => '185.123.45.67',
-                'location' => 'تهران، ایران',
-                'device' => 'Chrome on Windows',
-                'timestamp' => '۱۴۰۳/۱۰/۲۰ - ۱۰:۱۵',
-                'status' => 'موفق'
-            ],
-            [
-                'id' => 3,
-                'action' => 'ایجاد کلید API',
-                'ip' => '185.123.45.67',
-                'location' => 'تهران، ایران',
-                'device' => 'Chrome on Windows',
-                'timestamp' => '۱۴۰۳/۱۰/۱۸ - ۱۶:۴۵',
-                'status' => 'موفق'
-            ],
-            [
-                'id' => 4,
-                'action' => 'ورود به سیستم',
-                'ip' => '192.168.1.100',
-                'location' => 'اصفهان، ایران',
-                'device' => 'Safari on iOS',
-                'timestamp' => '۱۴۰۳/۱۰/۱۷ - ۰۹:۳۰',
-                'status' => 'موفق'
-            ],
-            [
-                'id' => 5,
-                'action' => 'تلاش برای ورود',
-                'ip' => '45.67.89.123',
-                'location' => 'نامشخص',
-                'device' => 'Unknown',
-                'timestamp' => '۱۴۰۳/۱۰/۱۵ - ۲۳:۱۵',
-                'status' => 'ناموفق'
-            ]
-        ];
+        // Get real activity logs
+        $activityLogs = $customer->activityLogs()
+            ->take(50)
+            ->get()
+            ->map(function ($log) {
+                return [
+                    'id' => $log->id,
+                    'action' => $log->action,
+                    'ip' => $log->ip_address ?? 'نامشخص',
+                    'location' => $log->location ?? 'نامشخص',
+                    'device' => $log->device ?? 'Unknown',
+                    'timestamp' => $log->created_at->format('Y/m/d - H:i'),
+                    'status' => $log->status === 'success' ? 'موفق' : 'ناموفق',
+                ];
+            })
+            ->toArray();
 
         return view('customer.profile.index', compact('user', 'twoFactorEnabled', 'twoFactorSecret', 'recoveryCodes', 'apiKeys', 'activityLogs'));
     }
@@ -108,7 +90,61 @@ class ProfileController extends Controller
      */
     public function updateProfile(Request $request)
     {
-        // TODO: Implement profile update logic
+        $customer = Auth::guard('customer')->user();
+        
+        if (!$customer) {
+            return redirect()->route('customer.login');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'first_name' => ['required', 'string', 'max:100'],
+            'last_name' => ['required', 'string', 'max:100'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['required', 'string', 'max:20'],
+            'national_id' => ['nullable', 'string', 'max:20'],
+            'company' => ['nullable', 'string', 'max:255'],
+            'address' => ['nullable', 'string'],
+            'city' => ['nullable', 'string', 'max:100'],
+            'postal_code' => ['nullable', 'string', 'max:20'],
+            'country' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('customer.profile.index')
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        // Update customer data
+        $customer->first_name = $request->first_name;
+        $customer->last_name = $request->last_name;
+        $customer->email = $request->email;
+        $customer->phone_number = $request->phone;
+        $customer->company_name = $request->company;
+        $customer->address = $request->address;
+        $customer->city = $request->city;
+        $customer->postal_code = $request->postal_code;
+        $customer->country = $request->country ?? $customer->country;
+        
+        // Store national_id in preferences
+        $preferences = $customer->preferences ?? [];
+        if ($request->national_id) {
+            $preferences['national_id'] = $request->national_id;
+        }
+        $customer->preferences = $preferences;
+        
+        $customer->save();
+
+        // Log activity
+        CustomerActivityLog::log(
+            $customer->id,
+            'به‌روزرسانی پروفایل',
+            'success',
+            $request->ip(),
+            $request->userAgent(),
+            ['fields' => array_keys($request->except(['_token']))]
+        );
+
         return redirect()->route('customer.profile.index')
             ->with('success', 'اطلاعات پروفایل با موفقیت به‌روزرسانی شد');
     }
@@ -118,11 +154,8 @@ class ProfileController extends Controller
      */
     public function show2FA()
     {
-        // Dummy QR code data
-        $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth://totp/CloudPlatform:user@example.com?secret=JBSWY3DPEHPK3PXP&issuer=CloudPlatform';
-        $secret = 'JBSWY3DPEHPK3PXP';
-        
-        return view('customer.profile.2fa', compact('qrCodeUrl', 'secret'));
+        // 2FA is disabled - redirect to profile
+        return redirect()->route('customer.profile.index');
     }
 
     /**
@@ -130,9 +163,8 @@ class ProfileController extends Controller
      */
     public function enable2FA(Request $request)
     {
-        // TODO: Implement 2FA enable logic
-        return redirect()->route('customer.profile.index')
-            ->with('success', 'احراز هویت دو مرحله‌ای فعال شد');
+        // 2FA is disabled - redirect to profile
+        return redirect()->route('customer.profile.index');
     }
 
     /**
@@ -140,9 +172,8 @@ class ProfileController extends Controller
      */
     public function disable2FA(Request $request)
     {
-        // TODO: Implement 2FA disable logic
-        return redirect()->route('customer.profile.index')
-            ->with('success', 'احراز هویت دو مرحله‌ای غیرفعال شد');
+        // 2FA is disabled - redirect to profile
+        return redirect()->route('customer.profile.index');
     }
 
     /**
@@ -150,7 +181,7 @@ class ProfileController extends Controller
      */
     public function showChangePassword()
     {
-        return view('customer.profile.change-password');
+        return redirect()->route('customer.profile.index');
     }
 
     /**
@@ -158,7 +189,59 @@ class ProfileController extends Controller
      */
     public function changePassword(Request $request)
     {
-        // TODO: Implement password change logic
+        $customer = Auth::guard('customer')->user();
+        
+        if (!$customer) {
+            return redirect()->route('customer.login');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'current_password' => ['required', 'string'],
+            'new_password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('customer.profile.index')
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        // Check if customer has a password set
+        // Since customers use SMS authentication, we'll check if password exists
+        // If not, we'll create one. Otherwise, verify current password.
+        if ($customer->password) {
+            if (!Hash::check($request->current_password, $customer->password)) {
+                CustomerActivityLog::log(
+                    $customer->id,
+                    'تلاش برای تغییر رمز عبور',
+                    'failed',
+                    $request->ip(),
+                    $request->userAgent()
+                );
+
+                return redirect()->route('customer.profile.index')
+                    ->withErrors(['current_password' => 'رمز عبور فعلی اشتباه است'])
+                    ->withInput();
+            }
+        } else {
+            // If no password is set, we still require current_password for security
+            // But we'll accept any value as long as it's provided
+            // In a real scenario, you might want to require email verification or SMS verification
+        }
+
+        // Update password (using mutator which will hash it)
+        $customer->password = $request->new_password;
+        $customer->save();
+
+        // Log activity
+        CustomerActivityLog::log(
+            $customer->id,
+            'تغییر رمز عبور',
+            'success',
+            $request->ip(),
+            $request->userAgent()
+        );
+
         return redirect()->route('customer.profile.index')
             ->with('success', 'رمز عبور با موفقیت تغییر کرد');
     }
@@ -168,19 +251,84 @@ class ProfileController extends Controller
      */
     public function createApiKey(Request $request)
     {
-        // TODO: Implement API key creation
+        $customer = Auth::guard('customer')->user();
+        
+        if (!$customer) {
+            return redirect()->route('customer.login');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => ['required', 'string', 'max:255'],
+            'permissions' => ['required', 'array'],
+            'permissions.*' => ['in:read,write'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('customer.profile.index')
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $permissions = $request->permissions ?? ['read'];
+        
+        // Create API key
+        $apiKey = CustomerApiKey::createForCustomer(
+            $customer->id,
+            $request->name,
+            $permissions
+        );
+
+        // Log activity
+        CustomerActivityLog::log(
+            $customer->id,
+            'ایجاد کلید API',
+            'success',
+            $request->ip(),
+            $request->userAgent(),
+            ['api_key_id' => $apiKey->id, 'name' => $apiKey->name]
+        );
+
+        // Store the key in session to show it once
+        $request->session()->flash('api_key_created', $apiKey->key);
+
         return redirect()->route('customer.profile.index')
-            ->with('success', 'کلید API جدید ایجاد شد');
+            ->with('success', 'کلید API جدید ایجاد شد. لطفاً آن را ذخیره کنید - دیگر نمایش داده نخواهد شد.');
     }
 
     /**
      * Delete API key
      */
-    public function deleteApiKey($id)
+    public function deleteApiKey(Request $request, $id)
     {
-        // TODO: Implement API key deletion
+        $customer = Auth::guard('customer')->user();
+        
+        if (!$customer) {
+            return redirect()->route('customer.login');
+        }
+
+        $apiKey = CustomerApiKey::where('customer_id', $customer->id)
+            ->where('id', $id)
+            ->first();
+
+        if (!$apiKey) {
+            return redirect()->route('customer.profile.index')
+                ->with('error', 'کلید API یافت نشد');
+        }
+
+        $apiKeyName = $apiKey->name;
+        $apiKey->delete();
+
+        // Log activity
+        CustomerActivityLog::log(
+            $customer->id,
+            'حذف کلید API',
+            'success',
+            $request->ip(),
+            $request->userAgent(),
+            ['api_key_name' => $apiKeyName]
+        );
+
         return redirect()->route('customer.profile.index')
             ->with('success', 'کلید API حذف شد');
     }
 }
-
