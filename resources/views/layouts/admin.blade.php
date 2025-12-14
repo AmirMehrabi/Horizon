@@ -444,39 +444,37 @@
             // The backend provides HTML with <mark> tags, we sanitize it
             function safeHtml(html) {
                 if (!html) return '';
-                // Remove any script tags and other dangerous elements
+                
+                // Create a temporary container
                 const temp = document.createElement('div');
                 temp.innerHTML = html;
-                // Remove script tags and other dangerous elements
-                const scripts = temp.querySelectorAll('script, iframe, object, embed, form, input');
-                scripts.forEach(el => el.remove());
-                // Only preserve mark tags, escape everything else
-                let result = '';
-                const walker = document.createTreeWalker(
-                    temp,
-                    NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT,
-                    {
-                        acceptNode: function(node) {
-                            if (node.nodeType === Node.TEXT_NODE) {
-                                return NodeFilter.FILTER_ACCEPT;
+                
+                // Remove dangerous elements
+                const dangerous = temp.querySelectorAll('script, iframe, object, embed, form, input, style');
+                dangerous.forEach(el => el.remove());
+                
+                // Process the content: preserve mark tags, escape everything else
+                function processNode(node) {
+                    let result = '';
+                    
+                    for (let child = node.firstChild; child; child = child.nextSibling) {
+                        if (child.nodeType === Node.TEXT_NODE) {
+                            result += escapeHtml(child.textContent);
+                        } else if (child.nodeType === Node.ELEMENT_NODE) {
+                            if (child.tagName === 'MARK') {
+                                // Preserve mark tag and its content
+                                result += `<mark class="bg-yellow-200 font-medium">${escapeHtml(child.textContent)}</mark>`;
+                            } else {
+                                // For other elements, just process their text content
+                                result += processNode(child);
                             }
-                            if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'MARK') {
-                                return NodeFilter.FILTER_ACCEPT;
-                            }
-                            return NodeFilter.FILTER_REJECT;
                         }
-                    },
-                    false
-                );
-                let node;
-                while (node = walker.nextNode()) {
-                    if (node.nodeType === Node.TEXT_NODE) {
-                        result += escapeHtml(node.textContent);
-                    } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'MARK') {
-                        result += `<mark class="bg-yellow-200 font-medium">${escapeHtml(node.textContent)}</mark>`;
                     }
+                    
+                    return result;
                 }
-                return result || escapeHtml(html);
+                
+                return processNode(temp);
             }
             
             // Perform search
