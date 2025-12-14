@@ -25,7 +25,7 @@ class NineEightSmsGateway implements SmsGatewayInterface
     /**
      * Send an SMS message via 0098sms gateway.
      *
-     * @param string $to Phone number (format: xxxxxxxxx09)
+     * @param string $to Phone number (will be formatted to: 09xxxxxxxxx)
      * @param string $message Message content
      * @param string|null $from Sender number (optional, uses config default)
      * @return array
@@ -159,7 +159,15 @@ class NineEightSmsGateway implements SmsGatewayInterface
     }
 
     /**
-     * Format phone number to 0098sms format (xxxxxxxxx09).
+     * Format phone number to 0098sms format (09xxxxxxxxx).
+     * 
+     * Accepts various formats and converts to: 09xxxxxxxxx (11 digits)
+     * Examples:
+     * - +989123456789 → 09123456789
+     * - 00989123456789 → 09123456789
+     * - 989123456789 → 09123456789
+     * - 9123456789 → 09123456789
+     * - 09123456789 → 09123456789
      *
      * @param string $phoneNumber
      * @return string
@@ -169,22 +177,54 @@ class NineEightSmsGateway implements SmsGatewayInterface
         // Remove all non-digit characters
         $phone = preg_replace('/[^0-9]/', '', $phoneNumber);
 
-        // If starts with country code +98, remove it
-        if (strpos($phone, '98') === 0 && strlen($phone) > 10) {
-            $phone = substr($phone, 2);
+        // Handle different input formats
+        if (strlen($phone) === 13 && strpos($phone, '0098') === 0) {
+            // Format: 00989123456789 → 09123456789
+            $phone = '0' . substr($phone, 4);
+        } elseif (strlen($phone) === 12 && strpos($phone, '0098') === 0) {
+            // Format: 0098123456789 → 09123456789 (if somehow missing a digit)
+            $phone = '0' . substr($phone, 4);
+        } elseif (strlen($phone) === 12 && strpos($phone, '98') === 0) {
+            // Format: 989123456789 → 09123456789
+            $phone = '0' . substr($phone, 2);
+        } elseif (strlen($phone) === 11 && strpos($phone, '98') === 0) {
+            // Format: 98123456789 → 09123456789
+            $phone = '0' . substr($phone, 2);
+        } elseif (strlen($phone) === 10 && strpos($phone, '9') === 0) {
+            // Format: 9123456789 → 09123456789
+            $phone = '0' . $phone;
+        } elseif (strlen($phone) === 11 && strpos($phone, '0') === 0 && strpos($phone, '09') === 0) {
+            // Format: 09123456789 → 09123456789 (already correct)
+            // Do nothing, already in correct format
+        } elseif (strlen($phone) === 11 && strpos($phone, '0') === 0) {
+            // Format: 01234567890 → might need adjustment, but keep as is for now
+            // This shouldn't happen for Iranian mobile numbers, but handle gracefully
+        } else {
+            // If we can't determine the format, try to extract the last 10 digits and add 0
+            if (strlen($phone) >= 10) {
+                $last10 = substr($phone, -10);
+                if (strpos($last10, '9') === 0) {
+                    $phone = '0' . $last10;
+                } else {
+                    // Fallback: try to construct from what we have
+                    $phone = '0' . $last10;
+                }
+            }
         }
 
-        // If starts with 0, remove it
-        if (strpos($phone, '0') === 0) {
-            $phone = substr($phone, 1);
-        }
-
-        // Ensure it's 10 digits (Iranian mobile format)
-        if (strlen($phone) === 10) {
+        // Final validation: ensure it's exactly 11 digits starting with 09
+        if (strlen($phone) === 11 && strpos($phone, '09') === 0) {
             return $phone;
         }
 
-        // Return as is if can't format properly
+        // Log warning if format is still incorrect
+        Log::warning('Phone number format may be incorrect for 0098sms', [
+            'original' => $phoneNumber,
+            'formatted' => $phone,
+            'length' => strlen($phone),
+        ]);
+
+        // Return formatted phone (even if not perfect, let the gateway handle validation)
         return $phone;
     }
 
